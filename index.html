@@ -18,16 +18,17 @@
 
 var board_to_world = function(position) {
   // Convert board position into world position
- 
   return {x: 100 * position.x, y: 100 * position.y, z:0};
- 
 };
 
 var barrier_to_world = function(position) {
-  // Convert board position into world position
- 
+  // Convert barrier position into world position
   return {x: 100 * position.x, y: 100 * position.y, z:0};
- 
+};
+    
+var goal_to_world = function(position) {
+  // Convert goal position into world position
+    return {x: 100 * position.x, y: 100 * position.y, z:0};
 };
 
 var Barrier = function(position) {
@@ -44,7 +45,26 @@ var Barrier = function(position) {
   this.object.position = board_to_world(this.boardPosition);  
 };
 
-
+var Goal = function(position) {
+    // The goal is a game object
+    this.boardPosition = position || {x: 0, y: 0};
+    this.type = 'goal';
+    this.geometry = new THREE.SphereGeometry(70, 70, 70);
+    // Geometry should always be around origin
+    this.material = new THREE.MeshPhongMaterial({color: 0xFE9C46});
+    this.object = new THREE.Mesh(this.geometry, this.material);
+    // A mesh is an Object 3D, change its position to move
+    this.object.position - board_to_world(this.boardPosition);
+};
+    
+Goal.prototype.moveTo = function(position) {
+    this.boardPosition = position;
+    this.updateBoardPosition();
+};
+    
+Goal.prototype.updateBoardPosition = function() {
+    this.object.position = goal_to_world(this.boardPosition);
+};
 
 Barrier.prototype.moveTo = function(position) {
   this.boardPosition = position;
@@ -95,9 +115,9 @@ Game.prototype.init = function() {
   
   this.startingBoard = [[false, false, true, false, false, false, false],							// create a board where true = occupied by a block
                         [false, false, false, false, false, true, false],							// and where false = empty spot
-                        [false, false, false, false, false, false, false],							// Y is horizontal
-                        [false, false, false, false, false, false, false],							// X is vertical
-                        [false, false, false, false, false, false, false],
+                        [false, false, true, true, true, true, false],							// Y is horizontal
+                        [false, false, true, false, false, false, false],							// X is vertical
+                        [false, false, true, true, true, true, false],
                         [false, false, false, false, false, true, false],
                         [false, false, false, false, false, false, false]];
                         
@@ -115,6 +135,7 @@ Game.prototype.init = function() {
   }
 
   this.robot = new Robot({x: -2, y: -3});																		// create a new robot
+  this.goal = new Goal({x: 8, y: 7});
 
   this.camera = new THREE.PerspectiveCamera(75, 4.0/3.0, 1, 10000);
   this.camera.position.z = 550;
@@ -131,6 +152,7 @@ for(var x = 0 ; x < 7; x++){
   }
   
   this.scene.add(this.robot.object);															// add robot to scene
+  this.scene.add(this.goal.object);                                                             // Add goal to the scene
                                                         
 
   // Spotlight

@@ -7,7 +7,13 @@
 		<script src="three.min.js"></script>
 	</head>
 	<body>
+<<<<<<< HEAD
 		<font size="6">Bejeweler</font>
+=======
+		<p>
+			Bejewler
+		</p>
+>>>>>>> 498e45a95569bc5997a5bb41e16d9a69c0bda731
 		<script>
 			// Convert board position into world position
 			var board_to_world = function(position) {
@@ -165,12 +171,21 @@
 
 				}
 
+<<<<<<< HEAD
 				this.startingBoard = [['0', '0', '0', '0', '0', '3', '0'], // create a board where true = occupied by a block
 									  ['0', '0', '0', '0', '0', '0', '0'], // and where '1' = empty spot
 									  ['0', '0', '0', '1', '0', '0', '0'],
 									  ['0', '0', '3', '1', '0', '0', '0'],
 									  ['0', '0', '2', '1', '0', '0', '0'],
 									  ['0', '0', '2', '0', '0', '0', '0'], 
+=======
+				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
+									  ['0', '2', '2', '1', '1', '0', '0'], // and where '1' = empty spot
+									  ['0', '0', '0', '0', '0', '0', '0'], 
+									  ['0', '1', '1', '2', '2', '0', '0'], 
+									  ['0', '0', '0', '0', '0', '0', '0'], 
+									  ['0', '0', '0', '0', '0', '0', '0'], 
+>>>>>>> 498e45a95569bc5997a5bb41e16d9a69c0bda731
 									  ['0', '0', '0', '0', '0', '0', '0']];
 				
 				
@@ -181,7 +196,7 @@
 						// If there is a 1 in startingBoard create a barrier object
 						if (this.startingBoard[y][x] == '1') {
 							this.virtualBoard[y][x] = new Barrier({
-								x : x - 3,
+								x : -(x - 3),
 								y : -(y - 3)
 							});
 						}
@@ -189,7 +204,7 @@
 						// If there is a 2 in startingBoard create a gem object
 						if (this.startingBoard[y][x] == '2') {
 							this.virtualBoard[y][x] = new Gem({
-								x : x - 3,
+								x : -(x - 3),
 								y : -(y - 3)
 							});
 						}
@@ -284,7 +299,7 @@
 				if (position.y < -3 || position.y > 3) {// check if position that you want to move to is the edge of the board vertically
 					return false;
 				}
-				if (this.virtualBoard[position.x + 3][position.y + 3].isEmpty) {
+				if (this.virtualBoard[-position.y + 3][-position.x + 3].isEmpty) {
 					return true;
 				} else {
 					return false;
@@ -369,6 +384,7 @@
 			});
 
 		</script>
+<<<<<<< HEAD
         <!---Implement directions from GMaps API---------->
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
         <style type="text/css">
@@ -461,6 +477,8 @@
             </select>
         </div>
         <div id="map-canvas"></div>
+=======
+>>>>>>> 498e45a95569bc5997a5bb41e16d9a69c0bda731
 
 	</body>
 </html>

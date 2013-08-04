@@ -93,7 +93,6 @@
 			Gem.prototype.updateBoardPosition = function() {
 				this.object.position = board_to_world(this.boardPosition);
 			};
-<<<<<<< HEAD
             
             // Goal class
 			var Goal = function(position) {
@@ -115,9 +114,6 @@
 				this.object.position = board_to_world(this.boardPosition);
 			};
             
-=======
-
->>>>>>> c657c0d62d2a2b1dfe7b11cdfa1ae097ab60cc90
 			var Robot = function(position) {
 				//// A Robot is a game object
 				// Default position if unspecified is at square 0, 0
@@ -162,22 +158,19 @@
 				}
 
 				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
-<<<<<<< HEAD
 									  ['0', '0', '2', '0', '0', '1', '0'], // and where '1' = empty spot
 									  ['0', '0', '2', '1', '0', '0', '0'],
 									  ['0', '0', '0', '1', '0', '0', '0'],
 									  ['0', '0', '0', '1', '0', '0', '0'],
 									  ['0', '0', '0', '0', '0', '0', '0'],
                                       ['0', '0', '0', '0', '0', '0', '0']]
-=======
 									  ['0', '2', '2', '1', '1', '0', '0'], // and where '1' = empty spot
 									  ['0', '0', '0', '0', '0', '0', '0'], 
 									  ['0', '1', '1', '2', '2', '0', '0'], 
 									  ['0', '0', '0', '0', '0', '0', '0'], 
 									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0']];
+									  ['0', '0', '0', '0', '0', '0', '0'];
 				
->>>>>>> c657c0d62d2a2b1dfe7b11cdfa1ae097ab60cc90
 				
 				for (var x = 0; x < 7; x++) {
 					for (var y = 0; y < 7; y++) {
@@ -198,7 +191,6 @@
 								y : (y - 3)
 							});
 						}
-<<<<<<< HEAD
                         
                         // If there is a 3 in startingBoard create a goal object
 						if (this.startingBoard[y][x] == '3') {
@@ -208,8 +200,6 @@
                                                               });
 						}
                         
-=======
->>>>>>> c657c0d62d2a2b1dfe7b11cdfa1ae097ab60cc90
 						// If there is a 0 in startingBoard set the slot's isEmpty property to true'
 						if (this.startingBoard[y][x] == '0') {
 							// For every slot in the board create an object Slot
@@ -293,11 +283,9 @@
 				if (position.y < -3 || position.y > 3) {                           // check if position that you want to move to is the edge of the board vertically
 					return false;
 				}
-<<<<<<< HEAD
+                
 				if (this.virtualBoard[position.y + 3][position.x - 3].isEmpty) {
-=======
 				if (this.virtualBoard[-position.y + 3][position.x + 3].isEmpty) {
->>>>>>> c657c0d62d2a2b1dfe7b11cdfa1ae097ab60cc90
 					return true;
 				} else {
 					return false;
@@ -395,7 +383,6 @@
 			});
 
 		</script>
-<<<<<<< HEAD
         <!---Implement directions from GMaps API---------->
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
         <style type="text/css">
@@ -488,9 +475,7 @@
             </select>
         </div>
         <div id="map-canvas"></div>
-=======
 
->>>>>>> c657c0d62d2a2b1dfe7b11cdfa1ae097ab60cc90
 	</body>
 </html>
 

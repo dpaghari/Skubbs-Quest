@@ -171,15 +171,8 @@
 									  ['0', '0', '0', '1', '0', '0', '0'],
 									  ['0', '0', '3', '1', '0', '0', '0'],
 									  ['0', '0', '2', '1', '0', '0', '0'],
-									  ['0', '0', '2', '0', '0', '0', '0'], 
-				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
-									  ['0', '2', '2', '1', '1', '0', '0'], // and where '1' = empty spot
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '1', '1', '2', '2', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0']]];
-				
+									  ['0', '0', '2', '0', '0', '0', '0'],
+                                      ['0', '0', '0', '0', '0', '0', '0']]
 				
 				for (var x = 0; x < 7; x++) {
 					for (var y = 0; y < 7; y++) {
@@ -188,7 +181,7 @@
 						// If there is a 1 in startingBoard create a barrier object
 						if (this.startingBoard[y][x] == '1') {
 							this.virtualBoard[y][x] = new Barrier({
-								x : -(x - 3),
+								x : (x - 3),
 								y : -(y - 3)
 							});
 						}
@@ -196,7 +189,7 @@
 						// If there is a 2 in startingBoard create a gem object
 						if (this.startingBoard[y][x] == '2') {
 							this.virtualBoard[y][x] = new Gem({
-								x : -(x - 3),
+								x : (x - 3),
 								y : -(y - 3)
 							});
 						}

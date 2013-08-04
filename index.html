@@ -114,15 +114,6 @@
 				this.object.position = board_to_world(this.boardPosition);
 			};
             
-			Goal.prototype.moveTo = function(position) {
-				this.boardPosition = position;
-				this.updateBoardPosition();
-			};
-            
-			Goal.prototype.updateBoardPosition = function() {
-				this.object.position = board_to_world(this.boardPosition);
-			};
-            
 			var Robot = function(position) {
 				//// A Robot is a game object
 				// Default position if unspecified is at square 0, 0
@@ -166,12 +157,12 @@
 
 				}
 
-				this.startingBoard = [['0', '0', '0', '0', '0', '3', '0'], // create a board where true = occupied by a block
-									  ['0', '0', '0', '0', '0', '0', '0'], // and where '1' = empty spot
-									  ['0', '0', '0', '1', '0', '0', '0'],
-									  ['0', '0', '3', '1', '0', '0', '0'],
+				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
+									  ['0', '0', '2', '0', '0', '1', '0'], // and where '1' = empty spot
 									  ['0', '0', '2', '1', '0', '0', '0'],
-									  ['0', '0', '2', '0', '0', '0', '0'],
+									  ['0', '0', '0', '1', '0', '0', '0'],
+									  ['0', '0', '0', '1', '0', '0', '0'],
+									  ['0', '0', '0', '0', '0', '0', '0'],
                                       ['0', '0', '0', '0', '0', '0', '0']]
 				
 				for (var x = 0; x < 7; x++) {
@@ -181,8 +172,8 @@
 						// If there is a 1 in startingBoard create a barrier object
 						if (this.startingBoard[y][x] == '1') {
 							this.virtualBoard[y][x] = new Barrier({
-								x : (x - 3),
-								y : -(y - 3)
+								x : x - 3,
+								y : (y - 3)
 							});
 						}
 
@@ -190,7 +181,7 @@
 						if (this.startingBoard[y][x] == '2') {
 							this.virtualBoard[y][x] = new Gem({
 								x : (x - 3),
-								y : -(y - 3)
+								y : (y - 3)
 							});
 						}
                         
@@ -198,7 +189,7 @@
 						if (this.startingBoard[y][x] == '3') {
 							this.virtualBoard[y][x] = new Goal({
                                                               x : x - 3,
-                                                              y : -(y - 3)
+                                                              y : (y - 3)
                                                               });
 						}
                         
@@ -225,7 +216,7 @@
 				for (var x = 0; x < 7; x++) {
 					for (var y = 0; y < 7; y++) {
 
-						if (this.startingBoard[x][y] == '1' || this.startingBoard[x][y] == '2') {
+						if (this.startingBoard[x][y] == '1' || this.startingBoard[x][y] == '2' || this.startingBoard[x][y] == '3') {
 							that.scene.add(this.virtualBoard[x][y].object);
 						}
 					}
@@ -278,13 +269,13 @@
 			};
 
 			Game.prototype.legalRobotMove = function(position) {
-				if (position.x < -3 || position.x > 3) {// check if position that you want to move to is the edge of the board horizontally
+				if (position.x < -3 || position.x > 3) {                           // check if position that you want to move to is the edge of the board horizontally
 					return false;
 				}
-				if (position.y < -3 || position.y > 3) {// check if position that you want to move to is the edge of the board vertically
+				if (position.y < -3 || position.y > 3) {                           // check if position that you want to move to is the edge of the board vertically
 					return false;
 				}
-				if (this.virtualBoard[-position.y + 3][-position.x + 3].isEmpty) {
+				if (this.virtualBoard[position.y + 3][position.x - 3].isEmpty) {
 					return true;
 				} else {
 					return false;
@@ -383,7 +374,7 @@
             
             function initialize() {
                 var map;
-                directionsDisplay = new google.maps.DirectionsRenderer();
+               // directionsDisplay = new google.maps.DirectionsRenderer();
                 var mapOptions = {
                     zoom: 18,
                     mapTypeId: google.maps.MapTypeId.SATELLITE

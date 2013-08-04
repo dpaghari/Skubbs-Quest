@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Bejewler</title>
+		<title>Bejeweler</title>
 		<script src="jquery.js"></script>
 		<script src="underscore.js"></script>
 		<script src="three.min.js"></script>
 	</head>
 	<body>
-		<p>
-        Bejewler
-		</p>
+		<font size="6">Bejeweler</font>
 		<script>
 			// Convert board position into world position
 			var board_to_world = function(position) {
@@ -66,6 +64,7 @@
 				this.object.position = board_to_world(this.boardPosition);
 			};
 
+            // Gem class
 			var Gem = function(position) {
 				//// A Barrier is a game object
 				// Default position if unspecified is at square 0, 0
@@ -93,7 +92,36 @@
 			Gem.prototype.updateBoardPosition = function() {
 				this.object.position = board_to_world(this.boardPosition);
 			};
-
+            
+            // Goal class
+			var Goal = function(position) {
+				// A goal is a game object
+				// Default position if unspecified is at square 0, 0
+				this.isEmpty = false;
+				this.boardPosition = position || {
+					x : 0,
+					y : 0
+				};
+				this.type = 'goal';
+				this.geometry = new THREE.SphereGeometry(45, 20, 20);
+				// Geometry should always be around origin
+				this.material = new THREE.MeshLambertMaterial({
+                                                              color : 0x0f0f0f
+                                                              });
+				this.object = new THREE.Mesh(this.geometry, this.material);
+				// A mesh is an Object3D, change its position to move
+				this.object.position = board_to_world(this.boardPosition);
+			};
+            
+			Goal.prototype.moveTo = function(position) {
+				this.boardPosition = position;
+				this.updateBoardPosition();
+			};
+            
+			Goal.prototype.updateBoardPosition = function() {
+				this.object.position = board_to_world(this.boardPosition);
+			};
+            
 			var Robot = function(position) {
 				//// A Robot is a game object
 				// Default position if unspecified is at square 0, 0
@@ -137,12 +165,12 @@
 
 				}
 
-				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
+				this.startingBoard = [['0', '0', '0', '0', '0', '3', '0'], // create a board where true = occupied by a block
 									  ['0', '0', '0', '0', '0', '0', '0'], // and where '1' = empty spot
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0'], 
+									  ['0', '0', '0', '1', '0', '0', '0'],
+									  ['0', '0', '3', '1', '0', '0', '0'],
+									  ['0', '0', '2', '1', '0', '0', '0'],
+									  ['0', '0', '2', '0', '0', '0', '0'], 
 									  ['0', '0', '0', '0', '0', '0', '0']];
 				
 				
@@ -165,13 +193,21 @@
 								y : -(y - 3)
 							});
 						}
+                        
+                        // If there is a 3 in startingBoard create a goal object
+						if (this.startingBoard[y][x] == '3') {
+							this.virtualBoard[y][x] = new Goal({
+                                                              x : x - 3,
+                                                              y : -(y - 3)
+                                                              });
+						}
+                        
 						// If there is a 0 in startingBoard set the slot's isEmpty property to true'
 						if (this.startingBoard[y][x] == '0') {
 							// For every slot in the board create an object Slot
 
 							this.virtualBoard[y][x].isEmpty = true;
 						}
-
 					}
 				}
 
@@ -372,6 +408,7 @@
                     // Browser doesn't support Geolocation
                     handleNoGeolocation(false);
                 }
+                google.maps.event.addDomListener(window, 'load', initialize);
             }
             
             function handleNoGeolocation(errorFlag) {
@@ -391,10 +428,9 @@
                 map.setCenter(options.position);
             }
             
-            google.maps.event.addDomListener(window, 'load', initialize);
             var directionsDisplay;
             var directionsService = new google.maps.DirectionsService();
-            
+
             function calcRoute() {
                 var start = document.getElementById('start').value;
                 var end = document.getElementById('end').value;
@@ -410,7 +446,6 @@
                                         });
             }
             
-            google.maps.event.addDomListener(window, 'load', initialize);
             </script>
         
         <div id="panel">

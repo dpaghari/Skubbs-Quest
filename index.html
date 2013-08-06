@@ -21,28 +21,7 @@
 				};
 
 			};
-			// Slot Class
-			var Slot = function(position) {
-				this.isEmpty = false;
-				this.boardPosition = position || {
-					x : 0,
-					y : 0
-				};
-				this.type = 'slot';
-				this.geometry = new THREE.CubeGeometry(90, 90, 90);
-				// Geometry should always be around origin
-				this.material = new THREE.MeshLambertMaterial({
-					color : 0x000000,
-					transparent : true
-				});
-				this.object = new THREE.Mesh(this.geometry, this.material);
-				// A mesh is an Object3D, change its position to move
-				this.object.position = board_to_world(this.boardPosition);
-			};
-
-			Slot.prototype.updateBoardPosition = function() {
-				this.object.position = board_to_world(this.boardPosition);
-			};
+		
 
 			// Barrier class
 			var Barrier = function(position) {
@@ -78,7 +57,7 @@
 				this.geometry = new THREE.CubeGeometry(90, 90, 90);
 				// Geometry should always be around origin
 				this.material = new THREE.MeshLambertMaterial({
-					color : 0x0f0f00
+					color : 0x0fff00
 				});
 				this.object = new THREE.Mesh(this.geometry, this.material);
 				// A mesh is an Object3D, change its position to move
@@ -93,27 +72,7 @@
 			Gem.prototype.updateBoardPosition = function() {
 				this.object.position = board_to_world(this.boardPosition);
 			};
-            
-            // Goal class
-			var Goal = function(position) {
-				// A goal is a game object
-				// Default position if unspecified is at square 0, 0
-				this.isEmpty = false;
-				this.boardPosition = position || {
-					x : 0,
-					y : 0
-				};
-				this.type = 'goal';
-				this.geometry = new THREE.SphereGeometry(45, 20, 20);
-				// Geometry should always be around origin
-				this.material = new THREE.MeshLambertMaterial({
-                                                              color : 0x0f0f0f
-                                                              });
-				this.object = new THREE.Mesh(this.geometry, this.material);
-				// A mesh is an Object3D, change its position to move
-				this.object.position = board_to_world(this.boardPosition);
-			};
-            
+
 			var Robot = function(position) {
 				//// A Robot is a game object
 				// Default position if unspecified is at square 0, 0
@@ -150,6 +109,8 @@
 
 			Game.prototype.init = function() {
 				var that = this;
+				
+				this.facing = 'up';
 
 				this.virtualBoard = new Array(7);
 				for (var i = 0; i < 7; i++) {
@@ -158,18 +119,12 @@
 				}
 
 				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
-									  ['0', '0', '2', '0', '0', '1', '0'], // and where '1' = empty spot
-									  ['0', '0', '2', '1', '0', '0', '0'],
-									  ['0', '0', '0', '1', '0', '0', '0'],
-									  ['0', '0', '0', '1', '0', '0', '0'],
-									  ['0', '0', '0', '0', '0', '0', '0'],
-                                      ['0', '0', '0', '0', '0', '0', '0']]
 									  ['0', '2', '2', '1', '1', '0', '0'], // and where '1' = empty spot
 									  ['0', '0', '0', '0', '0', '0', '0'], 
 									  ['0', '1', '1', '2', '2', '0', '0'], 
 									  ['0', '0', '0', '0', '0', '0', '0'], 
 									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0'];
+									  ['0', '0', '0', '0', '0', '0', '0']];
 				
 				
 				for (var x = 0; x < 7; x++) {
@@ -179,8 +134,8 @@
 						// If there is a 1 in startingBoard create a barrier object
 						if (this.startingBoard[y][x] == '1') {
 							this.virtualBoard[y][x] = new Barrier({
-								x : x - 3,
-								y : (y - 3)
+								x : (x - 3),
+								y : -(y - 3)
 							});
 						}
 
@@ -188,18 +143,9 @@
 						if (this.startingBoard[y][x] == '2') {
 							this.virtualBoard[y][x] = new Gem({
 								x : (x - 3),
-								y : (y - 3)
+								y : -(y - 3)
 							});
 						}
-                        
-                        // If there is a 3 in startingBoard create a goal object
-						if (this.startingBoard[y][x] == '3') {
-							this.virtualBoard[y][x] = new Goal({
-                                                              x : x - 3,
-                                                              y : (y - 3)
-                                                              });
-						}
-                        
 						// If there is a 0 in startingBoard set the slot's isEmpty property to true'
 						if (this.startingBoard[y][x] == '0') {
 							// For every slot in the board create an object Slot
@@ -224,7 +170,7 @@
 				for (var x = 0; x < 7; x++) {
 					for (var y = 0; y < 7; y++) {
 
-						if (this.startingBoard[x][y] == '1' || this.startingBoard[x][y] == '2' || this.startingBoard[x][y] == '3') {
+						if (this.startingBoard[x][y] == '1' || this.startingBoard[x][y] == '2') {
 							that.scene.add(this.virtualBoard[x][y].object);
 						}
 					}
@@ -277,21 +223,36 @@
 			};
 
 			Game.prototype.legalRobotMove = function(position) {
-				if (position.x < -3 || position.x > 3) {                           // check if position that you want to move to is the edge of the board horizontally
+				if (position.x < -3 || position.x > 3) {// check if position that you want to move to is the edge of the board horizontally
 					return false;
 				}
-				if (position.y < -3 || position.y > 3) {                           // check if position that you want to move to is the edge of the board vertically
+				if (position.y < -3 || position.y > 3) {// check if position that you want to move to is the edge of the board vertically
 					return false;
 				}
-                
-				if (this.virtualBoard[position.y + 3][position.x - 3].isEmpty) {
 				if (this.virtualBoard[-position.y + 3][position.x + 3].isEmpty) {
 					return true;
 				} else {
 					return false;
 				}
+				if(this.virtualBoard[-position.y + 3][position.x + 3].type = 'gem') {
+					return false;
+				} else{
+					return true;
+				}
 				return true;
 			};
+
+			Game.prototype.createGem = function(position){
+				
+				if(this.virtualBoard[-position.y + 3][position.x + 3].isEmpty){
+					this.virtualBoard[position]= new Gem(position);
+					this.scene.add(this.virtualBoard[position].object);
+					
+				}
+			};
+
+
+
 
 			Game.prototype.handleInput = function() {
 
@@ -341,18 +302,74 @@
 						this.robot.moveTo(newPosition);
 					}
 				}
-				
+				// Spacebar
 				if (this.keys[32] === true){
 					this.keys[32] = 'triggered';
+					that = this;
 					
-					var newPosition = {
-						x: this.robot.boardPosition.x,
+					// determine what direction character is facing
+					var newPosition;
+					if(this.facing == 'right'){
+					newPosition = {
+						x: this.robot.boardPosition.x + 1,
 						y: this.robot.boardPosition.y
 					};
-					console.log("luz");
-					this.gemz = new Gem(newPosition);
-					this.scene.add(this.gemz);
+					}
+					if(this.facing == 'up'){
+					newPosition = {
+						x: this.robot.boardPosition.x,
+						y: this.robot.boardPosition.y + 1
+					};
+					}
+					if(this.facing == 'left'){
+					newPosition = {
+						x: this.robot.boardPosition.x - 1,
+						y: this.robot.boardPosition.y
+					};
+					}
+					if(this.facing == 'down'){
+					newPosition = {
+						x: this.robot.boardPosition.x,
+						y: this.robot.boardPosition.y - 1
+					};
+					}
+					
+					console.log(this.facing);
+					// create a gem where character is facing
+					this.createGem(newPosition);
+				
+					
 				}
+				
+				// Inputs for determining where the character is facing
+				// Up arrow key
+				if (this.keys[38] === true) {
+					this.keys[38] = 'triggered';
+					
+					this.facing = 'up';	
+				}
+				// Left arrow key
+				if (this.keys[37] === true) {
+					this.keys[37] = 'triggered';
+					
+					this.facing = 'left';		
+				}
+				// Down arrow key
+				if (this.keys[40] === true) {
+					this.keys[40] = 'triggered';
+					
+					this.facing = 'down';	
+				}
+				// Right arrow key
+				if (this.keys[39] === true) {
+					this.keys[39] = 'triggered';
+					
+					this.facing = 'right';	
+				}
+				
+				
+				
+				
 				
 			};
 
@@ -383,98 +400,6 @@
 			});
 
 		</script>
-        <!---Implement directions from GMaps API---------->
-        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-        <style type="text/css">
-            html { height: 100%; }
-            body { height: 100%; margin: -50; padding: 50 }
-            #map-canvas { height: 50%; width: 50%}
-            </style>
-        <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9r1YcV7JvWDI13pROQIL7qTTXEl8WqSY&sensor=true">
-            </script>
-        <script type="text/javascript">
-            
-            function initialize() {
-                var map;
-               // directionsDisplay = new google.maps.DirectionsRenderer();
-                var mapOptions = {
-                    zoom: 18,
-                    mapTypeId: google.maps.MapTypeId.SATELLITE
-                };
-                map = new google.maps.Map(document.getElementById('map-canvas'),
-                                          mapOptions);
-                
-                directionsDisplay.setMap(map);
-                
-                // Try HTML5 geolocation
-                if(navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                                                             var pos = new google.maps.LatLng(position.coords.latitude,
-                                                                                              position.coords.longitude);
-                                                             
-                                                             
-                                                             map.setCenter(pos);
-                                                             }, function() {
-                                                             handleNoGeolocation(true);
-                                                             });
-                } else {
-                    // Browser doesn't support Geolocation
-                    handleNoGeolocation(false);
-                }
-                google.maps.event.addDomListener(window, 'load', initialize);
-            }
-            
-            function handleNoGeolocation(errorFlag) {
-                if (errorFlag) {
-                    var content = 'Error: The Geolocation service failed.';
-                } else {
-                    var content = 'Error: Your browser doesn\'t support geolocation.';
-                }
-                
-                var options = {
-                    map: map,
-                    position: new google.maps.LatLng(80, 105),
-                    content: content
-                };
-                
-                var infowindow = new google.maps.InfoWindow(options);
-                map.setCenter(options.position);
-            }
-            
-            var directionsDisplay;
-            var directionsService = new google.maps.DirectionsService();
-
-            function calcRoute() {
-                var start = document.getElementById('start').value;
-                var end = document.getElementById('end').value;
-                var request = {
-                    origin:start,
-                    destination:end,
-                    travelMode: google.maps.DirectionsTravelMode.WALKING
-                };
-                directionsService.route(request, function(response, status) {
-                                        if (status == google.maps.DirectionsStatus.OK) {
-                                        directionsDisplay.setDirections(response);
-                                        }
-                                        });
-            }
-            
-            </script>
-        
-        <div id="panel">
-            <b>Start: </b>
-            <select id="start" onchange="calcRoute();">
-                <option value="santa cruz, ca">Santa Cruz</option>
-                <option value="escondido, ca">Escondido</option>
-            </select>
-            <b>End: </b>
-            <select id="end" onchange="calcRoute();">
-                <option value="aptos, ca">Aptos</option>
-                <option value="san francisco, ca">San Francisco</option>
-            </select>
-        </div>
-        <div id="map-canvas"></div>
 
 	</body>
 </html>

@@ -109,41 +109,47 @@
 
 			Game.prototype.init = function() {
 				var that = this;
-				
+				this.boardSize = 9;
+				this.offset = 4;
 				this.facing = 'up';
 
-				this.virtualBoard = new Array(7);
-				for (var i = 0; i < 7; i++) {
-					this.virtualBoard[i] = [{},{},{},{},{},{},{}];
+				this.virtualBoard = new Array(this.boardSize);
+				for (var i = 0; i < this.boardSize; i++) {
+					this.virtualBoard[i] = [];
+					for(var j = 0; j < this.boardSize; j++){
+						this.virtualBoard[i].push({});
+					}
 
 				}
 
-				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
-									  ['0', '2', '2', '1', '1', '0', '0'], // and where '1' = empty spot
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '1', '1', '2', '2', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0']];
+				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
+									  ['0', '2', '2', '1', '1', '0', '0', '0', '0'], // and where '1' = empty spot
+									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'], 
+									  ['0', '1', '1', '2', '2', '0', '0', '0', '0'], 
+									  ['0', '1', '1', '0', '0', '0', '0', '0', '0'], 
+									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'], 
+									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
+									  ['0', '0', '0', '2', '2', '0', '0', '0', '0'],
+									  ['0', '0', '0', '2', '2', '0', '0', '0', '0']];
 				
 				
-				for (var x = 0; x < 7; x++) {
-					for (var y = 0; y < 7; y++) {
+				for (var x = 0; x < this.boardSize; x++) {
+					for (var y = 0; y < this.boardSize; y++) {
 						
 				
 						// If there is a 1 in startingBoard create a barrier object
 						if (this.startingBoard[y][x] == '1') {
 							this.virtualBoard[y][x] = new Barrier({
-								x : (x - 3),
-								y : -(y - 3)
+								x : (x - this.offset),
+								y : -(y - this.offset)
 							});
 						}
 
 						// If there is a 2 in startingBoard create a gem object
 						if (this.startingBoard[y][x] == '2') {
 							this.virtualBoard[y][x] = new Gem({
-								x : (x - 3),
-								y : -(y - 3)
+								x : (x - this.offset),
+								y : -(y - this.offset)
 							});
 						}
 						// If there is a 0 in startingBoard set the slot's isEmpty property to true'
@@ -163,12 +169,12 @@
 				// create a new robot
 
 				this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
-				this.camera.position.z = 550;
+				this.camera.position.z = 800;
 
 				this.scene = new THREE.Scene();
 
-				for (var x = 0; x < 7; x++) {
-					for (var y = 0; y < 7; y++) {
+				for (var x = 0; x < this.boardSize; x++) {
+					for (var y = 0; y < this.boardSize; y++) {
 
 						if (this.startingBoard[x][y] == '1' || this.startingBoard[x][y] == '2') {
 							that.scene.add(this.virtualBoard[x][y].object);
@@ -187,7 +193,7 @@
 				var ambient_light = new THREE.AmbientLight(0x202020);
 				this.scene.add(ambient_light);
 				// Background plane
-				var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(800, 700), new THREE.MeshLambertMaterial());
+				var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 900), new THREE.MeshLambertMaterial());
 				bgplane.translateZ(-100);
 				this.scene.add(bgplane);
 
@@ -217,24 +223,25 @@
 			Game.prototype.render = function(t) {
 				// Bob the camera a bit
 				this.camera.position.x = 0;
-				this.camera.position.y = -300;
+				this.camera.position.y = -400;
 				this.camera.lookAt(this.scene.position);
 				this.renderer.render(this.scene, this.camera);
 			};
+			
 
 			Game.prototype.legalRobotMove = function(position) {
-				if (position.x < -3 || position.x > 3) {// check if position that you want to move to is the edge of the board horizontally
+				if (position.x < -this.offset || position.x > this.offset) {// check if position that you want to move to is the edge of the board horizontally
 					return false;
 				}
-				if (position.y < -3 || position.y > 3) {// check if position that you want to move to is the edge of the board vertically
+				if (position.y < -this.offset || position.y > this.offset) {// check if position that you want to move to is the edge of the board vertically
 					return false;
 				}
-				if (this.virtualBoard[-position.y + 3][position.x + 3].isEmpty) {
+				if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
 					return true;
 				} else {
 					return false;
 				}
-				if(this.virtualBoard[-position.y + 3][position.x + 3].type = 'gem') {
+				if(this.virtualBoard[-position.y + this.offset][position.x + this.offset].type = 'gem') {
 					return false;
 				} else{
 					return true;
@@ -244,9 +251,11 @@
 
 			Game.prototype.createGem = function(position){
 				
-				if(this.virtualBoard[-position.y + 3][position.x + 3].isEmpty){
-					this.virtualBoard[position]= new Gem(position);
-					this.scene.add(this.virtualBoard[position].object);
+				if(this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty){
+					this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new Gem(position);
+					//this.startingBoard[position.y][position.x] = '2';
+					this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
+					this.scene.add(this.virtualBoard[-position.y + this.offset][position.x + this.offset].object);
 					
 				}
 			};

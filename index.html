@@ -8,71 +8,192 @@
 	</head>
 	<body>
 		<p>
-			Bejewler
+        Bejewler
 		</p>
 		<script>
 			// Convert board position into world position
 			var board_to_world = function(position) {
-
+                
 				return {
 					x : 100 * position.x,
 					y : 100 * position.y,
 					z : 0
 				};
-
+                
 			};
-		
-
-			// Barrier class
-			var Barrier = function(position) {
-				this.isEmpty = false;
-				this.boardPosition = position || {
-					x : 0,
-					y : 0
-				};
-				this.type = 'barrier';
-				this.geometry = new THREE.CubeGeometry(90, 90, 90);
-				// Geometry should always be around origin
-				this.material = new THREE.MeshLambertMaterial({
-					color : 0xff0000
-				});
-				this.object = new THREE.Mesh(this.geometry, this.material);
-				// A mesh is an Object3D, change its position to move
-				this.object.position = board_to_world(this.boardPosition);
-			};
-
-			Barrier.prototype.updateBoardPosition = function() {
-				this.object.position = board_to_world(this.boardPosition);
-			};
-
-			var Gem = function(position) {
-				//// A Barrier is a game object
-				// Default position if unspecified is at square 0, 0
-				this.isEmpty = false;
-				this.boardPosition = position || {
-					x : 0,
-					y : 0
-				};
-				this.type = 'gem';
-				this.geometry = new THREE.CubeGeometry(90, 90, 90);
-				// Geometry should always be around origin
-				this.material = new THREE.MeshLambertMaterial({
-					color : 0x0fff00
-				});
-				this.object = new THREE.Mesh(this.geometry, this.material);
-				// A mesh is an Object3D, change its position to move
-				this.object.position = board_to_world(this.boardPosition);
-			};
-
-			Gem.prototype.moveTo = function(position) {
+            
+            var sphere_gem_to_world = function(position) {
+                return {
+                    x : (100 * position.x) + 130,
+                    y : (100 * position.y) - 30,
+                    z : 0
+                };
+            };
+            
+            var iso_gem_to_world = function(position) {
+                return {
+                    x : (100 * position.x) + 100,
+                    y : (100 * position.y) - 50,
+                    z : 0
+                };
+            };
+            
+            var cube_gem_to_world = function(position) {
+                return {
+                    x : (100 * position.x) + 20,
+                    y : (100 * position.y),
+                    z : 0
+                };
+            };
+            
+            var diamond_gem_to_world = function(position) {
+                return {
+                    x : (100 * position.x) + 115,
+                    y : (100 * position.y) - 30,
+                    z : 0
+                };
+            };
+            
+            
+            
+            var diamondGem = function(position, scene){
+                var that = this;
+                this.isEmpty = false;
+                this.boardPosition = position || {
+                    x : 0,
+                    y : 0
+                };
+                this.type = 'gem';
+                this.material = new THREE.MeshLambertMaterial({
+                                                              color : 0xff0000
+                                                              });
+                this.figure = null;
+                
+                var jsonLoader = new THREE.JSONLoader();
+                jsonLoader.load('models/diamondGem.js', function(geometry) {
+                                that.figure = new THREE.Mesh(geometry, that.material);
+                                that.figure.scale.set(40, 40, 40);
+                                that.figure.rotation.y = 55;
+                                that.figure.rotation.z = 100;
+                                scene.add(that.figure);
+                                that.figure.position = diamond_gem_to_world(position);
+                                });
+                 
+            }
+            
+            diamondGem.prototype.moveTo = function(position) {
 				this.boardPosition = position;
 				this.updateBoardPosition();
 			};
-
-			Gem.prototype.updateBoardPosition = function() {
-				this.object.position = board_to_world(this.boardPosition);
+            
+			diamondGem.prototype.updateBoardPosition = function() {
+				this.object.position = gem_to_world(this.boardPosition);
 			};
-
+            
+            var cubeGem = function(position, scene){
+                var that = this;
+                this.isEmpty = false;
+                this.boardPosition = position || {
+                    x : 0,
+                    y : 0
+                };
+                this.type = 'gem';
+                this.material = new THREE.MeshLambertMaterial({
+                                                              color : 0xff0000
+                                                              });
+                this.figure = null;
+                
+                var jsonLoader = new THREE.JSONLoader();
+                jsonLoader.load('models/cubeGem.js', function(geometry) {
+                                that.figure = new THREE.Mesh(geometry, that.material);
+                                that.figure.scale.set(40, 40, 40);
+                                that.figure.rotation.x = 10;
+                                that.figure.rotation.y = 55;
+                                that.figure.rotation.z = 100;
+                                scene.add(that.figure);
+                                that.figure.position = cube_gem_to_world(position);
+                                });
+                
+            }
+            
+            cubeGem.prototype.moveTo = function(position) {
+				this.boardPosition = position;
+				this.updateBoardPosition();
+			};
+            
+			cubeGem.prototype.updateBoardPosition = function() {
+				this.object.position = gem_to_world(this.boardPosition);
+			};
+            
+            var sphereGem = function(position, scene){
+                var that = this;
+                this.isEmpty = false;
+                this.boardPosition = position || {
+                    x : 0,
+                    y : 0
+                };
+                this.type = 'gem';
+                this.material = new THREE.MeshLambertMaterial({
+                                                              color : 0xff0000
+                                                              });
+                this.figure = null;
+                
+                var jsonLoader = new THREE.JSONLoader();
+                jsonLoader.load('models/sphereGem.js', function(geometry) {
+                                that.figure = new THREE.Mesh(geometry, that.material);
+                                that.figure.scale.set(40, 40, 40);
+                                that.figure.rotation.y = 55;
+                                that.figure.rotation.z = 100;
+                                scene.add(that.figure);
+                                that.figure.position = sphere_gem_to_world(position);
+                                });
+                
+            }
+            
+            sphereGem.prototype.moveTo = function(position) {
+				this.boardPosition = position;
+				this.updateBoardPosition();
+			};
+            
+			sphereGem.prototype.updateBoardPosition = function() {
+				this.object.position = gem_to_world(this.boardPosition);
+			};
+            
+            var isoGem = function(position, scene){
+                var that = this;
+                this.isEmpty = false;
+                this.boardPosition = position || {
+                    x : 0,
+                    y : 0
+                };
+                this.type = 'gem';
+                this.material = new THREE.MeshLambertMaterial({
+                                                              color : 0xff0000
+                                                              });
+                this.figure = null;
+                
+                var jsonLoader = new THREE.JSONLoader();
+                jsonLoader.load('models/isoGem.js', function(geometry) {
+                                that.figure = new THREE.Mesh(geometry, that.material);
+                                that.figure.scale.set(40, 40, 40);
+                                that.figure.rotation.x = 40;
+                                that.figure.rotation.y = 55;
+                                that.figure.rotation.z = 100;
+                                scene.add(that.figure);
+                                that.figure.position = iso_gem_to_world(position);
+                                });
+                
+            }
+            
+            isoGem.prototype.moveTo = function(position) {
+				this.boardPosition = position;
+				this.updateBoardPosition();
+			};
+            
+			isoGem.prototype.updateBoardPosition = function() {
+				this.object.position = gem_to_world(this.boardPosition);
+			};
+            
 			var Robot = function(position) {
 				//// A Robot is a game object
 				// Default position if unspecified is at square 0, 0
@@ -85,106 +206,133 @@
 				// Geometry should always be around origin
 				// Make it blue
 				this.material = new THREE.MeshPhongMaterial({
-					color : 0x0000ff
-				});
+                                                            color : 0x0000ff
+                                                            });
 				this.object = new THREE.Mesh(this.geometry, this.material);
-
+                
 				// A mesh is an Object3D, change its position to move
 				this.object.position = board_to_world(this.boardPosition);
-
+                
 			};
-
+            
 			Robot.prototype.updateBoardPosition = function() {
 				this.object.position = board_to_world(this.boardPosition);
 			};
-
+            
 			Robot.prototype.moveTo = function(position) {
 				this.boardPosition = position;
 				this.updateBoardPosition();
 			};
-
+            
 			var Game = function() {
 				// A Game object is the highest level object representing entire game
 			};
-
+            
 			Game.prototype.init = function() {
+                this.scene = new THREE.Scene();
 				var that = this;
 				this.boardSize = 9;
 				this.offset = 4;
 				this.facing = 'up';
-
+                
 				this.virtualBoard = new Array(this.boardSize);
 				for (var i = 0; i < this.boardSize; i++) {
 					this.virtualBoard[i] = [];
 					for(var j = 0; j < this.boardSize; j++){
 						this.virtualBoard[i].push({});
 					}
-
+                    
 				}
-
-				this.startingBoard = [['0', '0', '0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
-									  ['0', '2', '2', '1', '1', '0', '0', '0', '0'], // and where '1' = empty spot
-									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '1', '1', '2', '2', '0', '0', '0', '0'], 
-									  ['0', '1', '1', '0', '0', '0', '0', '0', '0'], 
-									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'], 
+                
+				this.startingBoard = [['1', '0', '1', '0', '1', '0', '1', '0', '1'], // create a board where true = occupied by a block
+									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'], // and where '0' = empty spot
+									  ['2', '0', '2', '0', '2', '0', '2', '0', '2'],
 									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
-									  ['0', '0', '0', '2', '2', '0', '0', '0', '0'],
-									  ['0', '0', '0', '2', '2', '0', '0', '0', '0']];
-				
-				
+									  ['3', '0', '3', '0', '3', '0', '3', '0', '3'],
+									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
+									  ['4', '0', '4', '0', '4', '0', '4', '0', '4'],
+									  ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
+									  ['1', '0', '1', '0', '1', '0', '1', '0', '1']];
+                
+                
 				for (var x = 0; x < this.boardSize; x++) {
 					for (var y = 0; y < this.boardSize; y++) {
-						
-				
-						// If there is a 1 in startingBoard create a barrier object
-						if (this.startingBoard[y][x] == '1') {
-							this.virtualBoard[y][x] = new Barrier({
-								x : (x - this.offset),
-								y : -(y - this.offset)
-							});
-						}
-
-						// If there is a 2 in startingBoard create a gem object
-						if (this.startingBoard[y][x] == '2') {
-							this.virtualBoard[y][x] = new Gem({
-								x : (x - this.offset),
-								y : -(y - this.offset)
-							});
-						}
-						// If there is a 0 in startingBoard set the slot's isEmpty property to true'
+                        
+                        // If there is a 0 in startingBoard set the slot's isEmpty property to true'
 						if (this.startingBoard[y][x] == '0') {
 							// For every slot in the board create an object Slot
-
 							this.virtualBoard[y][x].isEmpty = true;
 						}
-
+                        
+						// If there is a 1 in startingBoard create a barrier object
+						if (this.startingBoard[y][x] == '1') {
+							this.virtualBoard[y][x] = new cubeGem({
+                                                                  x : (x - this.offset),
+                                                                  y : -(y - this.offset)
+                                                                  }, this.scene);
+						}
+                        
+						// If there is a 2 in startingBoard create a gem object
+						if (this.startingBoard[y][x] == '2') {
+							this.virtualBoard[y][x] = new diamondGem({
+                                                              x : (x - this.offset),
+                                                              y : -(y - this.offset)
+                                                              }, this.scene);
+						}
+                        
+                        if (this.startingBoard[y][x] == '3') {
+							this.virtualBoard[y][x] = new sphereGem({
+                                                                     x : (x - this.offset),
+                                                                     y : -(y - this.offset)
+                                                                     }, this.scene);
+						}
+                        
+                        if (this.startingBoard[y][x] == '4') {
+							this.virtualBoard[y][x] = new isoGem({
+                                                                     x : (x - this.offset),
+                                                                     y : -(y - this.offset)
+                                                                     }, this.scene);
+						}
 					}
 				}
-
+                
 				this.robot = new Robot({
-					x : -2,
-					y : -3
-				});
+                                       x : -2,
+                                       y : -3
+                                       });
 				// create a new robot
-
+                
 				this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
 				this.camera.position.z = 800;
-
-				this.scene = new THREE.Scene();
-
+                                
 				for (var x = 0; x < this.boardSize; x++) {
 					for (var y = 0; y < this.boardSize; y++) {
-
+                        
 						if (this.startingBoard[x][y] == '1' || this.startingBoard[x][y] == '2') {
 							that.scene.add(this.virtualBoard[x][y].object);
 						}
 					}
 				}
-
+                
+                this.material = new THREE.MeshLambertMaterial({
+                                                              color : 0xff0000
+                                                              });
+                this.figure = null;
+                /*
+                var jsonLoader = new THREE.JSONLoader();
+                jsonLoader.load('models/cubeGem-3.js', function(geometry) {
+                                that.figure = new THREE.Mesh(geometry, that.material);
+                                that.figure.scale.set(60, 60, 60);
+                                that.figure.position.x = 0;
+                                that.figure.position.y = -350;
+                                that.figure.rotation.y = 55;
+                                that.scene.add(that.figure);
+                                });
+                */
+                //var testGem = new THREE.Mesh(new THREE.SphereGeometry(90), this.material);
 				this.scene.add(this.robot.object);
 				// add robot to scene
-
+                
 				// Spotlight
 				var spotlight = new THREE.PointLight(0xffffff, 1, 1000);
 				spotlight.position.set(0, -100, 400);
@@ -196,30 +344,30 @@
 				var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 900), new THREE.MeshLambertMaterial());
 				bgplane.translateZ(-100);
 				this.scene.add(bgplane);
-
+                
 				this.renderer = new THREE.WebGLRenderer({
-					antialias : true
-				});
+                                                        antialias : true
+                                                        });
 				this.renderer.setSize(800, 600);
 				this.renderer.setClearColor(0xeeeeee, 1.0);
 				document.body.appendChild(this.renderer.domElement);
-
+                
 				// Setup keyboard events
 				this.keys = {};
 				$('body').keydown(function(e) {
-					if (e.which) {
-						if (that.keys[e.which] !== 'triggered') {
-							that.keys[e.which] = true;
-						}
-					}
-				});
+                                  if (e.which) {
+                                  if (that.keys[e.which] !== 'triggered') {
+                                  that.keys[e.which] = true;
+                                  }
+                                  }
+                                  });
 				$('body').keyup(function(e) {
-					if (e.which) {
-						that.keys[e.which] = false;
-					}
-				});
+                                if (e.which) {
+                                that.keys[e.which] = false;
+                                }
+                                });
 			};
-
+            
 			Game.prototype.render = function(t) {
 				// Bob the camera a bit
 				this.camera.position.x = 0;
@@ -227,8 +375,8 @@
 				this.camera.lookAt(this.scene.position);
 				this.renderer.render(this.scene, this.camera);
 			};
-			
-
+            
+            
 			Game.prototype.legalRobotMove = function(position) {
 				if (position.x < -this.offset || position.x > this.offset) {// check if position that you want to move to is the edge of the board horizontally
 					return false;
@@ -248,23 +396,20 @@
 				}
 				return true;
 			};
-
+            
 			Game.prototype.createGem = function(position){
-				
+                
 				if(this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty){
-					this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new Gem(position);
+					this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new Gem(position, this.scene);
 					//this.startingBoard[position.y][position.x] = '2';
 					this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 					this.scene.add(this.virtualBoard[-position.y + this.offset][position.x + this.offset].object);
-					
+                    
 				}
 			};
 
-
-
-
 			Game.prototype.handleInput = function() {
-
+                
 				// Left
 				if (this.keys[65] === true) {
 					this.keys[65] = 'triggered';
@@ -272,7 +417,7 @@
 						x : this.robot.boardPosition.x - 1,
 						y : this.robot.boardPosition.y
 					};
-
+                    
 					if (this.legalRobotMove(newPosition)) {
 						this.robot.moveTo(newPosition);
 						// check neighbors if there's a block
@@ -315,73 +460,69 @@
 				if (this.keys[32] === true){
 					this.keys[32] = 'triggered';
 					that = this;
-					
+                    
 					// determine what direction character is facing
 					var newPosition;
 					if(this.facing == 'right'){
-					newPosition = {
-						x: this.robot.boardPosition.x + 1,
-						y: this.robot.boardPosition.y
-					};
+                        newPosition = {
+                            x: this.robot.boardPosition.x + 1,
+                            y: this.robot.boardPosition.y
+                        };
 					}
 					if(this.facing == 'up'){
-					newPosition = {
-						x: this.robot.boardPosition.x,
-						y: this.robot.boardPosition.y + 1
-					};
+                        newPosition = {
+                            x: this.robot.boardPosition.x,
+                            y: this.robot.boardPosition.y + 1
+                        };
 					}
 					if(this.facing == 'left'){
-					newPosition = {
-						x: this.robot.boardPosition.x - 1,
-						y: this.robot.boardPosition.y
-					};
+                        newPosition = {
+                            x: this.robot.boardPosition.x - 1,
+                            y: this.robot.boardPosition.y
+                        };
 					}
 					if(this.facing == 'down'){
-					newPosition = {
-						x: this.robot.boardPosition.x,
-						y: this.robot.boardPosition.y - 1
-					};
+                        newPosition = {
+                            x: this.robot.boardPosition.x,
+                            y: this.robot.boardPosition.y - 1
+                        };
 					}
-					
+                    
 					console.log(this.facing);
 					// create a gem where character is facing
 					this.createGem(newPosition);
-				
-					
+                    
+                    
 				}
-				
+                
 				// Inputs for determining where the character is facing
 				// Up arrow key
 				if (this.keys[38] === true) {
 					this.keys[38] = 'triggered';
-					
+                    
 					this.facing = 'up';	
 				}
 				// Left arrow key
 				if (this.keys[37] === true) {
 					this.keys[37] = 'triggered';
-					
+                    
 					this.facing = 'left';		
 				}
 				// Down arrow key
 				if (this.keys[40] === true) {
 					this.keys[40] = 'triggered';
-					
+                    
 					this.facing = 'down';	
 				}
 				// Right arrow key
 				if (this.keys[39] === true) {
 					this.keys[39] = 'triggered';
-					
+                    
 					this.facing = 'right';	
-				}
-				
-				
-				
-				
-				
+				}        
+                
 			};
-
+            
 			Game.prototype.start = function() {
 				var that = this;
 				var time0 = new Date().getTime();
@@ -397,19 +538,110 @@
 				};
 				loop();
 			};
-
+            
 			////
-
+            
 			$(function() {
-
-				var game = new Game();
-				game.init();
-				game.start();
-
-			});
-
-		</script>
-
+              
+              var game = new Game();
+              game.init();
+              game.start();
+              
+              });
+            
+            </script>
+        <!---Implement directions from GMaps API---------->
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <style type="text/css">
+            html { height: 100%; }
+            body { height: 100%; margin: -50; padding: 50 }
+            #map-canvas { height: 50%; width: 50%}
+            </style>
+        <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9r1YcV7JvWDI13pROQIL7qTTXEl8WqSY&sensor=true">
+            </script>
+        <script type="text/javascript">
+            
+            function initialize() {
+                var map;
+                directionsDisplay = new google.maps.DirectionsRenderer();
+                var mapOptions = {
+                    zoom: 18,
+                    mapTypeId: google.maps.MapTypeId.SATELLITE
+                };
+                map = new google.maps.Map(document.getElementById('map-canvas'),
+                                          mapOptions);
+                
+                directionsDisplay.setMap(map);
+                
+                // Try HTML5 geolocation
+                if(navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                                                             var pos = new google.maps.LatLng(position.coords.latitude,
+                                                                                              position.coords.longitude);
+                                                             
+                                                             
+                                                             map.setCenter(pos);
+                                                             }, function() {
+                                                             handleNoGeolocation(true);
+                                                             });
+                } else {
+                    // Browser doesn't support Geolocation
+                    handleNoGeolocation(false);
+                }
+            }
+            
+            function handleNoGeolocation(errorFlag) {
+                if (errorFlag) {
+                    var content = 'Error: The Geolocation service failed.';
+                } else {
+                    var content = 'Error: Your browser doesn\'t support geolocation.';
+                }
+                
+                var options = {
+                    map: map,
+                    position: new google.maps.LatLng(80, 105),
+                    content: content
+                };
+                
+                var infowindow = new google.maps.InfoWindow(options);
+                map.setCenter(options.position);
+            }
+            
+            google.maps.event.addDomListener(window, 'load', initialize);
+            var directionsDisplay;
+            var directionsService = new google.maps.DirectionsService();
+            
+            function calcRoute() {
+                var start = document.getElementById('start').value;
+                var end = document.getElementById('end').value;
+                var request = {
+                    origin:start,
+                    destination:end,
+                    travelMode: google.maps.DirectionsTravelMode.WALKING
+                };
+                directionsService.route(request, function(response, status) {
+                                        if (status == google.maps.DirectionsStatus.OK) {
+                                        directionsDisplay.setDirections(response);
+                                        }
+                                        });
+            }
+            
+            google.maps.event.addDomListener(window, 'load', initialize);
+            </script>
+        
+        <div id="panel">
+            <b>Start: </b>
+            <select id="start" onchange="calcRoute();">
+                <option value="santa cruz, ca">Santa Cruz</option>
+                <option value="escondido, ca">Escondido</option>
+            </select>
+            <b>End: </b>
+            <select id="end" onchange="calcRoute();">
+                <option value="aptos, ca">Aptos</option>
+                <option value="san francisco, ca">San Francisco</option>
+            </select>
+        </div>
+        <div id="map-canvas"></div>
 	</body>
 </html>
-

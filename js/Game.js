@@ -13,37 +13,24 @@ Game.prototype.init = function() {
      http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
      */
     console.log("get materials");
-    var materials = [
-                     new THREE.MeshBasicMaterial({
-                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_4.jpg'),
-                                                 side: THREE.BackSide
-                                                 }),
-                     new THREE.MeshBasicMaterial({
-                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_2.jpg'),
-                                                 side: THREE.BackSide
-                                                 }),
-                     new THREE.MeshBasicMaterial({
-                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_1.jpg'),
-                                                 side: THREE.BackSide
-                                                 }),
-                     new THREE.MeshBasicMaterial({
-                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_6.jpg'),
-                                                 side: THREE.BackSide
-                                                 }),
-                     new THREE.MeshBasicMaterial({
-                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_3.jpg'),
-                                                 side: THREE.BackSide
-                                                 }),
-                     new THREE.MeshBasicMaterial({
-                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_5.jpg'),
-                                                 side: THREE.BackSide
-                                                 })
-                     ];
-    console.log("create mesh");
+    var filenames = ['skybox4.png', 'skybox2.png', 'skybox1.png', 'skybox6.png', 'skybox3.png', 'skybox5.png'];
+    var materials = [];
+    for(var i = 0; i < filenames.length; i++) {
+        materials.push(new THREE.MeshBasicMaterial({
+                                                   map: THREE.ImageUtils.loadTexture("images/skybox/" + filenames[i]),
+                                                   side: THREE.BackSide
+                                                   }));
+    }
     this.skybox = new THREE.Mesh(
-                                 new THREE.CubeGeometry(5000, 5000, 5000),
+                                 new THREE.CubeGeometry(10000, 10000, 10000),
                                  new THREE.MeshFaceMaterial(materials));
     this.scene.add(this.skybox);
+
+    
+    this.robot = new Robot({
+                           x : -2,
+                           y : -3
+                           }, this.scene);
     
     this.virtualBoard = new Array(this.boardSize);
     for (var i = 0; i < this.boardSize; i++) {
@@ -106,12 +93,6 @@ Game.prototype.init = function() {
         }
     }
     
-    this.robot = new Robot({
-                           x : -2,
-                           y : -3
-                           });
-    // create a new robot
-    
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 800;
     
@@ -129,7 +110,7 @@ Game.prototype.init = function() {
                                                   });
     this.figure = null;
     
-    this.scene.add(this.robot.object);
+    //this.scene.add(this.robot.object);
     // add robot to scene
     
     // Spotlight

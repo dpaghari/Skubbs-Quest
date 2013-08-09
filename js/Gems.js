@@ -38,14 +38,18 @@ var diamondGem = function(position, scene){
         y : 0
     };
     this.type = 'gem';
-    this.material = new THREE.MeshLambertMaterial({
-                                                  color : 0xff0000
-                                                  });
+    var diamondVertexShaderText = $('#diamond-vertex-shader').text();
+    var diamondFragmentShaderText = $('#diamond-fragment-shader').text();
+    
+    var diamondMaterial = new THREE.ShaderMaterial({
+                                              vertexShader: diamondVertexShaderText,
+                                              fragmentShader: diamondFragmentShaderText
+                                              });
     this.figure = null;
     
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/diamondGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, that.material);
+                    that.figure = new THREE.Mesh(geometry, diamondMaterial);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
@@ -72,14 +76,19 @@ var cubeGem = function(position, scene){
         y : 0
     };
     this.type = 'gem';
-    this.material = new THREE.MeshLambertMaterial({
-                                                  color : 0xff0000
-                                                  });
+    var cubeVertexShaderText = $('#cube-vertex-shader').text();
+    var cubeFragmentShaderText = $('#cube-fragment-shader').text();
+    
+    var cubeMaterial = new THREE.ShaderMaterial({
+                                              vertexShader:
+                                                  cubeVertexShaderText,
+                                              fragmentShader: cubeFragmentShaderText
+                                              });
     this.figure = null;
     
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/cubeGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, that.material);
+                    that.figure = new THREE.Mesh(geometry, cubeMaterial);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.x = 10;
                     that.figure.rotation.y = 55;
@@ -103,7 +112,7 @@ var sphereGem = function(position, scene){
     var sphereVertexShaderText = $('#sphere-vertex-shader').text();
     var sphereFragmentShaderText = $('#sphere-fragment-shader').text();
     
-    var myMaterial = new THREE.ShaderMaterial({
+    var sphereMaterial = new THREE.ShaderMaterial({
                                               vertexShader: sphereVertexShaderText,
                                               fragmentShader: sphereFragmentShaderText
                                               });
@@ -116,10 +125,10 @@ var sphereGem = function(position, scene){
     this.type = 'gem';
 
     this.figure = null;
-    
+        
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/sphereGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, myMaterial);
+                    that.figure = new THREE.Mesh(geometry, sphereMaterial);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
@@ -146,14 +155,19 @@ var isoGem = function(position, scene){
         y : 0
     };
     this.type = 'gem';
-    this.material = new THREE.MeshLambertMaterial({
-                                                  color : 0xff0000
-                                                  });
+    var isoVertexShaderText = $('#iso-vertex-shader').text();
+    var isoFragmentShaderText = $('#iso-fragment-shader').text();
+    
+    var isoMaterial = new THREE.ShaderMaterial({
+                                              vertexShader:
+                                                  isoVertexShaderText,
+                                              fragmentShader: isoFragmentShaderText
+                                              });
     this.figure = null;
     
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/isoGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, that.material);
+                    that.figure = new THREE.Mesh(geometry, isoMaterial);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.x = 40;
                     that.figure.rotation.y = 55;

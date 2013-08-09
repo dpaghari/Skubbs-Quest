@@ -5,6 +5,11 @@
 		<script src="js/jquery.js"></script>
 		<script src="js/underscore.js"></script>
 		<script src="js/three.min.js"></script>
+        <script src="js/EffectComposer.js"></script>
+        <script src="js/RenderPass.js"></script>
+        <script src="js/ShaderPass.js"></script>
+        <script src="js/MaskPass.js"></script>
+        <script src="js/CopyShader.js"></script>
         <script src="js/Gems.js"></script>
         <script src="js/Robot.js"></script>
         <script src="js/Game.js"></script>
@@ -14,6 +19,7 @@
 		<p>
         Bejewler
 		</p>
+        
         <script id='sphere-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
             
@@ -39,9 +45,111 @@
                 else
                 return vec4(0.1,0.2,0.1,1.0);
             }
+            void main() {
+                vec3 light = vec3(0.7, 0.7, 1.0);
+                // normalize light vector
+                light = normalize(light);
+                float prod = max(0.0, dot(normalize(vNormal), light));
+                gl_FragColor = transform(prod);
+            }
+            </script>
+        
+        <script id='iso-vertex-shader' type='x-shader/x-vertex'>
+            varying vec3 vNormal;
             
             void main() {
-                vec3 light = vec3(1.0, 1.0, 1.0);
+                // Calculate normal in view space
+                vNormal = normalMatrix * vec3(normal);
+                gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+            }
+            </script>
+        
+        <script id='iso-fragment-shader' type='x-shader/x-fragment'>
+            varying vec3 vNormal;
+            
+            vec4 transform(float u) {
+                if (u > 0.95)
+                return vec4(0.5,0.5,1.0,1.0);
+                else if (u > 0.5)
+                return vec4(0.3,0.3,0.8,1.0);
+                else if (u > 0.25)
+                return vec4(0.2,0.2,0.4,1.0);
+                else
+                return vec4(0.1,0.1,0.2,1.0);
+            }
+            void main() {
+                vec3 light = vec3(0.7, 0.7, 1.0);
+                // normalize light vector
+                light = normalize(light);
+                float prod = max(0.0, dot(normalize(vNormal), light));
+                gl_FragColor = transform(prod);
+            }
+            </script>
+        
+        <script id='diamond-vertex-shader' type='x-shader/x-vertex'>
+            varying vec3 vNormal;
+            
+            void main() {
+                // Calculate normal in view space
+                vNormal = normalMatrix * vec3(normal);
+                gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+            }
+            </script>
+        
+        <script id='diamond-fragment-shader' type='x-shader/x-fragment'>
+            varying vec3 vNormal;
+            
+            vec4 transform(float u) {
+                if (u > 0.95)
+                return vec4(1.0,1.0,0.5,1.0);
+                else if (u > 0.5)
+                return vec4(0.8,0.8,0.3,1.0);
+                else if (u > 0.25)
+                return vec4(0.4,0.4,0.2,1.0);
+                else
+                return vec4(0.2,0.2,0.1,1.0);
+            }
+            void main() {
+                vec3 light = vec3(0.7, 0.7, 1.0);
+                // normalize light vector
+                light = normalize(light);
+                float prod = max(0.0, dot(normalize(vNormal), light));
+                gl_FragColor = transform(prod);
+            }
+            </script>
+            
+        <script id='cube-vertex-shader' type='x-shader/x-vertex'>
+            varying vec3 vNormal;
+            
+            void main() {
+                // Calculate normal in view space
+                vNormal = normalMatrix * vec3(normal);
+                gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+            }
+            </script>
+        
+        <script id='cube-fragment-shader' type='x-shader/x-fragment'>
+            varying vec3 vNormal;
+            
+            vec4 transform(float u) {
+                if (u > 0.95)
+                return vec4(1.0,0.6,1.0,1.0);
+                else if (u > 0.5)
+                return vec4(0.9,0.4,0.9,1.0);
+                else if (u > 0.1)
+                return vec4(0.7,0.3,0.7,1.0);
+                else
+                return vec4(0.5,0.2,0.5,1.0);
+            }
+            
+            void main() {
+                vec3 light = vec3(0.7, 0.7, 1.0);
                 // normalize light vector
                 light = normalize(light);
                 float prod = max(0.0, dot(normalize(vNormal), light));

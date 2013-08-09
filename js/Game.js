@@ -9,6 +9,42 @@ Game.prototype.init = function() {
     this.offset = 4;
     this.facing = 'up';
     
+    /* Skybox texture from:
+     http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
+     */
+    console.log("get materials");
+    var materials = [
+                     new THREE.MeshBasicMaterial({
+                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_4.jpg'),
+                                                 side: THREE.BackSide
+                                                 }),
+                     new THREE.MeshBasicMaterial({
+                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_2.jpg'),
+                                                 side: THREE.BackSide
+                                                 }),
+                     new THREE.MeshBasicMaterial({
+                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_1.jpg'),
+                                                 side: THREE.BackSide
+                                                 }),
+                     new THREE.MeshBasicMaterial({
+                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_6.jpg'),
+                                                 side: THREE.BackSide
+                                                 }),
+                     new THREE.MeshBasicMaterial({
+                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_3.jpg'),
+                                                 side: THREE.BackSide
+                                                 }),
+                     new THREE.MeshBasicMaterial({
+                                                 map: THREE.ImageUtils.loadTexture('images/skybox/skybox_5.jpg'),
+                                                 side: THREE.BackSide
+                                                 })
+                     ];
+    console.log("create mesh");
+    this.skybox = new THREE.Mesh(
+                                 new THREE.CubeGeometry(5000, 5000, 5000),
+                                 new THREE.MeshFaceMaterial(materials));
+    this.scene.add(this.skybox);
+    
     this.virtualBoard = new Array(this.boardSize);
     for (var i = 0; i < this.boardSize; i++) {
         this.virtualBoard[i] = [];
@@ -132,6 +168,14 @@ Game.prototype.init = function() {
 };
 
 Game.prototype.render = function(t) {
+    if(this.virtualBoard.isEmpty === false){
+        for (var i = 0; i < this.boardSize; i++){
+            for (var j = 0; j < this.boardSize; j++){
+                this.startingBoard[i][j].rotation.x += 0.05;
+                this.startingBoard[i][j].rotation.y += 0.004;
+            }
+        }
+    }
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;
@@ -146,6 +190,7 @@ Game.prototype.legalMove = function(position) {
      *
      * Check if desired position is off of the edge of the board horizontally
      */
+    
     if (position.x < -this.offset || position.x > this.offset) {
         return false;
     }
@@ -164,7 +209,6 @@ Game.prototype.legalMove = function(position) {
 
 // Function for creating a gem
 Game.prototype.createGem = function(position){
-    
     
     if(this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty){
         this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new diamondGem(position, this.scene);

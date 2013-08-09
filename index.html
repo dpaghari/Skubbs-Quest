@@ -20,6 +20,34 @@
         Bejewler
 		</p>
         
+        <script id='goal-vertex-shader' type='x-shader/x-vertex'>
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            
+            void main() {
+                // Surface normal (world space)
+                vNormal = (modelMatrix * vec4(normal, 1.0)).xyz;
+                // Position (world space)
+                vPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+                gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+            }
+            </script>
+        
+        <script id='goal-fragment-shader' type='x-shader/x-fragment'>
+            uniform samplerCube envMap;
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            
+            void main() {
+                vec3 normal = normalize(vNormal);
+                vec3 cameraToVertex = normalize(vPosition - cameraPosition);
+                vec3 reflectVec = reflect(cameraToVertex, normal);
+                gl_FragColor = textureCube(envMap, reflectVec);
+            }
+            </script>
+        
         <script id='sphere-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
             

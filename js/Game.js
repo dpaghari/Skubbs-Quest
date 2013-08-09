@@ -42,7 +42,7 @@ Game.prototype.init = function() {
     }
     
     this.startingBoard = [['1', '1', '1', '1', '1', '1', '1', '1', '1'], // create a board where true = occupied by a block
-                          ['1', '0', '0', '0', '0', '0', '0', '0', '1'], // and where '0' = empty spot
+                          ['1', '0', '0', '0', '0', '0', '0', '5', '1'], // and where '0' = empty spot
                           ['1', '0', '2', '0', '2', '0', '2', '0', '1'],
                           ['1', '0', '0', '0', '0', '0', '0', '0', '1'],
                           ['1', '0', '3', '0', '3', '0', '3', '0', '1'],
@@ -86,6 +86,13 @@ Game.prototype.init = function() {
             
             if (this.startingBoard[y][x] == '4') {
                 this.virtualBoard[y][x] = new isoGem({
+                                                     x : (x - this.offset),
+                                                     y : -(y - this.offset)
+                                                     }, this.scene);
+            }
+            
+            if (this.startingBoard[y][x] == '5') {
+                this.virtualBoard[y][x] = new goalGem({
                                                      x : (x - this.offset),
                                                      y : -(y - this.offset)
                                                      }, this.scene);
@@ -161,6 +168,10 @@ Game.prototype.render = function(t) {
     this.camera.position.x = 0;
     this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
+    //this.sphere.visible = false;
+    //this.sphereCamera.updateCubeMap(this.renderer, this.scene);
+    //this.sphere.visible = true;
+    
     this.renderer.render(this.scene, this.camera);
 };
 

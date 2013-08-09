@@ -3,7 +3,7 @@ var robot_to_world = function(position) {
     
     return {
         x : (100 * position.x) - 40,
-        y : (100 * position.y) + 100,
+        y : (100 * position.y) + 120,
         z : 0
     };
     
@@ -24,7 +24,7 @@ var Robot = function(position, scene) {
     var robotMaterial = new THREE.MeshPhongMaterial({
                                                 color : 0x0000ff
                                                 });
-    
+    /* Robot from http://opengameart.org/content/simple-character */
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/character.js', function(geometry) {
                     that.figure = new THREE.Mesh(geometry, robotMaterial);

@@ -91,7 +91,7 @@ var MenuPane = function() {
     this.camera.position.z += 1000;
     this.camera.position.x += 1000;
     this.camera.position.y += 1000;
-    
+    console.log("draw scene in MenuPane");
     this.scene = new THREE.Scene();
     
     this.container = document.getElementById('gameArea');
@@ -203,9 +203,9 @@ MenuPane.prototype.update = function(t, renderer) {
 
 
 MenuPane.prototype.handleInput = function(keyboard, game) {
-    //if(keyboard.pressed('enter', true)) {
-        //game.pushPane(new GamePane());
-    //}
+    if(keyboard.pressed('enter', true)) {
+        game.pushPane(new GamePane());
+    }
 };
  
 

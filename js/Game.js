@@ -1,5 +1,4 @@
 var Game = function() {
-<<<<<<< HEAD
     // A Game object is the highest level object representing entire game
     // Container div
     this.container = document.getElementById('gameArea');
@@ -12,6 +11,16 @@ Game.prototype.init = function() {
     this.boardSize = 9;
     this.offset = 4;
     this.facing = 'up';
+    
+    // Visible canvas area on top of 3D rendering area
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.top = 0;
+    this.canvas.style.left = 0;
+    this.canvas.width = 800;
+    this.canvas.height = 600;
+    this.container.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext('2d');
     
     /* Skybox texture from:
      http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
@@ -208,9 +217,6 @@ Game.prototype.render = function(t, canvas, ctx) {
  * Add pane to Game object
  * Any existing panes are push down on stack
  */
-Game.prototype.pushPane = function(pane) {
-    this.panes.push(pane);
-};
 
 /**
  * Pop off top pane
@@ -220,10 +226,6 @@ Game.prototype.popPane = function() {
     this.panes.pop();
 };
 
-
-=======
-	// A Game object is the highest level object representing entire game
-};
 
 Game.prototype.init = function() {
 	this.scene = new THREE.Scene();
@@ -357,7 +359,6 @@ Game.prototype.render = function(t) {
 	this.renderer.render(this.scene, this.camera);
 };
 
->>>>>>> ee71067cf03bee47940a8954bf46675d32b9b8d5
 Game.prototype.legalMove = function(position) {
 	/* True = allows movement
 	 * False = hinders movement

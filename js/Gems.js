@@ -1,21 +1,3 @@
-/**
- * Synchronously load contents of file
- * Returns contents as string
- * NOTE:
- *   NOT FOR USE IN PRODUCTION
- *   Use asynchronous loading in production.
- */
-var loadFile = function(url) {
-    var result = null;
-    $.ajax({
-           url: url,
-           async: false
-           }).done(function(data) {
-                   result = data;
-                   });
-    return result;
-};
-
 var sphere_gem_to_world = function(position) {
     return {
         x : (100 * position.x) + 130,
@@ -25,14 +7,6 @@ var sphere_gem_to_world = function(position) {
 };
 
 var iso_gem_to_world = function(position) {
-    return {
-        x : (100 * position.x) + 100,
-        y : (100 * position.y) - 50,
-        z : 0
-    };
-};
-
-var goal_gem_to_world = function(position) {
     return {
         x : (100 * position.x) + 100,
         y : (100 * position.y) - 50,
@@ -63,27 +37,29 @@ var diamondGem = function(position, scene){
         x : 0,
         y : 0
     };
-    this.type = 'gem';
-    var diamondVertexShaderText = $('#diamond-vertex-shader').text();
-    var diamondFragmentShaderText = $('#diamond-fragment-shader').text();
-    
-    var diamondMaterial = new THREE.ShaderMaterial({
-                                              vertexShader: diamondVertexShaderText,
-                                              fragmentShader: diamondFragmentShaderText
-                                              });
+    this.type = 'diamond';
+    this.material = new THREE.MeshLambertMaterial({
+                                                  color : 0xff0000
+                                                  });
     this.figure = null;
     
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/diamondGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, diamondMaterial);
+                    that.figure = new THREE.Mesh(geometry, that.material);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
                     scene.add(that.figure);
                     that.figure.position = diamond_gem_to_world(position);
+                    Game.virtualBoard[this.boardPosition.y][this.boardPosition.x].figure = that.figure;
                     });
     
 }
+
+diamondGem.prototype.destroyGem = function(){
+	
+	scene.remove(this);
+};
 
 diamondGem.prototype.moveTo = function(position) {
     this.boardPosition = position;
@@ -101,28 +77,25 @@ var cubeGem = function(position, scene){
         x : 0,
         y : 0
     };
-    this.type = 'gem';
-    var cubeVertexShaderText = $('#cube-vertex-shader').text();
-    var cubeFragmentShaderText = $('#cube-fragment-shader').text();
-    
-    var cubeMaterial = new THREE.ShaderMaterial({
-                                              vertexShader:
-                                                  cubeVertexShaderText,
-                                              fragmentShader: cubeFragmentShaderText
-                                              });
+    this.type = 'cubegem';
+    this.material = new THREE.MeshLambertMaterial({
+                                                  color : 0xff0000
+                                                  });
     this.figure = null;
     
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/cubeGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, cubeMaterial);
+                    that.figure = new THREE.Mesh(geometry, that.material);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.x = 10;
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
                     scene.add(that.figure);
                     that.figure.position = cube_gem_to_world(position);
+                    
                     });
     
+   
 }
 
 cubeGem.prototype.moveTo = function(position) {
@@ -138,7 +111,7 @@ var sphereGem = function(position, scene){
     var sphereVertexShaderText = $('#sphere-vertex-shader').text();
     var sphereFragmentShaderText = $('#sphere-fragment-shader').text();
     
-    var sphereMaterial = new THREE.ShaderMaterial({
+    var myMaterial = new THREE.ShaderMaterial({
                                               vertexShader: sphereVertexShaderText,
                                               fragmentShader: sphereFragmentShaderText
                                               });
@@ -148,13 +121,13 @@ var sphereGem = function(position, scene){
         x : 0,
         y : 0
     };
-    this.type = 'gem';
+    this.type = 'spheregem';
 
     this.figure = null;
-        
+    
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/sphereGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, sphereMaterial);
+                    that.figure = new THREE.Mesh(geometry, myMaterial);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
@@ -180,20 +153,15 @@ var isoGem = function(position, scene){
         x : 0,
         y : 0
     };
-    this.type = 'gem';
-    var isoVertexShaderText = $('#iso-vertex-shader').text();
-    var isoFragmentShaderText = $('#iso-fragment-shader').text();
-    
-    var isoMaterial = new THREE.ShaderMaterial({
-                                              vertexShader:
-                                                  isoVertexShaderText,
-                                              fragmentShader: isoFragmentShaderText
-                                              });
+    this.type = 'isogem';
+    this.material = new THREE.MeshLambertMaterial({
+                                                  color : 0xff0000
+                                                  });
     this.figure = null;
     
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/isoGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, isoMaterial);
+                    that.figure = new THREE.Mesh(geometry, that.material);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.x = 40;
                     that.figure.rotation.y = 55;
@@ -211,48 +179,4 @@ isoGem.prototype.moveTo = function(position) {
 
 isoGem.prototype.updateBoardPosition = function() {
     this.object.position = gem_to_world(this.boardPosition);
-};
-
-var goalGem = function(position, scene){
-    var that = this;
-    this.isEmpty = false;
-    this.boardPosition = position || {
-        x : 0,
-        y : 0
-    };
-    this.type = 'gem';
-    
-    // Camera to draw reflections
-    var sphereCamera = new THREE.CubeCamera(75, 4.0 / 3.0, 1);
-    //scene.add(sphereCamera);
-    //sphereCamera.updateCubeMap(this.renderer, this.scene);
-    //this.sphere.visible = true;
-    
-    var perlinText = loadFile('shaders/perlin.glsl');
-    var goalVertexShaderText = $('#goal-vertex-shader').text();
-    var goalFragmentShaderText = $('#goal-fragment-shader').text();
-    
-    var goalMaterial = new THREE.MeshBasicMaterial({ envMap: sphereCamera.renderTarget });
-
-    this.figure = null;
-    
-    var jsonLoader = new THREE.JSONLoader();
-    jsonLoader.load('models/isoGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, goalMaterial);
-                    that.figure.scale.set(40, 40, 40);
-                    that.figure.rotation.x = 40;
-                    that.figure.rotation.y = 55;
-                    that.figure.rotation.z = 100;
-                    scene.add(that.figure);
-                    that.figure.position = goal_gem_to_world(position);
-                    });
-    
-}
-goalGem.prototype.moveTo = function(position) {
-    this.boardPosition = position;
-    this.updateBoardPosition();
-};
-
-goalGem.prototype.updateBoardPosition = function() {
-    this.object.position = goal_gem_to_world(this.boardPosition);
 };

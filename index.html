@@ -4,7 +4,7 @@
 		<title>Bejewler</title>
 		<script src="js/jquery.js"></script>
 		<script src="js/underscore.js"></script>
-		<script src="js/three.min.js"></script>
+		<script src="js/three.js"></script>
         <script src="js/EffectComposer.js"></script>
         <script src="js/RenderPass.js"></script>
         <script src="js/ShaderPass.js"></script>
@@ -13,12 +13,26 @@
         <script src="js/Gems.js"></script>
         <script src="js/Robot.js"></script>
         <script src="js/Game.js"></script>
+        <script src="js/Panes.js"></script>
+        <!-- load fonts -->
+        <script src="fonts/gentilis_bold.typeface.js"></script>
+        <script src="fonts/gentilis_regular.typeface.js"></script>
+        <script src="fonts/optimer_bold.typeface.js"></script>
+        <script src="fonts/optimer_regular.typeface.js"></script>
+        <script src="fonts/helvetiker_bold.typeface.js"></script>
+        <script src="fonts/helvetiker_regular.typeface.js"></script>
+        <script src="fonts/droid_sans_regular.typeface.js"></script>
+        <script src="fonts/droid_sans_bold.typeface.js"></script>
+        <script src="fonts/droid_serif_regular.typeface.js"></script>
+        <script src="fonts/droid_serif_bold.typeface.js"></script>
         
 	</head>
 	<body>
 		<p>
         Bejewler
 		</p>
+        
+        <div id='gameArea' />
         
         <script id='goal-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
@@ -191,6 +205,7 @@
               
               var game = new Game();
               game.init();
+              game.pushPane(new MenuPane());
               game.start();
               
               });

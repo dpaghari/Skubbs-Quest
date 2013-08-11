@@ -1,5 +1,8 @@
 var Game = function() {
     // A Game object is the highest level object representing entire game
+    // Container div
+    this.container = document.getElementById('gameArea');
+    this.container.style.position = 'relative';
 };
 
 Game.prototype.init = function() {
@@ -11,20 +14,27 @@ Game.prototype.init = function() {
     
     /* Skybox texture from:
      http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
+     * Code for skybox inspired by:
+     http://stemkoski.github.io/Three.js/Skybox.html
      */
     console.log("get materials");
-    var filenames = ['skybox4.png', 'skybox2.png', 'skybox1.png', 'skybox6.png', 'skybox3.png', 'skybox5.png'];
-    var materials = [];
-    for(var i = 0; i < filenames.length; i++) {
-        materials.push(new THREE.MeshBasicMaterial({
-                                                   map: THREE.ImageUtils.loadTexture("images/skybox/" + filenames[i]),
-                                                   side: THREE.BackSide
-                                                   }));
-    }
-    this.skybox = new THREE.Mesh(
-                                 new THREE.CubeGeometry(10000, 10000, 10000),
-                                 new THREE.MeshFaceMaterial(materials));
-    this.scene.add(this.skybox);
+    
+    this.panes = [];
+	
+    console.log("get skybox textures");
+	var directions  = ["skybox1", "skybox2", "skybox3", "skybox4", "skybox5", "skybox6"];
+	var imageSuffix = ".png";
+	var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
+	
+	var materialArray = [];
+	for (var i = 0; i < directions.length; i++)
+		materialArray.push( new THREE.MeshBasicMaterial({
+                                                        map: THREE.ImageUtils.loadTexture(directions[i] + imageSuffix),
+                                                        side: THREE.BackSide
+                                                        }));
+	var skyMaterial = new THREE.MeshFaceMaterial(materialArray);
+	var skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
+	this.scene.add(skyBox);
 
     
     this.robot = new Robot({
@@ -117,9 +127,6 @@ Game.prototype.init = function() {
                                                   });
     this.figure = null;
     
-    //this.scene.add(this.robot.object);
-    // add robot to scene
-    
     // Spotlight
     var spotlight = new THREE.PointLight(0xffffff, 1, 1000);
     spotlight.position.set(0, -100, 400);
@@ -128,7 +135,9 @@ Game.prototype.init = function() {
     var ambient_light = new THREE.AmbientLight(0x202020);
     this.scene.add(ambient_light);
     // Background plane
-    var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 900), new THREE.MeshLambertMaterial());
+    var bgTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
+    var bgMaterial = new THREE.MeshBasicMaterial( { map: bgTexture, side: THREE.DoubleSide } );
+    var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 900), bgMaterial);
     bgplane.translateZ(-100);
     this.scene.add(bgplane);
     
@@ -155,7 +164,7 @@ Game.prototype.init = function() {
                     });
 };
 
-Game.prototype.render = function(t) {
+Game.prototype.render = function(t, canvas, ctx) {
     if(this.virtualBoard.isEmpty === false){
         for (var i = 0; i < this.boardSize; i++){
             for (var j = 0; j < this.boardSize; j++){
@@ -164,6 +173,7 @@ Game.prototype.render = function(t) {
             }
         }
     }
+    
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;
@@ -172,7 +182,41 @@ Game.prototype.render = function(t) {
     //this.sphereCamera.updateCubeMap(this.renderer, this.scene);
     //this.sphere.visible = true;
     
+    // If there is no active pane do nothing
+    if(this.panes.length > 0) {
+        var pane = this.panes[this.panes.length - 1];
+        // Handle player input
+        pane.handleInput(this.keyboard, this);
+        // Update pane
+        // Pass renderer so it can do cubemaps for reflections
+        pane.update(t, this.renderer);
+        // Pass canvas so it can decide on its own overlay
+        // Render the pane
+        this.renderer.render(pane.scene, pane.camera);
+        // Clear pane overlay
+        // Touching width of a canvas always clears it
+        //canvas.width = canvas.width;
+        // Render pane overlay
+        pane.overlay(ctx);
+    }
+    
     this.renderer.render(this.scene, this.camera);
+};
+
+/**
+ * Add pane to Game object
+ * Any existing panes are push down on stack
+ */
+Game.prototype.pushPane = function(pane) {
+    this.panes.push(pane);
+};
+
+/**
+ * Pop off top pane
+ * Reveals lower panes on stack
+ */
+Game.prototype.popPane = function() {
+    this.panes.pop();
 };
 
 

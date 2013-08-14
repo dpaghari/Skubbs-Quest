@@ -44,7 +44,7 @@ Game.prototype.init = function() {
                                                         }));
 	var skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 	var skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
-	this.scene.add(skyBox);
+	//this.scene.add(skyBox);
 
     
     this.robot = new Robot({
@@ -61,15 +61,15 @@ Game.prototype.init = function() {
         
     }
     
-    this.startingBoard = [['1', '1', '1', '1', '1', '1', '1', '1', '1'], // create a board where true = occupied by a block
-                          ['1', '0', '0', '0', '0', '0', '0', '5', '1'], // and where '0' = empty spot
-                          ['1', '0', '2', '0', '2', '0', '2', '0', '1'],
-                          ['1', '0', '0', '0', '0', '0', '0', '0', '1'],
-                          ['1', '0', '3', '0', '3', '0', '3', '0', '1'],
-                          ['1', '0', '0', '0', '0', '0', '0', '0', '1'],
-                          ['1', '0', '4', '0', '4', '0', '4', '0', '1'],
-                          ['1', '0', '0', '0', '0', '0', '0', '0', '1'],
-                          ['1', '1', '1', '1', '1', '1', '1', '1', '1']];
+    this.startingBoard = [['0', '0', '0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0'], // and where '0' = empty spot
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '1'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0']];
     
     
     for (var x = 0; x < this.boardSize; x++) {
@@ -122,16 +122,7 @@ Game.prototype.init = function() {
     
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 800;
-    
-    for (var x = 0; x < this.boardSize; x++) {
-        for (var y = 0; y < this.boardSize; y++) {
-            
-            if (this.startingBoard[x][y] == '1' || this.startingBoard[x][y] == '2') {
-                that.scene.add(this.virtualBoard[x][y].object);
-            }
-        }
-    }
-    
+ 
     this.material = new THREE.MeshLambertMaterial({
                                                   color : 0xff0000
                                                   });
@@ -188,9 +179,7 @@ Game.prototype.render = function(t, canvas, ctx) {
     this.camera.position.x = 0;
     this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
-    //this.sphere.visible = false;
-    //this.sphereCamera.updateCubeMap(this.renderer, this.scene);
-    //this.sphere.visible = true;
+  
     
     // If there is no active pane do nothing
     if(this.panes.length > 0) {
@@ -226,139 +215,6 @@ Game.prototype.popPane = function() {
     this.panes.pop();
 };
 
-
-Game.prototype.init = function() {
-	this.scene = new THREE.Scene();
-	var that = this;
-	this.boardSize = 9;
-	this.offset = 4;
-	this.facing = 'up';
-
-	this.virtualBoard = new Array(this.boardSize);
-	for (var i = 0; i < this.boardSize; i++) {
-		this.virtualBoard[i] = [];
-		for (var j = 0; j < this.boardSize; j++) {
-			this.virtualBoard[i].push({});
-		}
-
-	}
-
-	/* 0 = Empty Space
-	 * 1 = Cube Gem
-	 * 2 = Diamond Gem
-	 * 3 = Sphere Gem
-	 * 4 = Isometric Gem
-	 */
-
-	this.startingBoard = [['1', '1', '1', '1', '1', '1', '1', '1', '1'], ['1', '0', '0', '0', '0', '0', '0', '0', '1'], ['1', '0', '0', '0', '0', '0', '0', '0', '1'], ['1', '0', '0', '0', '0', '0', '0', '0', '1'], ['1', '0', '0', '0', '0', '0', '0', '0', '1'], ['1', '0', '0', '0', '0', '0', '0', '0', '1'], ['1', '0', '0', '0', '0', '0', '0', '0', '1'], ['1', '0', '0', '0', '0', '0', '0', '0', '1'], ['1', '1', '1', '1', '1', '1', '1', '1', '1']];
-
-	for (var x = 0; x < this.boardSize; x++) {
-		for (var y = 0; y < this.boardSize; y++) {
-
-			// If there is a 0 in startingBoard set the slot's isEmpty property to true'
-			if (this.startingBoard[y][x] == '0') {
-				// For every slot in the board create an object Slot
-				this.virtualBoard[y][x].isEmpty = true;
-			}
-
-			// If there is a 1 in startingBoard create a barrier object
-			if (this.startingBoard[y][x] == '1') {
-				this.virtualBoard[y][x] = new cubeGem({
-					x : (x - this.offset),
-					y : -(y - this.offset)
-				}, this.scene);
-			}
-
-			// If there is a 2 in startingBoard create a gem object
-			if (this.startingBoard[y][x] == '2') {
-				this.virtualBoard[y][x] = new diamondGem({
-					x : (x - this.offset),
-					y : -(y - this.offset)
-				}, this.scene);
-			}
-
-			if (this.startingBoard[y][x] == '3') {
-				this.virtualBoard[y][x] = new sphereGem({
-					x : (x - this.offset),
-					y : -(y - this.offset)
-				}, this.scene);
-			}
-
-			if (this.startingBoard[y][x] == '4') {
-				this.virtualBoard[y][x] = new isoGem({
-					x : (x - this.offset),
-					y : -(y - this.offset)
-				}, this.scene);
-			}
-		}
-	}
-
-	this.robot = new Robot({
-		x : -2,
-		y : -3
-	}, this.scene);
-	// create a new robot
-
-	this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
-	this.camera.position.z = 800;
-
-	for (var x = 0; x < this.boardSize; x++) {
-		for (var y = 0; y < this.boardSize; y++) {
-
-			if (this.startingBoard[x][y] == '1' || this.startingBoard[x][y] == '2') {
-				that.scene.add(this.virtualBoard[x][y].object);
-			}
-		}
-	}
-
-
-
-	this.scene.add(this.robot.object);
-	// add robot to scene
-
-	// Spotlight
-	var spotlight = new THREE.PointLight(0xffffff, 1, 1000);
-	spotlight.position.set(0, -100, 400);
-	this.scene.add(spotlight);
-	// Ambient light
-	var ambient_light = new THREE.AmbientLight(0x202020);
-	this.scene.add(ambient_light);
-	// Background plane
-	var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 900), new THREE.MeshLambertMaterial());
-	bgplane.translateZ(-100);
-	this.scene.add(bgplane);
-
-	this.renderer = new THREE.WebGLRenderer({
-		antialias : true
-	});
-	this.renderer.setSize(800, 600);
-	this.renderer.setClearColor(0xeeeeee, 1.0);
-	document.body.appendChild(this.renderer.domElement);
-
-	// Setup keyboard events
-	this.keys = {};
-	$('body').keydown(function(e) {
-		if (e.which) {
-			if (that.keys[e.which] !== 'triggered') {
-				that.keys[e.which] = true;
-			}
-		}
-	});
-	$('body').keyup(function(e) {
-		if (e.which) {
-			that.keys[e.which] = false;
-		}
-	});
-};
-
-Game.prototype.render = function(t) {
-	// Bob the camera a bit
-	this.camera.position.x = 0;
-	this.camera.position.y = -400;
-	this.camera.lookAt(this.scene.position);
-	this.renderer.render(this.scene, this.camera);
-};
-
 Game.prototype.legalMove = function(position) {
 	/* True = allows movement
 	 * False = hinders movement
@@ -383,40 +239,44 @@ Game.prototype.legalMove = function(position) {
 
 // Function for creating a gem
 Game.prototype.createGem = function(position) {
-
-	if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
-
-		// Calculate a random number between 0-100 to determine what gem you are shooting next
-		//var randNum = Math.floor(Math.random() * (101));
-		var newPosition = {
-			x : position.x,
-			y : position.y
-		};
-
-		// If the random number is between 0 and 20 create a Diamond
-		//if(randNum >= 0.0 && randNum <= 20.0){
-		this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
-	/*	  }
-		 // If the random number is between 20 and 40 create a Sphere
-		 if(randNum > 20.0 && randNum <= 40.0){
-		 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new sphereGem(position, this.scene);
-		 }
-		 // If the random number is between 40 and 60 create an Isometric Gem
-		 if(randNum > 40.0 && randNum <= 60.0){
-		 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new isoGem(position, this.scene);
-		 }
-		 // If the random number is between 60 and 100 create a Cube Gem
-		 if(randNum > 60.0 && randNum <= 100.0){
-		 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new cubeGem(position, this.scene);
-		 }
-		 */
+	
+	if(this.legalPosition(position)){
 		
-		this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
-		//this.scene.remove(this.virtualBoard[-position.y + this.offset][position.x + this.offset]);
-		//this.scene.add(this.virtualBoard[-position.y + this.offset][position.x + this.offset].object);
-		this.checkRow(position);
-
+		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
+	
+			// Calculate a random number between 0-100 to determine what gem you are shooting next
+			//var randNum = Math.floor(Math.random() * (101));
+			var newPosition = {
+				x : position.x,
+				y : position.y
+			};
+	
+			// If the random number is between 0 and 20 create a Diamond
+			//if(randNum >= 0.0 && randNum <= 20.0){
+			this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
+		/*	  }
+			 // If the random number is between 20 and 40 create a Sphere
+			 if(randNum > 20.0 && randNum <= 40.0){
+			 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new sphereGem(position, this.scene);
+			 }
+			 // If the random number is between 40 and 60 create an Isometric Gem
+			 if(randNum > 40.0 && randNum <= 60.0){
+			 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new isoGem(position, this.scene);
+			 }
+			 // If the random number is between 60 and 100 create a Cube Gem
+			 if(randNum > 60.0 && randNum <= 100.0){
+			 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new cubeGem(position, this.scene);
+			 }
+			 */
+			
+			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
+		
+			this.checkRow(position);
+	
+		}
 	}
+	
+	
 
 };
 
@@ -445,7 +305,7 @@ Game.prototype.isEmptySquare = function(position) {
 Game.prototype.checkType = function(position){
 	// Check what type the object in the given position is
 	// return a number depending on the type of object it is
-	//console.log(this.virtualBoard[-position.y + this.offset][position.x + this.offset].type)
+	
 	if(this.virtualBoard[-position.y + this.offset][position.x + this.offset].type == 'diamond'){
 		return 1;
 	}
@@ -466,25 +326,11 @@ Game.prototype.threeRow = function(position) {
 	// Check if there is three in a row of a gem from the given position going to the right
 	// Returns true or false
 	// If off the board return false
-/*
-	var pos = {
-		x : position.x,
-		y : position.y
-	};
 
-	var newPosition = {
-		x : position.x + 1,
-		y : position.y
-	};
-	var newPosition2 = {
-		x : position.x + 2,
-		y : position.y
-	};
-	*/
 
 	if (this.legalPosition(position) && this.legalPosition({x: position.x + 1, y: position.y}) && this.legalPosition({x: position.x + 2, y: position.y})) {
 		if((this.checkType(position) == 1) && (this.checkType({x: position.x + 1, y: position.y}) == 1) && (this.checkType({x:position.x + 2, y: position.y}) == 1)){
-			console.log(this.checkType(position));
+			
 			return true;
 		}
 		if((this.checkType(position) == 2) && (this.checkType({x: position.x + 1, y: position.y}) == 2) && (this.checkType({x:position.x + 2, y: position.y}) == 2)){
@@ -518,42 +364,47 @@ Game.prototype.checkRow = function(position) {
 
 		//console.log(this.virtualBoard[-position.y + this.offset][position.x + this.offset]);
 		if (this.threeRow(newPosition)) {
-			console.log(this.threeRow(newPosition));
-			//console.log(this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset]);
+			
+			var boardSlot = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+			var boardSlot2 = this.virtualBoard[-position.y + this.offset][(position.x + 1) + this.offset];
+			var boardSlot3 = this.virtualBoard[-position.y + this.offset][(position.x + 2) + this.offset];
+			
+			if(boardSlot.figure === null){
+				
+				boardSlot.figure = 'empty';
+			}
+			else{
+				this.scene.remove(boardSlot.figure);
+			}
+			
+			if(boardSlot2.figure === null){
+				
+				boardSlot2.figure = 'empty';
+			}
+			else{
+				this.scene.remove(boardSlot2.figure);
+			}
+			
+			if(boardSlot3.figure === null){
+				
+				boardSlot3.figure = 'empty';
+			}
+			else{
+				this.scene.remove(boardSlot3.figure);
+			}
+			
+			
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = true;
 			this.virtualBoard[-position.y + this.offset][(position.x + 1) + this.offset].isEmpty = true;
 			this.virtualBoard[-position.y + this.offset][(position.x + 2) + this.offset].isEmpty = true;
-			
-			//this.virtualBoard[-position.y + this.offset][position.x + this.offset].destroyGem();
-			//console.log(this.virtualBoard[newPosition.y + this.offset][newPosition.x + this.offset])
-			
-			
-			//var killObj = this.virtualBoard[-position.y + this.offset][position.x + this.offset]; 
-			//this.scene.remove(killObj);
-			
-			this.scene.remove(this.virtualBoard[-position.y + this.offset][position.x + this.offset].figure);
+	
 
-/*
-			this.destroyGem(newPosition);
-			this.destroyGem(newPosition2);
-			this.destroyGem(newPosition3);
-*/
 		}
 
 	
 
 };
 
-Game.prototype.destroyGem = function(position) {
-	var newPosition = {
-		x : position.x,
-		y : position.y
-	};
-	this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset].isEmpty == true;
-	//console.log(this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset])
-	this.scene.remove(this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset].object);
-
-};
 
 // Function returns # of free spaces to the right
 Game.prototype.countSpacesRight = function(position) {
@@ -716,7 +567,7 @@ Game.prototype.handleInput = function() {
 
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
-					//console.log(newPosition);
+					console.log(newPosition);
 					this.createGem(newPosition);
 
 				}

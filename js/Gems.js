@@ -63,7 +63,7 @@ var diamondGem = function(position, scene){
         x : 0,
         y : 0
     };
-    this.type = 'gem';
+    this.type = 'diamond';
     var diamondVertexShaderText = $('#diamond-vertex-shader').text();
     var diamondFragmentShaderText = $('#diamond-fragment-shader').text();
     
@@ -75,14 +75,17 @@ var diamondGem = function(position, scene){
     
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/diamondGem.js', function(geometry) {
+    	
+    				if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, diamondMaterial);
                     that.figure.scale.set(40, 40, 40);
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
                     scene.add(that.figure);
                     that.figure.position = diamond_gem_to_world(position);
+                   }
                     });
-    
+    			
 }
 
 diamondGem.prototype.moveTo = function(position) {
@@ -101,7 +104,7 @@ var cubeGem = function(position, scene){
         x : 0,
         y : 0
     };
-    this.type = 'gem';
+    this.type = 'cubegem';
     var cubeVertexShaderText = $('#cube-vertex-shader').text();
     var cubeFragmentShaderText = $('#cube-fragment-shader').text();
     
@@ -148,7 +151,7 @@ var sphereGem = function(position, scene){
         x : 0,
         y : 0
     };
-    this.type = 'gem';
+    this.type = 'spheregem';
 
     this.figure = null;
         
@@ -180,7 +183,7 @@ var isoGem = function(position, scene){
         x : 0,
         y : 0
     };
-    this.type = 'gem';
+    this.type = 'isogem';
     var isoVertexShaderText = $('#iso-vertex-shader').text();
     var isoFragmentShaderText = $('#iso-fragment-shader').text();
     

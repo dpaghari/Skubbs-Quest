@@ -7,13 +7,13 @@ var Game = function() {
 };
 
 Game.prototype.init = function() {
+	// Initialize variables
     this.scene = new THREE.Scene();
     var that = this;
-    this.boardSize = 11;
-    this.offset = 5;
+    this.boardSize = 11;					
+    this.offset = 5;						
     this.facing = 'up';
-    this.shot = false;
-    this.initDone = false;
+   
     
     // Visible canvas area on top of 3D rendering area
     this.canvas = document.createElement('canvas');
@@ -30,11 +30,11 @@ Game.prototype.init = function() {
      * Code for skybox inspired by:
      http://stemkoski.github.io/Three.js/Skybox.html
      */
-    //console.log("get materials");
+   
     
     this.panes = [];
 	
-   // console.log("get skybox textures");
+   
 	var directions  = ["skybox1", "skybox2", "skybox3", "skybox4", "skybox5", "skybox6"];
 	var imageSuffix = ".png";
 	var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
@@ -50,7 +50,10 @@ Game.prototype.init = function() {
 	//this.scene.add(skyBox);
 
     
-    
+   
+   /* Create a board to keep track of collisions and legal moves
+    * 
+    */ 
     
     this.virtualBoard = new Array(this.boardSize);
     for (var i = 0; i < this.boardSize; i++) {
@@ -60,13 +63,15 @@ Game.prototype.init = function() {
         }
         
     }
-    /* 1 - Cube
+    /*	Create a Board giving a visual representation of the level
+     * 1 - Cube
      * 2 - Diamond
      * 3 - Sphere
      * 4 - Iso
      * 5 - Goal
      * 6 - Robot
      */
+     
     this.startingBoard = [['0', '0', '1', '2', '1', '1', '0', '0', '3', '0', '5'], 
                           ['1', '3', '1', '1', '3', '2', '1', '0', '3', '0', '0'], 
                           ['2', '1', '2', '2', '3', '2', '1', '0', '0', '2', '2'],
@@ -79,7 +84,10 @@ Game.prototype.init = function() {
                           ['0', '0', '0', '0', '0', '2', '1', '0', '0', '1', '1'],
                           ['0', '6', '0', '0', '0', '2', '0', '4', '4', '0', '0']];
     
-    
+   /* Add board elements(gems, character) to the 
+    * board handling collision and legal moves
+    */
+     
     for (var x = 0; x < this.boardSize; x++) {
         for (var y = 0; y < this.boardSize; y++) {
             
@@ -135,8 +143,11 @@ Game.prototype.init = function() {
         }
     }
     
-    this.randNum = Math.floor(Math.random() * (101));
-    this.initNum = true;
+    
+    /*
+     * Determine the initial first gem that the character can shoot when the level first loads
+     */
+    this.randNum = Math.floor(Math.random() * (101)); 
     this.nextGem = new nextGem(this.scene, this.randNum);
     
     
@@ -158,9 +169,6 @@ Game.prototype.init = function() {
     // Background plane
     var bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
     var bgMaterial = new THREE.MeshBasicMaterial( { map: bgTexture, side: THREE.DoubleSide } );
-
-    
-
     var bgplane = new THREE.Mesh(new THREE.CubeGeometry(1000, 1000, 150), bgMaterial);
 
     bgplane.translateZ(-100);
@@ -198,7 +206,7 @@ Game.prototype.init = function() {
     this.scene.add(this.NextMesh);
     
     this.nextPosition = { x : 575, y : 100};
-    console.log(this.nextPosition);
+   
     
     // Load the timer
     // Add 3D text
@@ -241,6 +249,7 @@ Game.prototype.init = function() {
                     });
 };
 
+// Render function
 Game.prototype.render = function(t, canvas, ctx) {
     if(this.virtualBoard.isEmpty === false){
         for (var i = 0; i < this.boardSize; i++){
@@ -250,9 +259,7 @@ Game.prototype.render = function(t, canvas, ctx) {
             }
         }
     }
-    
-    
-    
+   
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;
@@ -293,12 +300,13 @@ Game.prototype.popPane = function() {
     this.panes.pop();
 };
 
+/* Function that checks if the given position
+ * is within the board's limits and if it is occupied
+ * by a gem or not.
+ */
 Game.prototype.legalMove = function(position) {
-	/* True = allows movement
-	 * False = hinders movement
-	 *
-	 * Check if desired position is off of the edge of the board horizontally
-	 */
+	
+	// Check if desired position is off of the edge of the board horizontally 
 	if (position.x < -this.offset || position.x > this.offset) {
 		return false;
 	}
@@ -315,6 +323,10 @@ Game.prototype.legalMove = function(position) {
 	return true;
 };
 
+/*
+ * Function that checks if desired position is within
+ * board's limits.
+ */
 Game.prototype.legalPosition = function(position) {
 	// returns true or false if the move is within the board's limits
 	if (position.x < -this.offset || position.x > this.offset) {
@@ -326,7 +338,10 @@ Game.prototype.legalPosition = function(position) {
 	}
 	return true;
 };
-
+/*
+ * Function to generate a random number
+ * between 0-100
+ */
 Game.prototype.detRand = function(){
 	
 	var randNum = Math.floor(Math.random() * (101));
@@ -336,15 +351,17 @@ Game.prototype.detRand = function(){
 };
 
 
-// Function for creating a gem
+/*
+ * Function that creates a gem at a position if it is within its limits.
+ * Gem created is determined by a random number determined at creation.
+ * Also checks for matches of three and calls the update to the next gem
+ * that is shot.
+ */
 Game.prototype.createGem = function(position) {
 
 	if(this.legalPosition(position)){
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
-	
-			// Calculate a random number between 0-100 to determine what gem you are shooting next
-		
-			
+				
 			// If the random number is between 0 and 20 create a Diamond
 			if(this.randNum >= 0.0 && this.randNum <= 25.0){
                 this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
@@ -366,12 +383,8 @@ Game.prototype.createGem = function(position) {
                  this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new cubeGem(position, this.scene);
                
 			 }
-			 
-			 
-			
-			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
-		
-			
+
+			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;	
 			this.checkRow(position, this.facing);
 			this.checkMidRow(position, this.facing);
 			
@@ -380,13 +393,7 @@ Game.prototype.createGem = function(position) {
 		}
 	}
 	
-	this.initNum = false;
-	this.shot = false;
 	this.destroyNextGem();
-	
-	
-	
-	
 
 };
 
@@ -412,7 +419,7 @@ Game.prototype.checkEntireRow = function(position, direction){
 		}
 		var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
 		if(this.legalPosition(newPosition)){
-			console.log(newPosition);
+			
 			this.checkRow(newPosition, this.facing);
 		}
 	}
@@ -421,7 +428,10 @@ Game.prototype.checkEntireRow = function(position, direction){
 };
 
 
-
+/*
+ * Function that returns true if position is not occupied by a gem
+ * 
+ */
 Game.prototype.isEmptySquare = function(position) {
 	// returns true or false if input position is empty
 	if(this.legalPosition(position)){
@@ -433,7 +443,10 @@ Game.prototype.isEmptySquare = function(position) {
 		
 	}
 };
-
+/*
+ * Function that checks the type of the object at the desired position.
+ * Used to determine matches
+ */
 Game.prototype.checkType = function(position){
 	// Check what type the object in the given position is
 	// return a number depending on the type of object it is
@@ -454,6 +467,8 @@ Game.prototype.checkType = function(position){
 	
 	
 };
+
+
 Game.prototype.threeRow = function(position, direction, checkMid) {
 	// Check if there is three in a row of a gem from the given position going to the right
 	// Returns true or false
@@ -651,7 +666,7 @@ Game.prototype.checkRow = function(position, direction) {
 		}
 		
 		if(this.legalPosition(position)){
-				//console.log(this.virtualBoard[-position.y + this.offset][position.x + this.offset]);
+				
 				if (this.threeRow(newPosition, this.facing, false)) {
 					
 					var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
@@ -820,7 +835,7 @@ Game.prototype.countSpacesRight = function(position) {
 
 	return spaces;
 };
-
+// Function returns # of free spaces to the right
 Game.prototype.countSpacesLeft = function(position) {
 	var spaces = 0;
 	var newPosition = {
@@ -838,7 +853,7 @@ Game.prototype.countSpacesLeft = function(position) {
 
 	return spaces;
 };
-
+// Function returns # of free spaces up
 Game.prototype.countSpacesUp = function(position) {
 	var spaces = 0;
 	var newPosition = {
@@ -856,7 +871,7 @@ Game.prototype.countSpacesUp = function(position) {
 
 	return spaces;
 };
-
+// Function returns # of free spaces down
 Game.prototype.countSpacesDown = function(position) {
 	var spaces = 0;
 	var newPosition = {
@@ -898,7 +913,11 @@ Game.prototype.countSpaces = function(position, direction) {
 	return spaces;
 };
 
-
+/*
+ * Function that destroys the next Gem
+ *  and updates with a new gem that 
+ *  tells player what next gem to be fired will be
+ */
 Game.prototype.destroyNextGem = function() {
 		
 		this.randNum = this.detRand();
@@ -909,11 +928,24 @@ Game.prototype.destroyNextGem = function() {
 
 	
 };
+
+/*
+ * Function that handles player input using the keyboard
+ * Controls:
+ * W - Go Up a Space
+ * A - Go Left a Space
+ * S - Go Down a Space
+ * D - Go Right a Space
+ * Left Arrow Key - Turn Left(Set Direction to left)
+ * Up Arrow Key - Turn Up(Set Direction to up)
+ * Right Arrow Key - Turn Right
+ * Down Arrow Key - Turn Down
+ * Space - Shoot Next Gem
+ */
 Game.prototype.handleInput = function() {
 
-	
-	
 
+// Character Movement
 	// Left (A Key)
 	if (this.keys[65] === true) {
 		this.keys[65] = 'triggered';
@@ -921,7 +953,7 @@ Game.prototype.handleInput = function() {
 			x : this.robot.boardPosition.x - 1,
 			y : this.robot.boardPosition.y
 		};
-		// check neighbors if there's a block
+		// check neighbors if there's a gem
 		if (this.legalMove(newPosition)) {
 			this.robot.moveTo(newPosition);
 
@@ -960,14 +992,17 @@ Game.prototype.handleInput = function() {
 			this.robot.moveTo(newPosition);
 		}
 	}
-	// Spacebar
+	/* Spacebar
+	 * 
+	 * Creates a Gem where the character is facing 
+	 * and places it in the furthest empty space 
+	 * 
+	 */
 	if (this.keys[32] === true) {
 		this.keys[32] = 'triggered';
 		that = this;
-		this.shot = true;
-		
 
-		// determine what direction character is facing
+		
 		
 		var newPosition = {
 			x : this.robot.boardPosition.x,
@@ -990,7 +1025,7 @@ Game.prototype.handleInput = function() {
 		if (this.facing == 'up') {
 			var moveSpaces = this.countSpaces(newPosition, this.facing);
 			newPosition.y += moveSpaces;
-			//console.log(moveSpaces);
+			
 
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
@@ -1003,7 +1038,7 @@ Game.prototype.handleInput = function() {
 		if (this.facing == 'left') {
 			var moveSpaces = this.countSpaces(newPosition, this.facing);
 			newPosition.x -= moveSpaces;
-			//console.log(moveSpaces);
+			
 
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
@@ -1017,7 +1052,7 @@ Game.prototype.handleInput = function() {
 		if (this.facing == 'down') {
 			var moveSpaces = this.countSpaces(newPosition, this.facing);
 			newPosition.y -= moveSpaces;
-			//console.log(moveSpaces);
+			
 
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {

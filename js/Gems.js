@@ -16,6 +16,10 @@ var loadFile = function(url) {
     return result;
 };
 
+/*
+ * Helper functions to correctly place new gems
+ * onto the board space
+ */
 var sphere_gem_to_world = function(position) {
     return {
         x : (100 * position.x) + 130,
@@ -56,6 +60,9 @@ var diamond_gem_to_world = function(position) {
     };
 };
 
+/*
+ * Constructor for Diamond Gems
+ */
 var diamondGem = function(position, scene){
     var that = this;
     this.isEmpty = false;
@@ -88,15 +95,10 @@ var diamondGem = function(position, scene){
     			
 }
 
-diamondGem.prototype.moveTo = function(position) {
-    this.boardPosition = position;
-    this.updateBoardPosition();
-};
 
-diamondGem.prototype.updateBoardPosition = function() {
-    this.object.position = gem_to_world(this.boardPosition);
-};
-
+/*
+ * Constructor for Cube Gems
+ */
 var cubeGem = function(position, scene){
     var that = this;
     this.isEmpty = false;
@@ -132,15 +134,9 @@ var cubeGem = function(position, scene){
     
 }
 
-cubeGem.prototype.moveTo = function(position) {
-    this.boardPosition = position;
-    this.updateBoardPosition();
-};
-
-cubeGem.prototype.updateBoardPosition = function() {
-    this.object.position = gem_to_world(this.boardPosition);
-};
-
+/*
+ * Constructor for Sphere Gems
+ */
 var sphereGem = function(position, scene){
     var sphereVertexShaderText = $('#sphere-vertex-shader').text();
     var sphereFragmentShaderText = $('#sphere-fragment-shader').text();
@@ -174,15 +170,10 @@ var sphereGem = function(position, scene){
     
 }
 
-sphereGem.prototype.moveTo = function(position) {
-    this.boardPosition = position;
-    this.updateBoardPosition();
-};
 
-sphereGem.prototype.updateBoardPosition = function() {
-    this.object.position = gem_to_world(this.boardPosition);
-};
-
+/*
+ * Constructor for Isometric Gems
+ */
 var isoGem = function(position, scene){
     var that = this;
     this.isEmpty = false;
@@ -217,15 +208,10 @@ var isoGem = function(position, scene){
     
 }
 
-isoGem.prototype.moveTo = function(position) {
-    this.boardPosition = position;
-    this.updateBoardPosition();
-};
 
-isoGem.prototype.updateBoardPosition = function() {
-    this.object.position = gem_to_world(this.boardPosition);
-};
-
+/*
+ * Constructor for Goal Gem
+ */
 var goalGem = function(position, scene){
     var that = this;
     this.isEmpty = false;
@@ -269,12 +255,14 @@ goalGem.prototype.moveTo = function(position) {
 goalGem.prototype.updateBoardPosition = function() {
     this.object.position = goal_gem_to_world(this.boardPosition);
 };
-
+/*
+ * Constructor for the next gem indicator
+ */
 var nextGem = function(scene, random){
     var that = this;
     this.randNum = random;
     
-    console.log("Gem randnum", this.randNum);
+    
    
     
     this.type = 'nextgem';
@@ -315,8 +303,13 @@ var nextGem = function(scene, random){
     this.figure = null;
     
     var jsonLoader = new THREE.JSONLoader();
-    if(this.randNum >= 0.0 && this.randNum <= 25.0){
-    	console.log("Makin a diamond");
+    /*
+     * Determine what the next gem 
+     * that is going to be shot is going to be
+     */
+    if(this.randNum >= 0.0 && this.randNum <= 25.0){						
+ 	
+ 	// Display Diamond on Next Gem Indicator
     jsonLoader.load('models/diamondGem.js', function(geometry) {
     
     		
@@ -330,6 +323,7 @@ var nextGem = function(scene, random){
                 
     });
     }
+    // Display Sphere Gem
      if(this.randNum > 25.0 && this.randNum <= 50.0){
     jsonLoader.load('models/sphereGem.js', function(geometry) {
     
@@ -344,6 +338,7 @@ var nextGem = function(scene, random){
                
     });
     }
+    // Display Isometric Gem
      if(this.randNum > 50.0 && this.randNum <= 75.0){
     jsonLoader.load('models/isoGem.js', function(geometry) {
     
@@ -359,6 +354,8 @@ var nextGem = function(scene, random){
                 
     });
     }
+    
+    // Display Cube Gem
      if(this.randNum > 75.0 && this.randNum <= 100.0){
     jsonLoader.load('models/cubeGem.js', function(geometry) {
     

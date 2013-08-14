@@ -48,10 +48,7 @@ Game.prototype.init = function() {
 	//this.scene.add(skyBox);
 
     
-    this.robot = new Robot({
-                           x : -2,
-                           y : -3
-                           }, this.scene);
+    
     
     this.virtualBoard = new Array(this.boardSize);
     for (var i = 0; i < this.boardSize; i++) {
@@ -62,7 +59,7 @@ Game.prototype.init = function() {
         
     }
     
-    this.startingBoard = [['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
+    this.startingBoard = [['0', '0', '0', '0', '0', '0', '0', '0', '6', '0', '0'], // create a board where true = occupied by a block
                           ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'], // and where '0' = empty spot
                           ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
                           ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
@@ -120,6 +117,12 @@ Game.prototype.init = function() {
                                                      y : -(y - this.offset)
                                                      }, this.scene);
             }
+             if (this.startingBoard[y][x] == '6') {
+                this.virtualBoard[y][x] = this.robot = new Robot({
+                           x : (x - this.offset),
+                           y : -(y - this.offset)
+                           }, this.scene);
+            }
         }
     }
     
@@ -139,9 +142,13 @@ Game.prototype.init = function() {
     var ambient_light = new THREE.AmbientLight(0x202020);
     this.scene.add(ambient_light);
     // Background plane
-    var bgTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
+    var bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
     var bgMaterial = new THREE.MeshBasicMaterial( { map: bgTexture, side: THREE.DoubleSide } );
+
     var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1100), bgMaterial);
+
+    var bgplane = new THREE.Mesh(new THREE.CubeGeometry(1000, 1000, 100), bgMaterial);
+
     bgplane.translateZ(-100);
     this.scene.add(bgplane);
     
@@ -306,6 +313,7 @@ Game.prototype.legalPosition = function(position) {
 
 // Function for creating a gem
 Game.prototype.createGem = function(position) {
+    this.randNum = Math.floor(Math.random() * (101));
     // If the random number is between 0 and 20 create a Diamond
     if(this.randNum >= 0.0 && this.randNum <= 20.0){
         this.nextGem = new diamondGem(this.nextPosition, this.scene);
@@ -340,7 +348,6 @@ Game.prototype.createGem = function(position) {
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
 	
 			// Calculate a random number between 0-100 to determine what gem you are shooting next
-			this.randNum = Math.floor(Math.random() * (101));
 			var newPosition = {
 				x : position.x,
 				y : position.y

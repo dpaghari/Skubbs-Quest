@@ -12,6 +12,8 @@ Game.prototype.init = function() {
     this.boardSize = 11;
     this.offset = 5;
     this.facing = 'up';
+    this.shot = false;
+    this.initDone = false;
     
     // Visible canvas area on top of 3D rendering area
     this.canvas = document.createElement('canvas');
@@ -58,18 +60,24 @@ Game.prototype.init = function() {
         }
         
     }
-    
-    this.startingBoard = [['0', '0', '0', '0', '0', '0', '0', '0', '6', '0', '0'], // create a board where true = occupied by a block
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'], // and where '0' = empty spot
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']];
+    /* 1 - Cube
+     * 2 - Diamond
+     * 3 - Sphere
+     * 4 - Iso
+     * 5 - Goal
+     * 6 - Robot
+     */
+    this.startingBoard = [['0', '0', '1', '2', '1', '1', '0', '0', '3', '0', '5'], 
+                          ['1', '3', '1', '1', '3', '2', '1', '0', '3', '0', '0'], 
+                          ['2', '1', '2', '2', '3', '2', '1', '0', '0', '2', '2'],
+                          ['1', '1', '0', '0', '4', '3', '0', '4', '4', '2', '1'],
+                          ['0', '2', '3', '0', '2', '0', '0', '0', '0', '1', '1'],
+                          ['1', '2', '3', '0', '2', '0', '0', '3', '2', '0', '3'],
+                          ['0', '0', '0', '0', '0', '1', '0', '3', '2', '0', '3'],
+                          ['0', '0', '0', '0', '0', '3', '0', '0', '1', '1', '0'],
+                          ['0', '0', '0', '0', '0', '4', '1', '0', '2', '0', '0'],
+                          ['0', '0', '0', '0', '0', '2', '1', '0', '0', '1', '1'],
+                          ['0', '6', '0', '0', '0', '2', '0', '4', '4', '0', '0']];
     
     
     for (var x = 0; x < this.boardSize; x++) {
@@ -122,9 +130,15 @@ Game.prototype.init = function() {
                            x : (x - this.offset),
                            y : -(y - this.offset)
                            }, this.scene);
+                           this.virtualBoard[y][x].isEmpty = true;
             }
         }
     }
+    
+    this.randNum = Math.floor(Math.random() * (101));
+    this.initNum = true;
+    this.nextGem = new nextGem(this.scene, this.randNum);
+    
     
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 800;
@@ -145,9 +159,9 @@ Game.prototype.init = function() {
     var bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
     var bgMaterial = new THREE.MeshBasicMaterial( { map: bgTexture, side: THREE.DoubleSide } );
 
-    var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1100), bgMaterial);
+    
 
-    var bgplane = new THREE.Mesh(new THREE.CubeGeometry(1000, 1000, 100), bgMaterial);
+    var bgplane = new THREE.Mesh(new THREE.CubeGeometry(1000, 1000, 150), bgMaterial);
 
     bgplane.translateZ(-100);
     this.scene.add(bgplane);
@@ -237,6 +251,8 @@ Game.prototype.render = function(t, canvas, ctx) {
         }
     }
     
+    
+    
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;
@@ -311,93 +327,94 @@ Game.prototype.legalPosition = function(position) {
 	return true;
 };
 
+Game.prototype.detRand = function(){
+	
+	var randNum = Math.floor(Math.random() * (101));
+	
+	return randNum;
+	
+};
+
+
 // Function for creating a gem
 Game.prototype.createGem = function(position) {
-    this.randNum = Math.floor(Math.random() * (101));
-    // If the random number is between 0 and 20 create a Diamond
-    if(this.randNum >= 0.0 && this.randNum <= 20.0){
-        this.nextGem = new diamondGem(this.nextPosition, this.scene);
-    }
-    // If the random number is between 20 and 40 create a Sphere
-    if(this.randNum > 20.0 && this.randNum <= 40.0){
-        this.nextGem = new sphereGem(this.nextPosition, this.scene);
-    }
-    // If the random number is between 40 and 60 create an Isometric Gem
-    if(this.randNum > 40.0 && this.randNum <= 60.0){
-        this.nextGem = new isoGem(this.nextPosition, this.scene);
-    }
-    // If the random number is between 60 and 100 create a Cube Gem
-    if(this.randNum > 60.0 && this.randNum <= 100.0){
-        this.nextGem = new cubeGem(this.nextPosition, this.scene);
-    }
-    
-    /*
-	// Add the next gem
-    this.nextGem = new THREE.Mesh(
-                                  new THREE.CubeGeometry(100, 100, 100),
-                                  new THREE.MeshLambertMaterial({
-                                                                color: new THREE.Color(0xff8000)
-                                                                }));
-    this.nextGem.position.x = 650;
-    this.nextGem.rotation.x += 0.004;
-    this.nextGemPosition = { x : 575, y : 100 };
-    this.scene.add(this.nextGem);
-    */
-    
+
 	if(this.legalPosition(position)){
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
 	
 			// Calculate a random number between 0-100 to determine what gem you are shooting next
-			var newPosition = {
-				x : position.x,
-				y : position.y
-			};
-	
+		
+			
 			// If the random number is between 0 and 20 create a Diamond
-			if(this.randNum >= 0.0 && this.randNum <= 20.0){
+			if(this.randNum >= 0.0 && this.randNum <= 25.0){
                 this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
-                //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+                
 			  }
+			
 			 // If the random number is between 20 and 40 create a Sphere
-			 if(this.randNum > 20.0 && this.randNum <= 40.0){
+			 if(this.randNum > 25.0 && this.randNum <= 50.0){
                  this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new sphereGem(position, this.scene);
-                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+                
 			 }
 			 // If the random number is between 40 and 60 create an Isometric Gem
-			 if(this.randNum > 40.0 && this.randNum <= 60.0){
+			 if(this.randNum > 50.0 && this.randNum <= 75.0){
                  this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new isoGem(position, this.scene);
-                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+               
 			 }
 			 // If the random number is between 60 and 100 create a Cube Gem
-			 if(this.randNum > 60.0 && this.randNum <= 100.0){
+			 if(this.randNum > 75.0 && this.randNum <= 100.0){
                  this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new cubeGem(position, this.scene);
-                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+               
 			 }
+			 
 			 
 			
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 		
+			
 			this.checkRow(position, this.facing);
-			//this.checkEntireRow(position);
+			this.checkMidRow(position, this.facing);
+			
+			//this.checkEntireRow(position, this.facing);
 	
 		}
 	}
+	
+	this.initNum = false;
+	this.shot = false;
+	this.destroyNextGem();
+	
+	
 	
 	
 
 };
 
-Game.prototype.checkEntireRow = function(position){
+Game.prototype.checkEntireRow = function(position, direction){
 	
-	for(var i = -this.offset; i < this.offset; i++){
-		var newPosition = {
-		x: position.i,
-		y: position.y
-		
-		};
+	for(var i = -this.offset; i <= this.offset; i++){
+		if(this.facing == 'up' || this.facing == 'down'){
+			
+			
+			
+			var newPosition = {
+			x: i,
+			y: position.y
+			
+			};
+		}
+		if(this.facing == 'left' || this.facing == 'right'){
+			var newPosition = {
+			x: position.x,
+			y: i
+			
+			};
+		}
 		var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
-		this.checkRow(newPosition, this.facing);
-		
+		if(this.legalPosition(newPosition)){
+			console.log(newPosition);
+			this.checkRow(newPosition, this.facing);
+		}
 	}
 	
 	
@@ -437,7 +454,7 @@ Game.prototype.checkType = function(position){
 	
 	
 };
-Game.prototype.threeRow = function(position, direction) {
+Game.prototype.threeRow = function(position, direction, checkMid) {
 	// Check if there is three in a row of a gem from the given position going to the right
 	// Returns true or false
 	// If off the board return false
@@ -450,51 +467,101 @@ Game.prototype.threeRow = function(position, direction) {
 		};
 		if(this.facing == 'up'){
 			
-			var newPosition2 = {
-				x: position.x,
-				y: position.y + 1
-			};
-			
-			var newPosition3 = {
-				x: position.x,
-				y: position.y + 2
-			};
+			if(checkMid == false){
+				var newPosition2 = {
+					x: position.x,
+					y: position.y + 1
+				};
+				
+				var newPosition3 = {
+					x: position.x,
+					y: position.y + 2
+				};
+			}
+			else{
+				var newPosition2 = {
+					x: position.x - 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x + 1,
+					y: position.y
+				};
+			}
 		}
 		if(this.facing == 'down'){
-			
-			var newPosition2 = {
-				x: position.x,
-				y: position.y - 1
-			};
-			
-			var newPosition3 = {
-				x: position.x,
-				y: position.y - 2
-			};
+			if(checkMid == false){
+				var newPosition2 = {
+					x: position.x,
+					y: position.y - 1
+				};
+				
+				var newPosition3 = {
+					x: position.x,
+					y: position.y - 2
+				};
+			}
+			else{
+				var newPosition2 = {
+					x: position.x - 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x + 1,
+					y: position.y
+				};
+			}
 		}
 		if(this.facing == 'left'){
-			
-			var newPosition2 = {
-				x: position.x - 1,
-				y: position.y
-			};
-			
-			var newPosition3 = {
-				x: position.x - 2,
-				y: position.y
-			};
+			if(checkMid == false){
+				var newPosition2 = {
+					x: position.x - 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x - 2,
+					y: position.y
+				};
+			}
+				else{
+				var newPosition2 = {
+					x: position.x,
+					y: position.y + 1
+				};
+				
+				var newPosition3 = {
+					x: position.x,
+					y: position.y - 1
+				};
+			}
 		}
 		if(this.facing == 'right'){
 			
-			var newPosition2 = {
-				x: position.x + 1,
-				y: position.y
-			};
-			
-			var newPosition3 = {
-				x: position.x + 2,
-				y: position.y
-			};
+			if(checkMid == false){
+				var newPosition2 = {
+					x: position.x + 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x + 2,
+					y: position.y
+				};
+			}
+			else{
+				var newPosition2 = {
+					x: position.x - 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x + 1,
+					y: position.y
+				};
+			}
 		}
 
 
@@ -543,6 +610,8 @@ Game.prototype.checkRow = function(position, direction) {
 				x: position.x,
 				y: position.y + 2
 			};
+			
+			
 		}
 		if(this.facing == 'down'){
 			
@@ -583,8 +652,115 @@ Game.prototype.checkRow = function(position, direction) {
 		
 		if(this.legalPosition(position)){
 				//console.log(this.virtualBoard[-position.y + this.offset][position.x + this.offset]);
-				if (this.threeRow(newPosition, this.facing)) {
+				if (this.threeRow(newPosition, this.facing, false)) {
 					
+					var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
+					var boardSlot2 = this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset];
+					var boardSlot3 = this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset];
+					
+					if(boardSlot.figure === null){
+						
+						boardSlot.figure = 'empty';
+					}
+					else{
+						this.scene.remove(boardSlot.figure);
+					}
+					
+					if(boardSlot2.figure === null){
+						
+						boardSlot2.figure = 'empty';
+					}
+					else{
+						this.scene.remove(boardSlot2.figure);
+					}
+					
+					if(boardSlot3.figure === null){
+						
+						boardSlot3.figure = 'empty';
+					}
+					else{
+						this.scene.remove(boardSlot3.figure);
+					}
+					
+					
+					this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset].isEmpty = true;
+					this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset].isEmpty = true;
+					this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset].isEmpty = true;
+			
+		
+				}
+		}
+	
+
+};
+
+Game.prototype.checkMidRow = function(position, direction) {
+	// Check a row for sets of three gems of the same type in a row
+	// For every 3 gems found on a row in this row delete them
+
+	var that = this;
+	
+		var newPosition = {
+			x : position.x,
+			y : position.y
+
+		};
+		if(this.facing == 'up'){
+			
+			var newPosition2 = {
+				x: position.x - 1,
+				y: position.y
+			};
+			
+			var newPosition3 = {
+				x: position.x + 1,
+				y: position.y
+			};
+			
+			
+		}
+		if(this.facing == 'down'){
+			
+			var newPosition2 = {
+				x: position.x - 1,
+				y: position.y
+			};
+			
+			var newPosition3 = {
+				x: position.x + 1,
+				y: position.y
+			};
+		}
+		if(this.facing == 'left'){
+			
+			var newPosition2 = {
+				x: position.x,
+				y: position.y + 1
+			};
+			
+			var newPosition3 = {
+				x: position.x,
+				y: position.y - 1
+			};
+		}
+		if(this.facing == 'right'){
+			
+			var newPosition2 = {
+				x: position.x,
+				y: position.y - 1
+			};
+			
+			var newPosition3 = {
+				x: position.x,
+				y: position.y + 1
+			};
+		}
+		
+		if(this.legalPosition(position)){
+				
+				if (this.threeRow(newPosition, this.facing, true)) {
+					
+				
 					var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
 					var boardSlot2 = this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset];
 					var boardSlot3 = this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset];
@@ -722,7 +898,21 @@ Game.prototype.countSpaces = function(position, direction) {
 	return spaces;
 };
 
+
+Game.prototype.destroyNextGem = function() {
+		
+		this.randNum = this.detRand();
+		this.scene.remove(this.nextGem);
+		this.scene.remove(this.nextGem.figure);
+		this.nextGem = new nextGem(this.scene, this.randNum);
+		
+
+	
+};
 Game.prototype.handleInput = function() {
+
+	
+	
 
 	// Left (A Key)
 	if (this.keys[65] === true) {
@@ -774,6 +964,8 @@ Game.prototype.handleInput = function() {
 	if (this.keys[32] === true) {
 		this.keys[32] = 'triggered';
 		that = this;
+		this.shot = true;
+		
 
 		// determine what direction character is facing
 		
@@ -789,6 +981,7 @@ Game.prototype.handleInput = function() {
 				if (this.legalPosition(newPosition)) {
 					
 					this.createGem(newPosition);
+					
 
 				}
 			}
@@ -802,6 +995,7 @@ Game.prototype.handleInput = function() {
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
 					this.createGem(newPosition);
+					
 
 				}
 			}
@@ -814,6 +1008,7 @@ Game.prototype.handleInput = function() {
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
 					this.createGem(newPosition);
+					
 
 				}
 			}
@@ -827,6 +1022,7 @@ Game.prototype.handleInput = function() {
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
 					this.createGem(newPosition);
+					
 
 				}
 			}

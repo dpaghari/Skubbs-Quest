@@ -9,8 +9,8 @@ var Game = function() {
 Game.prototype.init = function() {
     this.scene = new THREE.Scene();
     var that = this;
-    this.boardSize = 9;
-    this.offset = 4;
+    this.boardSize = 11;
+    this.offset = 5;
     this.facing = 'up';
     
     // Visible canvas area on top of 3D rendering area
@@ -62,15 +62,17 @@ Game.prototype.init = function() {
         
     }
     
-    this.startingBoard = [['1', '1', '4', '4', '0', '4', '0', '0', '5'], // create a board where true = occupied by a block
-                          ['2', '2', '3', '4', '0', '0', '3', '2', '0'], // and where '0' = empty spot
-                          ['2', '3', '3', '0', '3', '2', '0', '0', '0'],
-                          ['0', '0', '2', '1', '2', '2', '0', '1', '1'],
-                          ['0', '4', '2', '1', '2', '0', '0', '0', '2'],
-                          ['0', '4', '3', '2', '1', '1', '0', '4', '2'],
-                          ['3', '0', '2', '3', '4', '3', '0', '4', '0'],
-                          ['4', '0', '0', '4', '3', '3', '2', '3', '0'],
-                          ['2', '0', '0', '1', '0', '0', '2', '1', '1']];
+    this.startingBoard = [['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'], // create a board where true = occupied by a block
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'], // and where '0' = empty spot
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+                          ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']];
     
     
     for (var x = 0; x < this.boardSize; x++) {
@@ -139,7 +141,7 @@ Game.prototype.init = function() {
     // Background plane
     var bgTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
     var bgMaterial = new THREE.MeshBasicMaterial( { map: bgTexture, side: THREE.DoubleSide } );
-    var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 900), bgMaterial);
+    var bgplane = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1100), bgMaterial);
     bgplane.translateZ(-100);
     this.scene.add(bgplane);
     
@@ -369,12 +371,29 @@ Game.prototype.createGem = function(position) {
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 		
 			this.checkRow(position, this.facing);
+			//this.checkEntireRow(position);
 	
 		}
 	}
 	
 	
 
+};
+
+Game.prototype.checkEntireRow = function(position){
+	
+	for(var i = -this.offset; i < this.offset; i++){
+		var newPosition = {
+		x: position.i,
+		y: position.y
+		
+		};
+		var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
+		this.checkRow(newPosition, this.facing);
+		
+	}
+	
+	
 };
 
 

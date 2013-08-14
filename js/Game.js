@@ -6,6 +6,24 @@ var Game = function() {
     this.clock = new THREE.Clock();
 };
 
+/**
+ * Synchronously load contents of file
+ * Returns contents as string
+ * NOTE:
+ *   NOT FOR USE IN PRODUCTION
+ *   Use asynchronous loading in production.
+ */
+var loadFile = function(url) {
+    var result = null;
+    $.ajax({
+           url: url,
+           async: false
+           }).done(function(data) {
+                   result = data;
+                   });
+    return result;
+};
+
 Game.prototype.init = function() {
     this.scene = new THREE.Scene();
     var that = this;
@@ -122,7 +140,7 @@ Game.prototype.init = function() {
     }
     
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
-    this.camera.position.z = 800;
+    this.camera.position.z = 850;
  
     this.material = new THREE.MeshLambertMaterial({
                                                   color : 0xff0000
@@ -137,11 +155,14 @@ Game.prototype.init = function() {
     var ambient_light = new THREE.AmbientLight(0x202020);
     this.scene.add(ambient_light);
     // Background plane
-    var bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
-    var bgMaterial = new THREE.MeshBasicMaterial( { map: bgTexture, side: THREE.DoubleSide } );
-    var bgplane = new THREE.Mesh(new THREE.CubeGeometry(1000, 1000, 100), bgMaterial);
-    bgplane.translateZ(-100);
-    this.scene.add(bgplane);
+    
+    this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
+    this.bgMaterial = new THREE.MeshBasicMaterial( { map: this.bgTexture, side: THREE.DoubleSide } );
+     
+    this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 900, 75), this.bgMaterial);
+    this.bgplane.rotation.x = 0;
+    this.bgplane.translateZ(-100);
+    this.scene.add(this.bgplane);
     
     this.renderer = new THREE.WebGLRenderer({
                                             antialias : true
@@ -155,8 +176,12 @@ Game.prototype.init = function() {
     this.materialFront = new THREE.MeshBasicMaterial( { color: 0xDF2BF0 } );
     this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
     
-    this.timeRemaining = 60;
-    this.time = this.clock.getElapsedTime() * 10;
+    // Load the timer
+    //var currentTime = 0;
+    //var previousTime = 0;
+    //var time = setTime();
+    
+    // Set timer remaining text
     this.NextGeom = new THREE.TextGeometry( "Next: ",
                                            {
                                            size: 100, height: 4, curveSegments: 3,
@@ -175,32 +200,29 @@ Game.prototype.init = function() {
     this.scene.add(this.NextMesh);
     
     this.nextPosition = { x : 575, y : 100};
-    console.log(this.nextPosition);
     
-    // Load the timer
-    // Add 3D text
-    this.timeRemaining = 60;
-    this.time = this.clock.getElapsedTime() * 10;
-    this.TimeGeom = new THREE.TextGeometry( "Time remaining: " + (this.clock.getDelta * 10),
+    // Add 3D text    
+    this.TimeGeom = new THREE.TextGeometry( "Time remaining: ",
                                            {
                                            size: 100, height: 4, curveSegments: 3,
                                            face: "helvetiker", weight: "normal", style: "normal",
                                            bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
                                            material: 5, extrudeMaterial: 5
                                            });
+     
     // font: helvetiker, gentilis, droid sans, droid serif, optimer
     // weight: normal, bold
-    
+        
     this.TextMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
-    this.TimeMesh = new THREE.Mesh(this.TimeGeom, this.TextMaterial);
+    this.TimeTextMesh = new THREE.Mesh(this.TimeGeom, this.TextMaterial);
     
     this.TimeGeom.computeBoundingBox();
     this.TimeWidth = this.TimeGeom.boundingBox.max.x - this.TimeGeom.boundingBox.min.x;
     
-    this.TimeMesh.position.x = -575;
-    this.TimeMesh.position.y = 700;
-    this.TimeMesh.rotation.x = -100;
-    this.scene.add(this.TimeMesh);
+    this.TimeTextMesh.position.x = -575;
+    this.TimeTextMesh.position.y = 700;
+    this.TimeTextMesh.rotation.x = -100;
+    this.scene.add(this.TimeTextMesh);
     
     // Setup keyboard events
     this.keys = {};
@@ -232,7 +254,29 @@ Game.prototype.render = function(t, canvas, ctx) {
     this.camera.position.x = 0;
     this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
-  
+    
+    // Load the time
+    //this.scene.remove(this.TimeMesh);
+    var Time = setTime(60);
+    
+    // Add counting timer
+    this.NumberGeom = new THREE.TextGeometry(this.time,
+                                        {
+                                        size: 100, height: 4, curveSegments: 3,
+                                        face: "helvetiker", weight: "normal", style: "normal",
+                                        bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                        material: 5, extrudeMaterial: 5
+                                        });
+    this.TextMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
+    this.TimeMesh = new THREE.Mesh(this.NumberGeom, this.TextMaterial);
+    
+    this.NumberGeom.computeBoundingBox();
+    this.TimeWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
+    
+    this.TimeMesh.position.x = 400;
+    this.TimeMesh.position.y = 700;
+    this.TimeMesh.rotation.x = -100;
+    this.scene.add(this.TimeMesh);
     
     // If there is no active pane do nothing
     if(this.panes.length > 0) {
@@ -251,7 +295,6 @@ Game.prototype.render = function(t, canvas, ctx) {
         // Render pane overlay
         pane.overlay(ctx);
     }
-    
     this.renderer.render(this.scene, this.camera);
 };
 
@@ -308,18 +351,34 @@ Game.prototype.createGem = function(position) {
     // If the random number is between 0 and 20 create a Diamond
     if(this.randNum >= 0.0 && this.randNum <= 20.0){
         this.nextGem = new diamondGem(this.nextPosition, this.scene);
+        this.nextGem.position.x = 675;
+        this.nextGem.position.y = 100;
+        this.nextGem.position.z = 599;
+        this.scene.add(this.nextGem);
     }
     // If the random number is between 20 and 40 create a Sphere
     if(this.randNum > 20.0 && this.randNum <= 40.0){
         this.nextGem = new sphereGem(this.nextPosition, this.scene);
+        this.nextGem.position.x = 675;
+        this.nextGem.position.y = 100;
+        this.nextGem.position.z = 599;
+        this.scene.add(this.nextGem);
     }
     // If the random number is between 40 and 60 create an Isometric Gem
     if(this.randNum > 40.0 && this.randNum <= 60.0){
         this.nextGem = new isoGem(this.nextPosition, this.scene);
+        this.nextGem.position.x = 675;
+        this.nextGem.position.y = 100;
+        this.nextGem.position.z = 599;
+        this.scene.add(this.nextGem);
     }
     // If the random number is between 60 and 100 create a Cube Gem
     if(this.randNum > 60.0 && this.randNum <= 100.0){
         this.nextGem = new cubeGem(this.nextPosition, this.scene);
+        this.nextGem.position.x = 675;
+        this.nextGem.position.y = 100;
+        this.nextGem.position.z = 599;
+        this.scene.add(this.nextGem);
     }
     
     /*
@@ -364,17 +423,13 @@ Game.prototype.createGem = function(position) {
                  this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new cubeGem(position, this.scene);
                  //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
 			 }
-			 
+
 			
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 		
 			this.checkRow(position, this.facing);
-	
 		}
 	}
-	
-	
-
 };
 
 

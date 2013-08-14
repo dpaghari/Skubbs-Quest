@@ -34,6 +34,122 @@
         
         <div id='gameArea' />
         
+        <p id="timer"></p>
+        
+        <script>
+        //var Timer = setInterval(function() {
+        //                        setTime()},1000);
+        var Ticker;
+        var timeLeft;
+        var totalTime;
+            
+        function setTime(amountOfTime){
+            timeLeft = amountOfTime;
+            totalTime = timeLeft;
+            Time = setInterval(function() {tick()}, 1000);
+            //return currentTime;
+        }
+            
+        function tick(){
+            id = document.getElementById("timer");
+            timeLeft--;
+            console.log(timeLeft);
+            var currentTime = timeLeft
+            return currentTime;
+        }
+
+            /*
+            //Global time displays
+            var d = new Date();
+            var currentTime = d.toLocaleTimeString();
+            document.getElementById("timer").innerHTML = currentTime;
+            console.log(currentTime);
+            var previousTime;
+            
+            if (previousTime !== currentTime){
+                currentTime = d.toLocaleTimeString();
+                previousTime = currentTime;
+                
+                //return currentTime;
+            }
+             */
+            
+            </script>
+        
+        <script id='board-vertex-shader' type='x-shader/x-vertex'>
+            uniform float uTime;
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            
+            void main() {
+                vNormal = normalMatrix * vec3(normal);
+                vPosition = position;
+                gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+            }
+            </script>
+        
+        <script id='board-fragment-shader' type='x-shader/x-fragment'>
+            uniform float uTime;
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            
+            /* Turbulence from explosion demo at:
+             www.clicktorelease.com/code/perlin/explosion.html
+             */
+            float turbulence(vec3 p) {
+                float t = -.5;
+                for (float f = 1.0 ; f <= 10.0 ; f++){
+                    float power = pow(2.0, f);
+                    t += abs(pnoise(vec3(power * p ), vec3(10.0, 10.0, 10.0)) / power);
+                }
+                return t;
+            }
+            
+            void main() {
+                vec3 nvNormal = normalize(vNormal);
+                vec3 lookup = vPosition * 0.005 + 0.1 * uTime * vec3(0.0, 0.0, 1.0);
+                float turb = turbulence(lookup) * 10.0 + 2.5;
+                gl_FragColor = vec4(turb, 0.0, 0.0, 1.0);
+            }
+            </script>
+        
+        <script id='wood-vertex-shader' type='x-shader/x-vertex'>
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            
+            void main() {
+                // Surface normal (view space)
+                vNormal = normalMatrix * vec3(normal);
+                // Position (model space)
+                vPosition = position;
+                gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(position, 1.0);
+            }
+            </script>
+        
+        <script id='wood-fragment-shader' type='x-shader/x-fragment'>
+            varying vec3 vNormal;
+            uniform float uTime;
+            varying vec3 vPosition;
+            varying vec3 vView;
+            
+            float wood(vec3 p) {
+                float noise = 3.0 * cnoise(p * vec3(0.02, 0.005, 0.02));
+                return sin(0.3 * length(p.xz) + noise);
+            }
+            
+            void main() {
+                float noise = wood(vPosition);
+                vec4 woodDark = vec4(150.0/255.0, 111.0/255.0, 51.0/255.0, 1.0);
+                vec4 woodLight = vec4(249.0/255.0, 195.0/255.0, 150.0/255.0, 1.0);
+                vec4 noiseColor = noise * woodDark + (1.0 - noise) * woodLight;
+                gl_FragColor = vec4(noiseColor.rgb, 1.0);
+            }
+            </script>
+        
         <script id='goal-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
             varying vec3 vPosition;

@@ -3,6 +3,7 @@ var Game = function() {
     // Container div
     this.container = document.getElementById('gameArea');
     this.container.style.position = 'relative';
+    this.clock = new THREE.Clock();
 };
 
 Game.prototype.init = function() {
@@ -149,6 +150,58 @@ Game.prototype.init = function() {
     this.renderer.setClearColor(0xeeeeee, 1.0);
     document.body.appendChild(this.renderer.domElement);
     
+    // Load the 'Next' section
+    // Add Materials
+    this.materialFront = new THREE.MeshBasicMaterial( { color: 0xDF2BF0 } );
+    this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+    
+    this.timeRemaining = 60;
+    this.time = this.clock.getElapsedTime() * 10;
+    this.NextGeom = new THREE.TextGeometry( "Next: ",
+                                           {
+                                           size: 100, height: 4, curveSegments: 3,
+                                           face: "helvetiker", weight: "normal", style: "normal",
+                                           bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                           material: 5, extrudeMaterial: 5
+                                           });
+    this.NextMesh = new THREE.Mesh(this.NextGeom, this.TextMaterial);
+    
+    this.NextGeom.computeBoundingBox();
+    this.NextWidth = this.NextGeom.boundingBox.max.x - this.NextGeom.boundingBox.min.x;
+    
+    this.NextMesh.position.x = 575;
+    this.NextMesh.position.y = 200;
+    this.NextMesh.rotation.x = -100;
+    this.scene.add(this.NextMesh);
+    
+    this.nextPosition = { x : 575, y : 100};
+    console.log(this.nextPosition);
+    
+    // Load the timer
+    // Add 3D text
+    this.timeRemaining = 60;
+    this.time = this.clock.getElapsedTime() * 10;
+    this.TimeGeom = new THREE.TextGeometry( "Time remaining: " + (this.clock.getDelta * 10),
+                                           {
+                                           size: 100, height: 4, curveSegments: 3,
+                                           face: "helvetiker", weight: "normal", style: "normal",
+                                           bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                           material: 5, extrudeMaterial: 5
+                                           });
+    // font: helvetiker, gentilis, droid sans, droid serif, optimer
+    // weight: normal, bold
+    
+    this.TextMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
+    this.TimeMesh = new THREE.Mesh(this.TimeGeom, this.TextMaterial);
+    
+    this.TimeGeom.computeBoundingBox();
+    this.TimeWidth = this.TimeGeom.boundingBox.max.x - this.TimeGeom.boundingBox.min.x;
+    
+    this.TimeMesh.position.x = -575;
+    this.TimeMesh.position.y = 700;
+    this.TimeMesh.rotation.x = -100;
+    this.scene.add(this.TimeMesh);
+    
     // Setup keyboard events
     this.keys = {};
     $('body').keydown(function(e) {
@@ -251,33 +304,65 @@ Game.prototype.legalPosition = function(position) {
 
 // Function for creating a gem
 Game.prototype.createGem = function(position) {
-	
+    // If the random number is between 0 and 20 create a Diamond
+    if(this.randNum >= 0.0 && this.randNum <= 20.0){
+        this.nextGem = new diamondGem(this.nextPosition, this.scene);
+    }
+    // If the random number is between 20 and 40 create a Sphere
+    if(this.randNum > 20.0 && this.randNum <= 40.0){
+        this.nextGem = new sphereGem(this.nextPosition, this.scene);
+    }
+    // If the random number is between 40 and 60 create an Isometric Gem
+    if(this.randNum > 40.0 && this.randNum <= 60.0){
+        this.nextGem = new isoGem(this.nextPosition, this.scene);
+    }
+    // If the random number is between 60 and 100 create a Cube Gem
+    if(this.randNum > 60.0 && this.randNum <= 100.0){
+        this.nextGem = new cubeGem(this.nextPosition, this.scene);
+    }
+    
+    /*
+	// Add the next gem
+    this.nextGem = new THREE.Mesh(
+                                  new THREE.CubeGeometry(100, 100, 100),
+                                  new THREE.MeshLambertMaterial({
+                                                                color: new THREE.Color(0xff8000)
+                                                                }));
+    this.nextGem.position.x = 650;
+    this.nextGem.rotation.x += 0.004;
+    this.nextGemPosition = { x : 575, y : 100 };
+    this.scene.add(this.nextGem);
+    */
+    
 	if(this.legalPosition(position)){
-		
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
 	
 			// Calculate a random number between 0-100 to determine what gem you are shooting next
-			var randNum = Math.floor(Math.random() * (101));
+			this.randNum = Math.floor(Math.random() * (101));
 			var newPosition = {
 				x : position.x,
 				y : position.y
 			};
 	
 			// If the random number is between 0 and 20 create a Diamond
-			if(randNum >= 0.0 && randNum <= 20.0){
-			this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
+			if(this.randNum >= 0.0 && this.randNum <= 20.0){
+                this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
+                //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
 			  }
 			 // If the random number is between 20 and 40 create a Sphere
-			 if(randNum > 20.0 && randNum <= 40.0){
-			 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new sphereGem(position, this.scene);
+			 if(this.randNum > 20.0 && this.randNum <= 40.0){
+                 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new sphereGem(position, this.scene);
+                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
 			 }
 			 // If the random number is between 40 and 60 create an Isometric Gem
-			 if(randNum > 40.0 && randNum <= 60.0){
-			 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new isoGem(position, this.scene);
+			 if(this.randNum > 40.0 && this.randNum <= 60.0){
+                 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new isoGem(position, this.scene);
+                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
 			 }
 			 // If the random number is between 60 and 100 create a Cube Gem
-			 if(randNum > 60.0 && randNum <= 100.0){
-			 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new cubeGem(position, this.scene);
+			 if(this.randNum > 60.0 && this.randNum <= 100.0){
+                 this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new cubeGem(position, this.scene);
+                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
 			 }
 			 
 			

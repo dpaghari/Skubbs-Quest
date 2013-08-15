@@ -5,6 +5,7 @@
  *   NOT FOR USE IN PRODUCTION
  *   Use asynchronous loading in production.
  */
+/*
 var loadFile = function(url) {
     var result = null;
     $.ajax({
@@ -15,7 +16,7 @@ var loadFile = function(url) {
                    });
     return result;
 };
-
+*/
 /*
  * Helper functions to correctly place new gems
  * onto the board space
@@ -214,7 +215,7 @@ var isoGem = function(position, scene){
  */
 var goalGem = function(position, scene){
     var that = this;
-    this.isEmpty = false;
+    this.isEmpty = true;
     this.boardPosition = position || {
         x : 0,
         y : 0
@@ -247,14 +248,7 @@ var goalGem = function(position, scene){
                     });
     
 }
-goalGem.prototype.moveTo = function(position) {
-    this.boardPosition = position;
-    this.updateBoardPosition();
-};
 
-goalGem.prototype.updateBoardPosition = function() {
-    this.object.position = goal_gem_to_world(this.boardPosition);
-};
 /*
  * Constructor for the next gem indicator
  */

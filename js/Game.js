@@ -1,3 +1,7 @@
+
+
+
+
 var Game = function() {
     // A Game object is the highest level object representing entire game
     // Container div
@@ -5,6 +9,7 @@ var Game = function() {
     this.container.style.position = 'relative';
     this.clock = new THREE.Clock();
     
+    /*
     // Create particle helper variables
     this.particleCount = 50;
     this.particles = new THREE.Geometry();
@@ -24,16 +29,11 @@ var Game = function() {
     this.particleSystem = new THREE.ParticleSystem(
                                                    this.particles,
                                                    this.particleMaterial);
+    */
+   
     };
-
-/**
- * Synchronously load contents of file
- * Returns contents as string
- * NOTE:
- *   NOT FOR USE IN PRODUCTION
- *   Use asynchronous loading in production.
- */
-var loadFile = function(url) {
+   
+    var loadFile = function(url) {
     var result = null;
     $.ajax({
            url: url,
@@ -43,6 +43,8 @@ var loadFile = function(url) {
                    });
     return result;
 };
+
+    
 
 Game.prototype.init = function() {
 	// Initialize variables
@@ -87,7 +89,7 @@ Game.prototype.init = function() {
 	var skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
 	//this.scene.add(skyBox);
     
-    this.scene.add(this.particleSystem);
+    //this.scene.add(this.particleSystem);
    
    /* Create a board to keep track of collisions and legal moves
     * 
@@ -193,9 +195,11 @@ Game.prototype.init = function() {
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 850;
  
+    /*
     this.material = new THREE.MeshLambertMaterial({
                                                   color : 0xff0000
                                                   });
+    */
     this.figure = null;
     
     // Spotlight
@@ -207,11 +211,20 @@ Game.prototype.init = function() {
     this.scene.add(ambient_light);
     // Background plane
     
-    this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
-    this.bgMaterial = new THREE.MeshBasicMaterial( { map: this.bgTexture, side: THREE.DoubleSide } );
+    var perlinText = loadFile('perlin.glsl');
+    var vertexShaderText = $('#noise-vertex-shader').text();
+    var fragmentShaderText = $('#noise-fragment-shader').text();
+    
+   // this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
+    this.bgMaterial = new THREE.ShaderMaterial({
+    	uniforms: {
+    		'uTime': { type: 'f', value: 0.0},
+    	},
+    	vertexShader: perlinText + vertexShaderText,
+    	fragmentShader: perlinText + fragmentShaderText });
      
     this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 1100, 75), this.bgMaterial);
-    this.bgplane.rotation.x = 0;
+    //this.bgplane.rotation.x = 0;
     this.bgplane.translateZ(-100);
     this.scene.add(this.bgplane);
     
@@ -253,6 +266,7 @@ Game.prototype.init = function() {
     this.nextPosition = { x : 575, y : 100};
     
     // Add 3D text    
+    /*
     this.TimeGeom = new THREE.TextGeometry( "Time remaining: ",
                                            {
                                            size: 100, height: 4, curveSegments: 3,
@@ -274,6 +288,7 @@ Game.prototype.init = function() {
     this.TimeTextMesh.position.y = 700;
     this.TimeTextMesh.rotation.x = -100;
     this.scene.add(this.TimeTextMesh);
+    */
     
     // Setup keyboard events
     this.keys = {};
@@ -293,6 +308,7 @@ Game.prototype.init = function() {
 
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
+	this.bgMaterial.uniforms['uTime'].value = (t);
     if(this.virtualBoard.isEmpty === false){
         for (var i = 0; i < this.boardSize; i++){
             for (var j = 0; j < this.boardSize; j++){
@@ -307,6 +323,7 @@ Game.prototype.render = function(t, canvas, ctx) {
     this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
     
+    /*
     // Load the time
     //this.scene.remove(this.TimeMesh);
     setTime(60);
@@ -329,6 +346,7 @@ Game.prototype.render = function(t, canvas, ctx) {
     this.NumberMesh.position.y = 700;
     this.NumberMesh.rotation.x = -100;
     this.scene.add(this.NumberMesh);
+    */
     
     // If there is no active pane do nothing
     if(this.panes.length > 0) {
@@ -347,6 +365,7 @@ Game.prototype.render = function(t, canvas, ctx) {
         // Render pane overlay
         pane.overlay(ctx);
     }
+    
     this.renderer.render(this.scene, this.camera);
 };
 
@@ -421,52 +440,6 @@ Game.prototype.detRand = function(){
  * that is shot.
  */
 Game.prototype.createGem = function(position) {
-    this.randNum = Math.floor(Math.random() * (101));
-    // If the random number is between 0 and 20 create a Diamond
-    if(this.randNum >= 0.0 && this.randNum <= 20.0){
-        this.nextGem = new diamondGem(this.nextPosition, this.scene);
-        this.nextGem.position.x = 675;
-        this.nextGem.position.y = 100;
-        this.nextGem.position.z = 599;
-        this.scene.add(this.nextGem);
-    }
-    // If the random number is between 20 and 40 create a Sphere
-    if(this.randNum > 20.0 && this.randNum <= 40.0){
-        this.nextGem = new sphereGem(this.nextPosition, this.scene);
-        this.nextGem.position.x = 675;
-        this.nextGem.position.y = 100;
-        this.nextGem.position.z = 599;
-        this.scene.add(this.nextGem);
-    }
-    // If the random number is between 40 and 60 create an Isometric Gem
-    if(this.randNum > 40.0 && this.randNum <= 60.0){
-        this.nextGem = new isoGem(this.nextPosition, this.scene);
-        this.nextGem.position.x = 675;
-        this.nextGem.position.y = 100;
-        this.nextGem.position.z = 599;
-        this.scene.add(this.nextGem);
-    }
-    // If the random number is between 60 and 100 create a Cube Gem
-    if(this.randNum > 60.0 && this.randNum <= 100.0){
-        this.nextGem = new cubeGem(this.nextPosition, this.scene);
-        this.nextGem.position.x = 675;
-        this.nextGem.position.y = 100;
-        this.nextGem.position.z = 599;
-        this.scene.add(this.nextGem);
-    }
-    
-    /*
-	// Add the next gem
-    this.nextGem = new THREE.Mesh(
-                                  new THREE.CubeGeometry(100, 100, 100),
-                                  new THREE.MeshLambertMaterial({
-                                                                color: new THREE.Color(0xff8000)
-                                                                }));
-    this.nextGem.position.x = 650;
-    this.nextGem.rotation.x += 0.004;
-    this.nextGemPosition = { x : 575, y : 100 };
-    this.scene.add(this.nextGem);
-    */
     
 	if(this.legalPosition(position)){
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
@@ -495,24 +468,24 @@ Game.prototype.createGem = function(position) {
 
 			
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
-		
-			this.checkRow(position, this.facing);
+			this.checkEntireRow(position, this.facing);
+			//this.checkRow(position, this.facing);
 		}
 	}
-			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;	
-			this.checkRow(position, this.facing);
-			this.checkMidRow(position, this.facing);
+			//this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;	
+			//this.checkRow(position, this.facing);
+			//this.checkMidRow(position, this.facing);
 			
-			//this.checkEntireRow(position, this.facing);
+		
 	
-	this.destroyNextGem();
+			this.destroyNextGem();
 
 };
 
 Game.prototype.checkEntireRow = function(position, direction){
 	
 	for(var i = -this.offset; i <= this.offset; i++){
-		if(this.facing == 'up' || this.facing == 'down'){
+		//if(this.facing == 'up' || this.facing == 'down'){
 			
 			
 			
@@ -521,18 +494,39 @@ Game.prototype.checkEntireRow = function(position, direction){
 			y: position.y
 			
 			};
+		//}
+		//if(this.facing == 'left' || this.facing == 'right'){
+		
+	//	}
+		
+		
+		
+		var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
+		if(this.legalPosition(newPosition)){
+		//	for(var j = -this.offset; j  <= this.offset; j++){
+				//console.log("Checking:", newPosition);
+				this.checkRow(newPosition, 'up');
+				this.checkRow(newPosition, 'down');
+				this.checkRow(newPosition, 'left');
+				this.checkRow(newPosition, 'right');
+				this.checkMidRow(newPosition, this.facing);
+		//	}
 		}
-		if(this.facing == 'left' || this.facing == 'right'){
 			var newPosition = {
 			x: position.x,
 			y: i
 			
 			};
-		}
-		var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
-		if(this.legalPosition(newPosition)){
 			
-			this.checkRow(newPosition, this.facing);
+			if(this.legalPosition(newPosition)){
+		//	for(var j = -this.offset; j  <= this.offset; j++){
+				//console.log("Checking:", newPosition);
+				this.checkRow(newPosition, 'up');
+				this.checkRow(newPosition, 'down');
+				this.checkRow(newPosition, 'left');
+				this.checkRow(newPosition, 'right');
+				this.checkMidRow(newPosition, this.facing);
+		//	}
 		}
 	}
 	
@@ -680,13 +674,13 @@ Game.prototype.threeRow = function(position, direction, checkMid) {
 			}
 			else{
 				var newPosition2 = {
-					x: position.x - 1,
-					y: position.y
+					x: position.x,
+					y: position.y + 1
 				};
 				
 				var newPosition3 = {
-					x: position.x + 1,
-					y: position.y
+					x: position.x,
+					y: position.y - 1
 				};
 			}
 		}
@@ -736,9 +730,7 @@ Game.prototype.checkRow = function(position, direction) {
 			var newPosition3 = {
 				x: position.x,
 				y: position.y + 2
-			};
-			
-			
+			};		
 		}
 		if(this.facing == 'down'){
 			

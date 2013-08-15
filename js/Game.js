@@ -5,8 +5,8 @@
 var Game = function() {
     // A Game object is the highest level object representing entire game
     // Container div
-    this.container = document.getElementById('gameArea');
-    this.container.style.position = 'relative';
+   // this.container = document.getElementById('gameArea');
+   // this.container.style.position = 'relative';
     this.clock = new THREE.Clock();
     
     /*
@@ -29,11 +29,22 @@ var Game = function() {
     this.particleSystem = new THREE.ParticleSystem(
                                                    this.particles,
                                                    this.particleMaterial);
+
     */
    
     };
    
-    var loadFile = function(url) {
+
+
+/**
+ * Synchronously load contents of file
+ * Returns contents as string
+ * NOTE:
+ *   NOT FOR USE IN PRODUCTION
+ *   Use asynchronous loading in production.
+ */
+var loadFile = function(url) {
+
     var result = null;
     $.ajax({
            url: url,
@@ -56,6 +67,7 @@ Game.prototype.init = function() {
    
     
     // Visible canvas area on top of 3D rendering area
+    /*
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
     this.canvas.style.top = 0;
@@ -64,7 +76,7 @@ Game.prototype.init = function() {
     this.canvas.height = 600;
     this.container.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
-    
+    */
     /* Skybox texture from:
      http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
      * Code for skybox inspired by:
@@ -151,7 +163,6 @@ Game.prototype.init = function() {
                                                          x : (x - this.offset),
                                                          y : -(y - this.offset)
                                                          }, this.scene);
-                console.log(this.figure);
             }
             
             if (this.startingBoard[y][x] == '3') {
@@ -211,18 +222,22 @@ Game.prototype.init = function() {
     this.scene.add(ambient_light);
     // Background plane
     
-    var perlinText = loadFile('perlin.glsl');
-    var vertexShaderText = $('#noise-vertex-shader').text();
-    var fragmentShaderText = $('#noise-fragment-shader').text();
+
+    this.perlinText = loadFile('perlin.glsl');
+    this.woodVertexShaderText = $('#wood-vertex-shader').text();
+    this.woodFragmentShaderText = $('#wood-fragment-shader').text();
     
-   // this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
+    this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
+    
     this.bgMaterial = new THREE.ShaderMaterial({
-    	uniforms: {
-    		'uTime': { type: 'f', value: 0.0},
-    	},
-    	vertexShader: perlinText + vertexShaderText,
-    	fragmentShader: perlinText + fragmentShaderText });
-     
+                                               uniforms: {
+                                               'uTime': { type: 'f', value: 0.0 },
+                                               },
+                                               vertexShader: this.perlinText + this.woodVertexShaderText,
+                                               fragmentShader: this.perlinText + this.woodFragmentShaderText
+                                               });
+    
+    //this.bgMaterial = new THREE.MeshBasicMaterial( { map: this.bgTexture, side: THREE.DoubleSide});
     this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 1100, 75), this.bgMaterial);
     //this.bgplane.rotation.x = 0;
     this.bgplane.translateZ(-100);
@@ -308,7 +323,7 @@ Game.prototype.init = function() {
 
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
-	this.bgMaterial.uniforms['uTime'].value = (t);
+	//this.bgMaterial.uniforms['uTime'].value = (t);
     if(this.virtualBoard.isEmpty === false){
         for (var i = 0; i < this.boardSize; i++){
             for (var j = 0; j < this.boardSize; j++){
@@ -327,6 +342,8 @@ Game.prototype.render = function(t, canvas, ctx) {
     // Load the time
     //this.scene.remove(this.TimeMesh);
     setTime(60);
+    
+    //this.bgMaterial.uniforms['uTime'].value = t;
     
     // Add counting timer
     this.NumberGeom = new THREE.TextGeometry(time,
@@ -440,7 +457,7 @@ Game.prototype.detRand = function(){
  * that is shot.
  */
 Game.prototype.createGem = function(position) {
-    
+
 	if(this.legalPosition(position)){
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
 				
@@ -469,12 +486,9 @@ Game.prototype.createGem = function(position) {
 			
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 			this.checkEntireRow(position, this.facing);
-			//this.checkRow(position, this.facing);
+			
 		}
 	}
-			//this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;	
-			//this.checkRow(position, this.facing);
-			//this.checkMidRow(position, this.facing);
 			
 		
 	
@@ -1203,7 +1217,7 @@ Game.prototype.start = function() {
 	var time0 = new Date().getTime();
 	// milliseconds since 1970
 	var loop = function() {
-		var time = new Date().getTime();
+		//var time = new Date().getTime();
 		// Render visual frame
 		that.render(time - time0);
 		// Respond to user input

@@ -24,7 +24,7 @@ var Game = function() {
     this.particleSystem = new THREE.ParticleSystem(
                                                    this.particles,
                                                    this.particleMaterial);
-    };
+};
 
 /**
  * Synchronously load contents of file
@@ -149,7 +149,6 @@ Game.prototype.init = function() {
                                                          x : (x - this.offset),
                                                          y : -(y - this.offset)
                                                          }, this.scene);
-                console.log(this.figure);
             }
             
             if (this.startingBoard[y][x] == '3') {
@@ -207,9 +206,33 @@ Game.prototype.init = function() {
     this.scene.add(ambient_light);
     // Background plane
     
-    this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
-    this.bgMaterial = new THREE.MeshBasicMaterial( { map: this.bgTexture, side: THREE.DoubleSide } );
+    /*
+     var vertexShaderText = $('#my-vertex-shader').text();
+     var fragmentShaderText = $('#my-fragment-shader').text();
      
+     this.myMaterial = new THREE.ShaderMaterial({
+     uniforms: {
+     'uTime': { type: 'f', value: 0.0 },
+     },
+     vertexShader: vertexShaderText,
+     fragmentShader: fragmentShaderText
+     });
+     */
+    this.perlinText = loadFile('perlin.glsl');
+    this.woodVertexShaderText = $('#wood-vertex-shader').text();
+    this.woodFragmentShaderText = $('#wood-fragment-shader').text();
+    
+    this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
+    /*
+    this.bgMaterial = new THREE.ShaderMaterial({
+                                               uniforms: {
+                                               'uTime': { type: 'f', value: 0.0 },
+                                               },
+                                               vertexShader: this.perlinText + this.woodVertexShaderText,
+                                               fragmentShader: this.perlinText + this.woodFragmentShaderText
+                                               });
+    */
+    this.bgMaterial = new THREE.MeshBasicMaterial( { map: this.bgTexture, side: THREE.DoubleSide});
     this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 1100, 75), this.bgMaterial);
     this.bgplane.rotation.x = 0;
     this.bgplane.translateZ(-100);
@@ -310,6 +333,8 @@ Game.prototype.render = function(t, canvas, ctx) {
     // Load the time
     //this.scene.remove(this.TimeMesh);
     setTime(60);
+    
+    //this.bgMaterial.uniforms['uTime'].value = t;
     
     // Add counting timer
     this.NumberGeom = new THREE.TextGeometry(time,
@@ -421,53 +446,6 @@ Game.prototype.detRand = function(){
  * that is shot.
  */
 Game.prototype.createGem = function(position) {
-    this.randNum = Math.floor(Math.random() * (101));
-    // If the random number is between 0 and 20 create a Diamond
-    if(this.randNum >= 0.0 && this.randNum <= 20.0){
-        this.nextGem = new diamondGem(this.nextPosition, this.scene);
-        this.nextGem.position.x = 675;
-        this.nextGem.position.y = 100;
-        this.nextGem.position.z = 599;
-        this.scene.add(this.nextGem);
-    }
-    // If the random number is between 20 and 40 create a Sphere
-    if(this.randNum > 20.0 && this.randNum <= 40.0){
-        this.nextGem = new sphereGem(this.nextPosition, this.scene);
-        this.nextGem.position.x = 675;
-        this.nextGem.position.y = 100;
-        this.nextGem.position.z = 599;
-        this.scene.add(this.nextGem);
-    }
-    // If the random number is between 40 and 60 create an Isometric Gem
-    if(this.randNum > 40.0 && this.randNum <= 60.0){
-        this.nextGem = new isoGem(this.nextPosition, this.scene);
-        this.nextGem.position.x = 675;
-        this.nextGem.position.y = 100;
-        this.nextGem.position.z = 599;
-        this.scene.add(this.nextGem);
-    }
-    // If the random number is between 60 and 100 create a Cube Gem
-    if(this.randNum > 60.0 && this.randNum <= 100.0){
-        this.nextGem = new cubeGem(this.nextPosition, this.scene);
-        this.nextGem.position.x = 675;
-        this.nextGem.position.y = 100;
-        this.nextGem.position.z = 599;
-        this.scene.add(this.nextGem);
-    }
-    
-    /*
-	// Add the next gem
-    this.nextGem = new THREE.Mesh(
-                                  new THREE.CubeGeometry(100, 100, 100),
-                                  new THREE.MeshLambertMaterial({
-                                                                color: new THREE.Color(0xff8000)
-                                                                }));
-    this.nextGem.position.x = 650;
-    this.nextGem.rotation.x += 0.004;
-    this.nextGemPosition = { x : 575, y : 100 };
-    this.scene.add(this.nextGem);
-    */
-    
 	if(this.legalPosition(position)){
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
 				
@@ -1211,7 +1189,7 @@ Game.prototype.start = function() {
 	var time0 = new Date().getTime();
 	// milliseconds since 1970
 	var loop = function() {
-		var time = new Date().getTime();
+		//var time = new Date().getTime();
 		// Render visual frame
 		that.render(time - time0);
 		// Respond to user input

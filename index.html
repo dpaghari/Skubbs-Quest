@@ -42,21 +42,31 @@
         var Ticker;
         var timeLeft;
         var totalTime;
+        var time = 60;
+        //var currentTime;
             
         function setTime(amountOfTime){
             timeLeft = amountOfTime;
             totalTime = timeLeft;
-            Time = setInterval(function() {tick()}, 1000);
+            Ticker = setInterval(function() {tick()}, 1000);
             //return currentTime;
         }
             
         function tick(){
             id = document.getElementById("timer");
-            timeLeft--;
-            console.log(timeLeft);
-            var currentTime = timeLeft
-            return currentTime;
+            //timeLeft--;
+            time = timeLeft;
+            //console.log(timeLeft);
+            //var currentTime = timeLeft;
+            //return currentTime;
+            //time = currentTime;
+            //returnTime(currentTime);
         }
+            
+            function returnTime(time) {
+                //console.log(time);
+                return time;
+            }
 
             /*
             //Global time displays

@@ -4,7 +4,27 @@ var Game = function() {
     this.container = document.getElementById('gameArea');
     this.container.style.position = 'relative';
     this.clock = new THREE.Clock();
-};
+    
+    // Create particle helper variables
+    this.particleCount = 50;
+    this.particles = new THREE.Geometry();
+    this.particleMaterial = new THREE.ParticleBasicMaterial({
+                                                           color: 0xFF0000,
+                                                           size: 20
+                                                           });
+    // Add vertices to particle geometry to place particles
+    for(var i = 0; i < this.particleCount; i++) {
+        this.px = (Math.random() * 2.0 - 1.0) * 1000;
+        this.py = (Math.random() * 2.0 - 1.0) * 1000;
+        this.pz = (Math.random() * 2.0 - 1.0) * 1000;
+        this.vertex = new THREE.Vector3(this.px, this.py, this.pz);
+        this.particles.vertices.push(this.vertex);
+    }
+    // Now create particle system itself
+    this.particleSystem = new THREE.ParticleSystem(
+                                                   this.particles,
+                                                   this.particleMaterial);
+    };
 
 /**
  * Synchronously load contents of file
@@ -25,11 +45,13 @@ var loadFile = function(url) {
 };
 
 Game.prototype.init = function() {
+	// Initialize variables
     this.scene = new THREE.Scene();
     var that = this;
-    this.boardSize = 9;
-    this.offset = 4;
+    this.boardSize = 11;					
+    this.offset = 5;						
     this.facing = 'up';
+   
     
     // Visible canvas area on top of 3D rendering area
     this.canvas = document.createElement('canvas');
@@ -46,11 +68,11 @@ Game.prototype.init = function() {
      * Code for skybox inspired by:
      http://stemkoski.github.io/Three.js/Skybox.html
      */
-    //console.log("get materials");
+   
     
     this.panes = [];
 	
-   // console.log("get skybox textures");
+   
 	var directions  = ["skybox1", "skybox2", "skybox3", "skybox4", "skybox5", "skybox6"];
 	var imageSuffix = ".png";
 	var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
@@ -64,12 +86,12 @@ Game.prototype.init = function() {
 	var skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 	var skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
 	//this.scene.add(skyBox);
-
     
-    this.robot = new Robot({
-                           x : -2,
-                           y : -3
-                           }, this.scene);
+    this.scene.add(this.particleSystem);
+   
+   /* Create a board to keep track of collisions and legal moves
+    * 
+    */ 
     
     this.virtualBoard = new Array(this.boardSize);
     for (var i = 0; i < this.boardSize; i++) {
@@ -79,18 +101,31 @@ Game.prototype.init = function() {
         }
         
     }
+    /*	Create a Board giving a visual representation of the level
+     * 1 - Cube
+     * 2 - Diamond
+     * 3 - Sphere
+     * 4 - Iso
+     * 5 - Goal
+     * 6 - Robot
+     */
+     
+    this.startingBoard = [['0', '0', '1', '2', '1', '1', '0', '0', '3', '0', '5'], 
+                          ['1', '3', '1', '1', '3', '2', '1', '0', '3', '0', '0'], 
+                          ['2', '1', '2', '2', '3', '2', '1', '0', '0', '2', '2'],
+                          ['1', '1', '0', '0', '4', '3', '0', '4', '4', '2', '1'],
+                          ['0', '2', '3', '0', '2', '0', '0', '0', '0', '1', '1'],
+                          ['1', '2', '3', '0', '2', '0', '0', '3', '2', '0', '3'],
+                          ['0', '0', '0', '0', '0', '1', '0', '3', '2', '0', '3'],
+                          ['0', '0', '0', '0', '0', '3', '0', '0', '1', '1', '0'],
+                          ['0', '0', '0', '0', '0', '4', '1', '0', '2', '0', '0'],
+                          ['0', '0', '0', '0', '0', '2', '1', '0', '0', '1', '1'],
+                          ['0', '6', '0', '0', '0', '2', '0', '4', '4', '0', '0']];
     
-    this.startingBoard = [['1', '1', '4', '4', '0', '4', '0', '0', '5'], // create a board where true = occupied by a block
-                          ['2', '2', '3', '4', '0', '0', '3', '2', '0'], // and where '0' = empty spot
-                          ['2', '3', '3', '0', '3', '2', '0', '0', '0'],
-                          ['0', '0', '2', '1', '2', '2', '0', '1', '1'],
-                          ['0', '4', '2', '1', '2', '0', '0', '0', '2'],
-                          ['0', '4', '3', '2', '1', '1', '0', '4', '2'],
-                          ['3', '0', '2', '3', '4', '3', '0', '4', '0'],
-                          ['4', '0', '0', '4', '3', '3', '2', '3', '0'],
-                          ['2', '0', '0', '1', '0', '0', '2', '1', '1']];
-    
-    
+   /* Add board elements(gems, character) to the 
+    * board handling collision and legal moves
+    */
+     
     for (var x = 0; x < this.boardSize; x++) {
         for (var y = 0; y < this.boardSize; y++) {
             
@@ -114,6 +149,7 @@ Game.prototype.init = function() {
                                                          x : (x - this.offset),
                                                          y : -(y - this.offset)
                                                          }, this.scene);
+                console.log(this.figure);
             }
             
             if (this.startingBoard[y][x] == '3') {
@@ -136,8 +172,23 @@ Game.prototype.init = function() {
                                                      y : -(y - this.offset)
                                                      }, this.scene);
             }
+             if (this.startingBoard[y][x] == '6') {
+                this.virtualBoard[y][x] = this.robot = new Robot({
+                           x : (x - this.offset),
+                           y : -(y - this.offset)
+                           }, this.scene);
+                           this.virtualBoard[y][x].isEmpty = true;
+            }
         }
     }
+    
+    
+    /*
+     * Determine the initial first gem that the character can shoot when the level first loads
+     */
+    this.randNum = Math.floor(Math.random() * (101)); 
+    this.nextGem = new nextGem(this.scene, this.randNum);
+    
     
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 850;
@@ -159,7 +210,7 @@ Game.prototype.init = function() {
     this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
     this.bgMaterial = new THREE.MeshBasicMaterial( { map: this.bgTexture, side: THREE.DoubleSide } );
      
-    this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 900, 75), this.bgMaterial);
+    this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 1100, 75), this.bgMaterial);
     this.bgplane.rotation.x = 0;
     this.bgplane.translateZ(-100);
     this.scene.add(this.bgplane);
@@ -182,7 +233,7 @@ Game.prototype.init = function() {
     //var time = setTime();
     
     // Set timer remaining text
-    this.NextGeom = new THREE.TextGeometry( "Next: ",
+    this.NextGeom = new THREE.TextGeometry( "Next : ",
                                            {
                                            size: 100, height: 4, curveSegments: 3,
                                            face: "helvetiker", weight: "normal", style: "normal",
@@ -194,8 +245,8 @@ Game.prototype.init = function() {
     this.NextGeom.computeBoundingBox();
     this.NextWidth = this.NextGeom.boundingBox.max.x - this.NextGeom.boundingBox.min.x;
     
-    this.NextMesh.position.x = 575;
-    this.NextMesh.position.y = 200;
+    this.NextMesh.position.x = 615;
+    this.NextMesh.position.y = 100;
     this.NextMesh.rotation.x = -100;
     this.scene.add(this.NextMesh);
     
@@ -240,6 +291,7 @@ Game.prototype.init = function() {
                     });
 };
 
+// Render function
 Game.prototype.render = function(t, canvas, ctx) {
     if(this.virtualBoard.isEmpty === false){
         for (var i = 0; i < this.boardSize; i++){
@@ -249,7 +301,7 @@ Game.prototype.render = function(t, canvas, ctx) {
             }
         }
     }
-    
+   
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;
@@ -257,26 +309,26 @@ Game.prototype.render = function(t, canvas, ctx) {
     
     // Load the time
     //this.scene.remove(this.TimeMesh);
-    var Time = setTime(60);
+    setTime(60);
     
     // Add counting timer
-    this.NumberGeom = new THREE.TextGeometry(this.time,
+    this.NumberGeom = new THREE.TextGeometry(time,
                                         {
                                         size: 100, height: 4, curveSegments: 3,
                                         face: "helvetiker", weight: "normal", style: "normal",
                                         bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
                                         material: 5, extrudeMaterial: 5
                                         });
-    this.TextMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
-    this.TimeMesh = new THREE.Mesh(this.NumberGeom, this.TextMaterial);
+    this.NumberMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
+    this.NumberMesh = new THREE.Mesh(this.NumberGeom, this.NumberMaterial);
     
     this.NumberGeom.computeBoundingBox();
-    this.TimeWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
+    this.NumberWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
     
-    this.TimeMesh.position.x = 400;
-    this.TimeMesh.position.y = 700;
-    this.TimeMesh.rotation.x = -100;
-    this.scene.add(this.TimeMesh);
+    this.NumberMesh.position.x = 400;
+    this.NumberMesh.position.y = 700;
+    this.NumberMesh.rotation.x = -100;
+    this.scene.add(this.NumberMesh);
     
     // If there is no active pane do nothing
     if(this.panes.length > 0) {
@@ -311,12 +363,13 @@ Game.prototype.popPane = function() {
     this.panes.pop();
 };
 
+/* Function that checks if the given position
+ * is within the board's limits and if it is occupied
+ * by a gem or not.
+ */
 Game.prototype.legalMove = function(position) {
-	/* True = allows movement
-	 * False = hinders movement
-	 *
-	 * Check if desired position is off of the edge of the board horizontally
-	 */
+	
+	// Check if desired position is off of the edge of the board horizontally 
 	if (position.x < -this.offset || position.x > this.offset) {
 		return false;
 	}
@@ -333,6 +386,10 @@ Game.prototype.legalMove = function(position) {
 	return true;
 };
 
+/*
+ * Function that checks if desired position is within
+ * board's limits.
+ */
 Game.prototype.legalPosition = function(position) {
 	// returns true or false if the move is within the board's limits
 	if (position.x < -this.offset || position.x > this.offset) {
@@ -344,8 +401,25 @@ Game.prototype.legalPosition = function(position) {
 	}
 	return true;
 };
+/*
+ * Function to generate a random number
+ * between 0-100
+ */
+Game.prototype.detRand = function(){
+	
+	var randNum = Math.floor(Math.random() * (101));
+	
+	return randNum;
+	
+};
 
-// Function for creating a gem
+
+/*
+ * Function that creates a gem at a position if it is within its limits.
+ * Gem created is determined by a random number determined at creation.
+ * Also checks for matches of three and calls the update to the next gem
+ * that is shot.
+ */
 Game.prototype.createGem = function(position) {
     this.randNum = Math.floor(Math.random() * (101));
     // If the random number is between 0 and 20 create a Diamond
@@ -396,32 +470,27 @@ Game.prototype.createGem = function(position) {
     
 	if(this.legalPosition(position)){
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
-	
-			// Calculate a random number between 0-100 to determine what gem you are shooting next
-			var newPosition = {
-				x : position.x,
-				y : position.y
-			};
-	
+				
 			// If the random number is between 0 and 20 create a Diamond
-			if(this.randNum >= 0.0 && this.randNum <= 20.0){
+			if(this.randNum >= 0.0 && this.randNum <= 25.0){
                 this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
-                //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+                
 			  }
+			
 			 // If the random number is between 20 and 40 create a Sphere
-			 if(this.randNum > 20.0 && this.randNum <= 40.0){
+			 if(this.randNum > 25.0 && this.randNum <= 50.0){
                  this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new sphereGem(position, this.scene);
-                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+                
 			 }
 			 // If the random number is between 40 and 60 create an Isometric Gem
-			 if(this.randNum > 40.0 && this.randNum <= 60.0){
+			 if(this.randNum > 50.0 && this.randNum <= 75.0){
                  this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new isoGem(position, this.scene);
-                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+               
 			 }
 			 // If the random number is between 60 and 100 create a Cube Gem
-			 if(this.randNum > 60.0 && this.randNum <= 100.0){
+			 if(this.randNum > 75.0 && this.randNum <= 100.0){
                  this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new cubeGem(position, this.scene);
-                 //this.nextGem = this.virtualBoard[-position.y + this.offset][position.x + this.offset];
+               
 			 }
 
 			
@@ -430,10 +499,51 @@ Game.prototype.createGem = function(position) {
 			this.checkRow(position, this.facing);
 		}
 	}
+			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;	
+			this.checkRow(position, this.facing);
+			this.checkMidRow(position, this.facing);
+			
+			//this.checkEntireRow(position, this.facing);
+	
+	this.destroyNextGem();
+
+};
+
+Game.prototype.checkEntireRow = function(position, direction){
+	
+	for(var i = -this.offset; i <= this.offset; i++){
+		if(this.facing == 'up' || this.facing == 'down'){
+			
+			
+			
+			var newPosition = {
+			x: i,
+			y: position.y
+			
+			};
+		}
+		if(this.facing == 'left' || this.facing == 'right'){
+			var newPosition = {
+			x: position.x,
+			y: i
+			
+			};
+		}
+		var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
+		if(this.legalPosition(newPosition)){
+			
+			this.checkRow(newPosition, this.facing);
+		}
+	}
+	
+	
 };
 
 
-
+/*
+ * Function that returns true if position is not occupied by a gem
+ * 
+ */
 Game.prototype.isEmptySquare = function(position) {
 	// returns true or false if input position is empty
 	if(this.legalPosition(position)){
@@ -445,7 +555,10 @@ Game.prototype.isEmptySquare = function(position) {
 		
 	}
 };
-
+/*
+ * Function that checks the type of the object at the desired position.
+ * Used to determine matches
+ */
 Game.prototype.checkType = function(position){
 	// Check what type the object in the given position is
 	// return a number depending on the type of object it is
@@ -466,7 +579,9 @@ Game.prototype.checkType = function(position){
 	
 	
 };
-Game.prototype.threeRow = function(position, direction) {
+
+
+Game.prototype.threeRow = function(position, direction, checkMid) {
 	// Check if there is three in a row of a gem from the given position going to the right
 	// Returns true or false
 	// If off the board return false
@@ -479,51 +594,101 @@ Game.prototype.threeRow = function(position, direction) {
 		};
 		if(this.facing == 'up'){
 			
-			var newPosition2 = {
-				x: position.x,
-				y: position.y + 1
-			};
-			
-			var newPosition3 = {
-				x: position.x,
-				y: position.y + 2
-			};
+			if(checkMid == false){
+				var newPosition2 = {
+					x: position.x,
+					y: position.y + 1
+				};
+				
+				var newPosition3 = {
+					x: position.x,
+					y: position.y + 2
+				};
+			}
+			else{
+				var newPosition2 = {
+					x: position.x - 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x + 1,
+					y: position.y
+				};
+			}
 		}
 		if(this.facing == 'down'){
-			
-			var newPosition2 = {
-				x: position.x,
-				y: position.y - 1
-			};
-			
-			var newPosition3 = {
-				x: position.x,
-				y: position.y - 2
-			};
+			if(checkMid == false){
+				var newPosition2 = {
+					x: position.x,
+					y: position.y - 1
+				};
+				
+				var newPosition3 = {
+					x: position.x,
+					y: position.y - 2
+				};
+			}
+			else{
+				var newPosition2 = {
+					x: position.x - 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x + 1,
+					y: position.y
+				};
+			}
 		}
 		if(this.facing == 'left'){
-			
-			var newPosition2 = {
-				x: position.x - 1,
-				y: position.y
-			};
-			
-			var newPosition3 = {
-				x: position.x - 2,
-				y: position.y
-			};
+			if(checkMid == false){
+				var newPosition2 = {
+					x: position.x - 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x - 2,
+					y: position.y
+				};
+			}
+				else{
+				var newPosition2 = {
+					x: position.x,
+					y: position.y + 1
+				};
+				
+				var newPosition3 = {
+					x: position.x,
+					y: position.y - 1
+				};
+			}
 		}
 		if(this.facing == 'right'){
 			
-			var newPosition2 = {
-				x: position.x + 1,
-				y: position.y
-			};
-			
-			var newPosition3 = {
-				x: position.x + 2,
-				y: position.y
-			};
+			if(checkMid == false){
+				var newPosition2 = {
+					x: position.x + 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x + 2,
+					y: position.y
+				};
+			}
+			else{
+				var newPosition2 = {
+					x: position.x - 1,
+					y: position.y
+				};
+				
+				var newPosition3 = {
+					x: position.x + 1,
+					y: position.y
+				};
+			}
 		}
 
 
@@ -572,6 +737,8 @@ Game.prototype.checkRow = function(position, direction) {
 				x: position.x,
 				y: position.y + 2
 			};
+			
+			
 		}
 		if(this.facing == 'down'){
 			
@@ -611,9 +778,116 @@ Game.prototype.checkRow = function(position, direction) {
 		}
 		
 		if(this.legalPosition(position)){
-				//console.log(this.virtualBoard[-position.y + this.offset][position.x + this.offset]);
-				if (this.threeRow(newPosition, this.facing)) {
+				
+				if (this.threeRow(newPosition, this.facing, false)) {
 					
+					var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
+					var boardSlot2 = this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset];
+					var boardSlot3 = this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset];
+					
+					if(boardSlot.figure === null){
+						
+						boardSlot.figure = 'empty';
+					}
+					else{
+						this.scene.remove(boardSlot.figure);
+					}
+					
+					if(boardSlot2.figure === null){
+						
+						boardSlot2.figure = 'empty';
+					}
+					else{
+						this.scene.remove(boardSlot2.figure);
+					}
+					
+					if(boardSlot3.figure === null){
+						
+						boardSlot3.figure = 'empty';
+					}
+					else{
+						this.scene.remove(boardSlot3.figure);
+					}
+					
+					
+					this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset].isEmpty = true;
+					this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset].isEmpty = true;
+					this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset].isEmpty = true;
+			
+		
+				}
+		}
+	
+
+};
+
+Game.prototype.checkMidRow = function(position, direction) {
+	// Check a row for sets of three gems of the same type in a row
+	// For every 3 gems found on a row in this row delete them
+
+	var that = this;
+	
+		var newPosition = {
+			x : position.x,
+			y : position.y
+
+		};
+		if(this.facing == 'up'){
+			
+			var newPosition2 = {
+				x: position.x - 1,
+				y: position.y
+			};
+			
+			var newPosition3 = {
+				x: position.x + 1,
+				y: position.y
+			};
+			
+			
+		}
+		if(this.facing == 'down'){
+			
+			var newPosition2 = {
+				x: position.x - 1,
+				y: position.y
+			};
+			
+			var newPosition3 = {
+				x: position.x + 1,
+				y: position.y
+			};
+		}
+		if(this.facing == 'left'){
+			
+			var newPosition2 = {
+				x: position.x,
+				y: position.y + 1
+			};
+			
+			var newPosition3 = {
+				x: position.x,
+				y: position.y - 1
+			};
+		}
+		if(this.facing == 'right'){
+			
+			var newPosition2 = {
+				x: position.x,
+				y: position.y - 1
+			};
+			
+			var newPosition3 = {
+				x: position.x,
+				y: position.y + 1
+			};
+		}
+		
+		if(this.legalPosition(position)){
+				
+				if (this.threeRow(newPosition, this.facing, true)) {
+					
+				
 					var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
 					var boardSlot2 = this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset];
 					var boardSlot3 = this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset];
@@ -673,7 +947,7 @@ Game.prototype.countSpacesRight = function(position) {
 
 	return spaces;
 };
-
+// Function returns # of free spaces to the right
 Game.prototype.countSpacesLeft = function(position) {
 	var spaces = 0;
 	var newPosition = {
@@ -691,7 +965,7 @@ Game.prototype.countSpacesLeft = function(position) {
 
 	return spaces;
 };
-
+// Function returns # of free spaces up
 Game.prototype.countSpacesUp = function(position) {
 	var spaces = 0;
 	var newPosition = {
@@ -709,7 +983,7 @@ Game.prototype.countSpacesUp = function(position) {
 
 	return spaces;
 };
-
+// Function returns # of free spaces down
 Game.prototype.countSpacesDown = function(position) {
 	var spaces = 0;
 	var newPosition = {
@@ -751,8 +1025,39 @@ Game.prototype.countSpaces = function(position, direction) {
 	return spaces;
 };
 
+/*
+ * Function that destroys the next Gem
+ *  and updates with a new gem that 
+ *  tells player what next gem to be fired will be
+ */
+Game.prototype.destroyNextGem = function() {
+		
+		this.randNum = this.detRand();
+		this.scene.remove(this.nextGem);
+		this.scene.remove(this.nextGem.figure);
+		this.nextGem = new nextGem(this.scene, this.randNum);
+		
+
+	
+};
+
+/*
+ * Function that handles player input using the keyboard
+ * Controls:
+ * W - Go Up a Space
+ * A - Go Left a Space
+ * S - Go Down a Space
+ * D - Go Right a Space
+ * Left Arrow Key - Turn Left(Set Direction to left)
+ * Up Arrow Key - Turn Up(Set Direction to up)
+ * Right Arrow Key - Turn Right
+ * Down Arrow Key - Turn Down
+ * Space - Shoot Next Gem
+ */
 Game.prototype.handleInput = function() {
 
+
+// Character Movement
 	// Left (A Key)
 	if (this.keys[65] === true) {
 		this.keys[65] = 'triggered';
@@ -760,7 +1065,7 @@ Game.prototype.handleInput = function() {
 			x : this.robot.boardPosition.x - 1,
 			y : this.robot.boardPosition.y
 		};
-		// check neighbors if there's a block
+		// check neighbors if there's a gem
 		if (this.legalMove(newPosition)) {
 			this.robot.moveTo(newPosition);
 
@@ -799,12 +1104,17 @@ Game.prototype.handleInput = function() {
 			this.robot.moveTo(newPosition);
 		}
 	}
-	// Spacebar
+	/* Spacebar
+	 * 
+	 * Creates a Gem where the character is facing 
+	 * and places it in the furthest empty space 
+	 * 
+	 */
 	if (this.keys[32] === true) {
 		this.keys[32] = 'triggered';
 		that = this;
 
-		// determine what direction character is facing
+		
 		
 		var newPosition = {
 			x : this.robot.boardPosition.x,
@@ -818,6 +1128,7 @@ Game.prototype.handleInput = function() {
 				if (this.legalPosition(newPosition)) {
 					
 					this.createGem(newPosition);
+					
 
 				}
 			}
@@ -826,11 +1137,12 @@ Game.prototype.handleInput = function() {
 		if (this.facing == 'up') {
 			var moveSpaces = this.countSpaces(newPosition, this.facing);
 			newPosition.y += moveSpaces;
-			//console.log(moveSpaces);
+			
 
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
 					this.createGem(newPosition);
+					
 
 				}
 			}
@@ -838,11 +1150,12 @@ Game.prototype.handleInput = function() {
 		if (this.facing == 'left') {
 			var moveSpaces = this.countSpaces(newPosition, this.facing);
 			newPosition.x -= moveSpaces;
-			//console.log(moveSpaces);
+			
 
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
 					this.createGem(newPosition);
+					
 
 				}
 			}
@@ -851,11 +1164,12 @@ Game.prototype.handleInput = function() {
 		if (this.facing == 'down') {
 			var moveSpaces = this.countSpaces(newPosition, this.facing);
 			newPosition.y -= moveSpaces;
-			//console.log(moveSpaces);
+			
 
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
 					this.createGem(newPosition);
+					
 
 				}
 			}

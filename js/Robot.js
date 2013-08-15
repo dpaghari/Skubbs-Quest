@@ -33,7 +33,7 @@ var Robot = function(position, scene) {
                     that.figure.rotation.y = 66;
                     that.figure.rotation.z = 100.5;
                     scene.add(that.figure);
-                    console.log("past scene.add");
+                    
                     that.figure.position = robot_to_world(position);
                     });
     

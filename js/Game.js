@@ -1,13 +1,5 @@
-/**
- * Synchronously load contents of file
- * Returns contents as string
- * NOTE:
- *   NOT FOR USE IN PRODUCTION
- *   Use asynchronous loading in production.
- */
-            
-var loadFile = function(url) {
 
+var loadFile = function(url) {
     var result = null;
     $.ajax({
            url: url,
@@ -18,11 +10,12 @@ var loadFile = function(url) {
     return result;
 };
 
+
 var Game = function() {
     // A Game object is the highest level object representing entire game
     // Container div
-   // this.container = document.getElementById('gameArea');
-   // this.container.style.position = 'relative';
+    this.container = document.getElementById('gameArea');
+    this.container.style.position = 'relative';
     this.clock = new THREE.Clock();
     
     /*
@@ -45,11 +38,9 @@ var Game = function() {
     this.particleSystem = new THREE.ParticleSystem(
                                                    this.particles,
                                                    this.particleMaterial);
-
     */
-   
     };
-   
+    
 
 Game.prototype.init = function() {
 	// Initialize variables
@@ -61,7 +52,6 @@ Game.prototype.init = function() {
    
     
     // Visible canvas area on top of 3D rendering area
-    /*
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
     this.canvas.style.top = 0;
@@ -70,7 +60,7 @@ Game.prototype.init = function() {
     this.canvas.height = 600;
     this.container.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
-    */
+    
     /* Skybox texture from:
      http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
      * Code for skybox inspired by:
@@ -157,6 +147,7 @@ Game.prototype.init = function() {
                                                          x : (x - this.offset),
                                                          y : -(y - this.offset)
                                                          }, this.scene);
+                console.log(this.figure);
             }
             
             if (this.startingBoard[y][x] == '3') {
@@ -200,11 +191,9 @@ Game.prototype.init = function() {
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 850;
  
-    /*
     this.material = new THREE.MeshLambertMaterial({
                                                   color : 0xff0000
                                                   });
-    */
     this.figure = null;
     
     // Spotlight
@@ -216,26 +205,21 @@ Game.prototype.init = function() {
     this.scene.add(ambient_light);
     // Background plane
     
-
     var perlinText = loadFile('perlin.glsl');
-    var woodVertexShaderText = $('#wood-vertex-shader').text();
-    var woodFragmentShaderText = $('#wood-fragment-shader').text();
+    var vertexShaderText = $('#noise-vertex-shader').text();
+    var fragmentShaderText = $('#noise-fragment-shader').text();
     
-    //this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
-    
+   // this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
     this.bgMaterial = new THREE.ShaderMaterial({
-                                               uniforms: {
-                                               'uTime': { type: 'f', value: 0.0 },
-                                               },
-                                               vertexShader: perlinText + woodVertexShaderText,
-                                               fragmentShader: perlinText + woodFragmentShaderText
-                                               });
-    
-    
-    //this.bgMaterial = new THREE.MeshBasicMaterial( { map: this.bgTexture, side: THREE.DoubleSide});
+    	uniforms: {
+    		'uTime': { type: 'f', value: 0.0},
+    	},
+    	vertexShader: perlinText + vertexShaderText,
+    	fragmentShader: perlinText + fragmentShaderText });
+     
     this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 1100, 75), this.bgMaterial);
-    //this.bgplane.rotation.x = 0;
-    //this.bgplane.translateZ(-100);
+    this.bgplane.rotation.x = 0;
+    this.bgplane.translateZ(-100);
     this.scene.add(this.bgplane);
     
     this.renderer = new THREE.WebGLRenderer({
@@ -276,7 +260,6 @@ Game.prototype.init = function() {
     this.nextPosition = { x : 575, y : 100};
     
     // Add 3D text    
-    /*
     this.TimeGeom = new THREE.TextGeometry( "Time remaining: ",
                                            {
                                            size: 100, height: 4, curveSegments: 3,
@@ -298,7 +281,9 @@ Game.prototype.init = function() {
     this.TimeTextMesh.position.y = 700;
     this.TimeTextMesh.rotation.x = -100;
     this.scene.add(this.TimeTextMesh);
-    */
+    
+    // Load the time
+    setTime(60);
     
     // Setup keyboard events
     this.keys = {};
@@ -333,32 +318,28 @@ Game.prototype.render = function(t, canvas, ctx) {
     this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
     
-    /*
-    // Load the time
-    //this.scene.remove(this.TimeMesh);
-    setTime(60);
-    
-    //this.bgMaterial.uniforms['uTime'].value = t;
-    
     // Add counting timer
-    this.NumberGeom = new THREE.TextGeometry(time,
+    if (checkTime()){
+    	this.scene.remove(this.NumberMesh);
+    	this.NumberGeom = new THREE.TextGeometry(time,
                                         {
                                         size: 100, height: 4, curveSegments: 3,
                                         face: "helvetiker", weight: "normal", style: "normal",
                                         bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
                                         material: 5, extrudeMaterial: 5
                                         });
-    this.NumberMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
-    this.NumberMesh = new THREE.Mesh(this.NumberGeom, this.NumberMaterial);
+    	this.NumberMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
+   	    this.NumberMesh = new THREE.Mesh(this.NumberGeom, this.NumberMaterial);
     
-    this.NumberGeom.computeBoundingBox();
-    this.NumberWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
+   	 this.NumberGeom.computeBoundingBox();
+   	 this.NumberWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
     
-    this.NumberMesh.position.x = 400;
+   	 this.NumberMesh.position.x = 400;
     this.NumberMesh.position.y = 700;
     this.NumberMesh.rotation.x = -100;
     this.scene.add(this.NumberMesh);
-    */
+    }
+    
     
     // If there is no active pane do nothing
     if(this.panes.length > 0) {
@@ -444,28 +425,6 @@ Game.prototype.detRand = function(){
 	
 };
 
-Game.prototype.checkLose = function() {
-	var newPosition = {
-		x: this.robot.boardPosition.x,
-		y: this.robot.boardPosition.y
-		
-	};
-	console.log(newPosition);
-	var boardSlotUp = this.virtualBoard[(-newPosition.y + 1)+ this.offset][newPosition.x + this.offset];
-	var boardSlotDown = this.virtualBoard[(-newPosition.y - 1)+ this.offset][newPosition.x + this.offset];
-	var boardSlotLeft = this.virtualBoard[-newPosition.y+ this.offset][(newPosition.x - 1) + this.offset];
-	var boardSlotRight = this.virtualBoard[(-newPosition.y + 1)+ this.offset][(newPosition.x + 1) + this.offset];
-	console.log(boardSlotUp.isEmpty);
-	console.log(boardSlotDown.isEmpty);
-	console.log(boardSlotLeft.isEmpty);
-	console.log(boardSlotRight.isEmpty);
-	if(boardSlotUp.isEmpty == false && boardSlotDown.isEmpty == false && boardSlotLeft.isEmpty == false && boardSlotRight.isEmpty == false){
-		alert("YOU LOSE");
-		
-	}
-	
-};
-
 
 /*
  * Function that creates a gem at a position if it is within its limits.
@@ -474,7 +433,7 @@ Game.prototype.checkLose = function() {
  * that is shot.
  */
 Game.prototype.createGem = function(position) {
-
+    
 	if(this.legalPosition(position)){
 		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
 				
@@ -503,13 +462,15 @@ Game.prototype.createGem = function(position) {
 			
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 			this.checkEntireRow(position, this.facing);
-			
-			
+			//this.checkRow(position, this.facing);
 		}
 	}
+			//this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;	
+			//this.checkRow(position, this.facing);
+			//this.checkMidRow(position, this.facing);
 			
 		
-			this.checkLose();
+	
 			this.destroyNextGem();
 
 };
@@ -1235,7 +1196,7 @@ Game.prototype.start = function() {
 	var time0 = new Date().getTime();
 	// milliseconds since 1970
 	var loop = function() {
-		//var time = new Date().getTime();
+		var time = new Date().getTime();
 		// Render visual frame
 		that.render(time - time0);
 		// Respond to user input

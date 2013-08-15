@@ -1,6 +1,22 @@
+/**
+ * Synchronously load contents of file
+ * Returns contents as string
+ * NOTE:
+ *   NOT FOR USE IN PRODUCTION
+ *   Use asynchronous loading in production.
+ */
+            
+var loadFile = function(url) {
 
-
-
+    var result = null;
+    $.ajax({
+           url: url,
+           async: false
+           }).done(function(data) {
+                   result = data;
+                   });
+    return result;
+};
 
 var Game = function() {
     // A Game object is the highest level object representing entire game
@@ -34,28 +50,6 @@ var Game = function() {
    
     };
    
-
-
-/**
- * Synchronously load contents of file
- * Returns contents as string
- * NOTE:
- *   NOT FOR USE IN PRODUCTION
- *   Use asynchronous loading in production.
- */
-var loadFile = function(url) {
-
-    var result = null;
-    $.ajax({
-           url: url,
-           async: false
-           }).done(function(data) {
-                   result = data;
-                   });
-    return result;
-};
-
-    
 
 Game.prototype.init = function() {
 	// Initialize variables
@@ -223,24 +217,25 @@ Game.prototype.init = function() {
     // Background plane
     
 
-    this.perlinText = loadFile('perlin.glsl');
-    this.woodVertexShaderText = $('#wood-vertex-shader').text();
-    this.woodFragmentShaderText = $('#wood-fragment-shader').text();
+    var perlinText = loadFile('perlin.glsl');
+    var woodVertexShaderText = $('#wood-vertex-shader').text();
+    var woodFragmentShaderText = $('#wood-fragment-shader').text();
     
-    this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
+    //this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
     
     this.bgMaterial = new THREE.ShaderMaterial({
                                                uniforms: {
                                                'uTime': { type: 'f', value: 0.0 },
                                                },
-                                               vertexShader: this.perlinText + this.woodVertexShaderText,
-                                               fragmentShader: this.perlinText + this.woodFragmentShaderText
+                                               vertexShader: perlinText + woodVertexShaderText,
+                                               fragmentShader: perlinText + woodFragmentShaderText
                                                });
+    
     
     //this.bgMaterial = new THREE.MeshBasicMaterial( { map: this.bgTexture, side: THREE.DoubleSide});
     this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 1100, 75), this.bgMaterial);
     //this.bgplane.rotation.x = 0;
-    this.bgplane.translateZ(-100);
+    //this.bgplane.translateZ(-100);
     this.scene.add(this.bgplane);
     
     this.renderer = new THREE.WebGLRenderer({
@@ -323,7 +318,7 @@ Game.prototype.init = function() {
 
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
-	//this.bgMaterial.uniforms['uTime'].value = (t);
+	this.bgMaterial.uniforms['uTime'].value = (t);
     if(this.virtualBoard.isEmpty === false){
         for (var i = 0; i < this.boardSize; i++){
             for (var j = 0; j < this.boardSize; j++){
@@ -449,6 +444,28 @@ Game.prototype.detRand = function(){
 	
 };
 
+Game.prototype.checkLose = function() {
+	var newPosition = {
+		x: this.robot.boardPosition.x,
+		y: this.robot.boardPosition.y
+		
+	};
+	console.log(newPosition);
+	var boardSlotUp = this.virtualBoard[(-newPosition.y + 1)+ this.offset][newPosition.x + this.offset];
+	var boardSlotDown = this.virtualBoard[(-newPosition.y - 1)+ this.offset][newPosition.x + this.offset];
+	var boardSlotLeft = this.virtualBoard[-newPosition.y+ this.offset][(newPosition.x - 1) + this.offset];
+	var boardSlotRight = this.virtualBoard[(-newPosition.y + 1)+ this.offset][(newPosition.x + 1) + this.offset];
+	console.log(boardSlotUp.isEmpty);
+	console.log(boardSlotDown.isEmpty);
+	console.log(boardSlotLeft.isEmpty);
+	console.log(boardSlotRight.isEmpty);
+	if(boardSlotUp.isEmpty == false && boardSlotDown.isEmpty == false && boardSlotLeft.isEmpty == false && boardSlotRight.isEmpty == false){
+		alert("YOU LOSE");
+		
+	}
+	
+};
+
 
 /*
  * Function that creates a gem at a position if it is within its limits.
@@ -487,11 +504,12 @@ Game.prototype.createGem = function(position) {
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 			this.checkEntireRow(position, this.facing);
 			
+			
 		}
 	}
 			
 		
-	
+			this.checkLose();
 			this.destroyNextGem();
 
 };

@@ -14,6 +14,7 @@
         <script src="js/Robot.js"></script>
         <script src="js/Game.js"></script>
         <script src="js/Panes.js"></script>
+       
         <!-- load fonts -->
         <script src="fonts/gentilis_bold.typeface.js"></script>
         <script src="fonts/gentilis_regular.typeface.js"></script>
@@ -126,7 +127,7 @@
             }
             </script>
         
-        <script id='noise-vertex-shader' type='x-shader/x-vertex'>
+        <script id='wood-vertex-shader' type='x-shader/x-vertex'>
 			varying vec3 vNormal;
 			varying vec3 vPosition;
 			
@@ -141,7 +142,7 @@
 			}
 			</script>
 			
-			<script id='noise-fragment-shader' type='x-shader/x-fragment'>
+			<script id='wood-fragment-shader' type='x-shader/x-fragment'>
 			varying vec3 vNormal;
 			uniform float uTime;
 			varying vec3 vPosition;
@@ -325,6 +326,7 @@
                 gl_FragColor = transform(prod);
             }
             </script>
+
 
 		<script>
 

@@ -45,10 +45,12 @@ var Game = function() {
 Game.prototype.init = function() {
 	// Initialize variables
     this.scene = new THREE.Scene();
+    score = 0;
     var that = this;
     this.boardSize = 11;					
     this.offset = 5;						
     this.facing = 'up';
+    scoreKeeper = false;
    
     
     // Visible canvas area on top of 3D rendering area
@@ -70,21 +72,25 @@ Game.prototype.init = function() {
     
     this.panes = [];
 	
-   
-	var directions  = ["skybox1", "skybox2", "skybox3", "skybox4", "skybox5", "skybox6"];
+	var axes = new THREE.AxisHelper(100);
+	this.scene.add( axes );
+	
+	// Set up Skybox
+	
+	var directions  = ["space", "space", "space", "space", "space", "space"];
 	var imageSuffix = ".png";
-	var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
+	var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );	
 	
 	var materialArray = [];
-	for (var i = 0; i < directions.length; i++)
+	for (var i = 0; i < 6; i++)
 		materialArray.push( new THREE.MeshBasicMaterial({
-                                                        map: THREE.ImageUtils.loadTexture(directions[i] + imageSuffix),
-                                                        side: THREE.BackSide
-                                                        }));
-	var skyMaterial = new THREE.MeshFaceMaterial(materialArray);
-	var skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
-	//this.scene.add(skyBox);
-    
+			map: THREE.ImageUtils.loadTexture(directions[i] + imageSuffix),
+			side: THREE.BackSide
+		}));
+	var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
+	var skyBox = new THREE.Mesh(skyGeometry, skyMaterial );
+	this.scene.add( skyBox );  
+
     //this.scene.add(this.particleSystem);
    
    /* Create a board to keep track of collisions and legal moves
@@ -110,15 +116,15 @@ Game.prototype.init = function() {
      
     this.startingBoard = [['0', '0', '1', '2', '1', '1', '0', '0', '3', '0', '5'], 
                           ['1', '3', '1', '1', '3', '2', '1', '0', '3', '0', '0'], 
-                          ['2', '1', '2', '2', '3', '2', '1', '0', '0', '2', '2'],
-                          ['1', '1', '0', '0', '4', '3', '0', '4', '4', '2', '1'],
+                          ['2', '1', '2', '2', '3', '2', '1', '4', '1', '2', '2'],
+                          ['1', '1', '2', '3', '4', '3', '0', '4', '4', '2', '1'],
                           ['0', '2', '3', '0', '2', '0', '0', '0', '0', '1', '1'],
-                          ['1', '2', '3', '0', '2', '0', '0', '3', '2', '0', '3'],
-                          ['0', '0', '0', '0', '0', '1', '0', '3', '2', '0', '3'],
-                          ['0', '0', '0', '0', '0', '3', '0', '0', '1', '1', '0'],
-                          ['0', '0', '0', '0', '0', '4', '1', '0', '2', '0', '0'],
-                          ['0', '0', '0', '0', '0', '2', '1', '0', '0', '1', '1'],
-                          ['0', '6', '0', '0', '0', '2', '0', '4', '4', '0', '0']];
+                          ['1', '2', '3', '1', '2', '0', '0', '3', '2', '0', '3'],
+                          ['1', '4', '4', '1', '0', '1', '1', '3', '2', '0', '3'],
+                          ['0', '3', '4', '0', '0', '3', '0', '0', '1', '1', '0'],
+                          ['0', '0', '0', '2', '3', '4', '1', '0', '2', '0', '0'],
+                          ['0', '0', '0', '2', '3', '2', '1', '0', '0', '1', '1'],
+                          ['0', '6', '0', '0', '2', '2', '0', '4', '4', '0', '0']];
     
    /* Add board elements(gems, character) to the 
     * board handling collision and legal moves
@@ -165,10 +171,12 @@ Game.prototype.init = function() {
             }
             
             if (this.startingBoard[y][x] == '5') {
-                this.virtualBoard[y][x] = new goalGem({
+            	this.goalGemz = this.virtualBoard[y][x];
+                this.goalGemz = new goalGem({
                                                      x : (x - this.offset),
                                                      y : -(y - this.offset)
                                                      }, this.scene);
+                           this.virtualBoard[y][x].isEmpty = true;
             }
              if (this.startingBoard[y][x] == '6') {
                 this.virtualBoard[y][x] = this.robot = new Robot({
@@ -206,8 +214,8 @@ Game.prototype.init = function() {
     // Background plane
     
     var perlinText = loadFile('perlin.glsl');
-    var vertexShaderText = $('#noise-vertex-shader').text();
-    var fragmentShaderText = $('#noise-fragment-shader').text();
+    var vertexShaderText = $('#wood-vertex-shader').text();
+    var fragmentShaderText = $('#wood-fragment-shader').text();
     
    // this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
     this.bgMaterial = new THREE.ShaderMaterial({
@@ -233,6 +241,7 @@ Game.prototype.init = function() {
     // Add Materials
     this.materialFront = new THREE.MeshBasicMaterial( { color: 0xDF2BF0 } );
     this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+    this.LoseMaterialFront = new THREE.MeshBasicMaterial( { color: 0xF50000 } );
     
     // Load the timer
     //var currentTime = 0;
@@ -282,6 +291,25 @@ Game.prototype.init = function() {
     this.TimeTextMesh.rotation.x = -100;
     this.scene.add(this.TimeTextMesh);
     
+    // Add 3D text for score
+    this.ScoreGeom = new THREE.TextGeometry( "Score: ", 
+    										{
+    											size: 100, height: 4, curveSegments: 3,
+    											face: "helvetiker", weight: "normal", 
+    											style: "normal", bevelThickness: 5,
+    											bevelSize: 2, bevelEnabled: true,
+    											material: 5, extrudeMaterial: 5
+    										});
+    
+    this.ScoreMesh = new THREE.Mesh(this.ScoreGeom, this.TextMaterial);
+    this.ScoreGeom.computeBoundingBox();
+    this.ScoreWidth = this.ScoreGeom.boundingBox.max.x - this.ScoreGeom.boundingBox.min.x;
+    
+    this.ScoreMesh.position.x = -1200;
+    this.ScoreMesh.position.y = 700;
+    this.ScoreMesh.rotation.x = -100;
+    this.scene.add(this.ScoreMesh);
+    
     // Load the time
     setTime(60);
     
@@ -304,19 +332,34 @@ Game.prototype.init = function() {
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
 	this.bgMaterial.uniforms['uTime'].value = (t);
-    if(this.virtualBoard.isEmpty === false){
-        for (var i = 0; i < this.boardSize; i++){
-            for (var j = 0; j < this.boardSize; j++){
-                this.startingBoard[i][j].rotation.x += 0.05;
-                this.startingBoard[i][j].rotation.y += 0.004;
-            }
-        }
-    }
+	this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
+  
    
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
+    
+    if(scoreKeeper == true){
+    	this.scene.remove(this.ScoreNumberMesh)
+    	this.ScoreNumberGeom = new THREE.TextGeometry( score, 
+    										{
+    											size: 100, height: 4, curveSegments: 3,
+    											face: "helvetiker", weight: "normal", 
+    											style: "normal", bevelThickness: 5,
+    											bevelSize: 2, bevelEnabled: true,
+    											material: 5, extrudeMaterial: 5
+    										});
+    
+    	this.ScoreNumberMesh = new THREE.Mesh(this.ScoreNumberGeom, this.TextMaterial);
+    	this.ScoreNumberGeom.computeBoundingBox();
+    	this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
+    
+    	this.ScoreNumberMesh.position.x = -800;
+   	 	this.ScoreNumberMesh.position.y = 700;
+    	this.ScoreNumberMesh.rotation.x = -100;
+    	this.scene.add(this.ScoreNumberMesh);
+    }
     
     // Add counting timer
     if (checkTime()){
@@ -331,49 +374,42 @@ Game.prototype.render = function(t, canvas, ctx) {
     	this.NumberMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
    	    this.NumberMesh = new THREE.Mesh(this.NumberGeom, this.NumberMaterial);
     
-   	 this.NumberGeom.computeBoundingBox();
-   	 this.NumberWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
+   		 this.NumberGeom.computeBoundingBox();
+   		 this.NumberWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
     
-   	 this.NumberMesh.position.x = 400;
-    this.NumberMesh.position.y = 700;
-    this.NumberMesh.rotation.x = -100;
-    this.scene.add(this.NumberMesh);
+   	 	this.NumberMesh.position.x = 400;
+    	this.NumberMesh.position.y = 700;
+   	    this.NumberMesh.rotation.x = -100;
+   		this.scene.add(this.NumberMesh);
+   		if (time <= 1){
+   			this.LoseGeom = new THREE.TextGeometry("Game over!",
+                                                     {
+                                                     size: 175, height: 4, curveSegments: 3,
+                                                     face: "helvetiker", weight: "normal", style: "normal",
+                                                     bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                                     material: 5, extrudeMaterial: 5
+                                                     });
+
+            this.LoseMaterial = new THREE.MeshBasicMaterial(this.LoseMaterialFront, this.materialSide);
+            this.LoseMesh = new THREE.Mesh(this.LoseGeom, this.LoseMaterial);
+
+            this.LoseGeom.computeBoundingBox();
+            this.LoseWidth = this.LoseGeom.boundingBox.max.x - this.LoseGeom.boundingBox.min.x;
+            this.LoseMesh.position.x = -600;
+            this.LoseMesh.position.y = 80;
+            this.LoseMesh.position.z = 400;
+            this.LoseMesh.rotation.x = -100;
+            this.LoseMesh.rotation.z = 50;
+            this.scene.add(this.LoseMesh);
+            this.scene.remove(this.NumberMesh);
+
+   		}
     }
-    
-    
-    // If there is no active pane do nothing
-    if(this.panes.length > 0) {
-        var pane = this.panes[this.panes.length - 1];
-        // Handle player input
-        pane.handleInput(this.keyboard, this);
-        // Update pane
-        // Pass renderer so it can do cubemaps for reflections
-        pane.update(t, this.renderer);
-        // Pass canvas so it can decide on its own overlay
-        // Render the pane
-        this.renderer.render(pane.scene, pane.camera);
-        // Clear pane overlay
-        // Touching width of a canvas always clears it
-        //canvas.width = canvas.width;
-        // Render pane overlay
-        pane.overlay(ctx);
-    }
-    
+   
     this.renderer.render(this.scene, this.camera);
 };
 
-/**
- * Add pane to Game object
- * Any existing panes are push down on stack
- */
 
-/**
- * Pop off top pane
- * Reveals lower panes on stack
- */
-Game.prototype.popPane = function() {
-    this.panes.pop();
-};
 
 /* Function that checks if the given position
  * is within the board's limits and if it is occupied
@@ -462,48 +498,36 @@ Game.prototype.createGem = function(position) {
 			
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 			this.checkEntireRow(position, this.facing);
-			//this.checkRow(position, this.facing);
+			
 		}
 	}
-			//this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;	
-			//this.checkRow(position, this.facing);
-			//this.checkMidRow(position, this.facing);
 			
 		
-	
+		
 			this.destroyNextGem();
 
 };
 
+
 Game.prototype.checkEntireRow = function(position, direction){
 	
 	for(var i = -this.offset; i <= this.offset; i++){
-		//if(this.facing == 'up' || this.facing == 'down'){
-			
-			
-			
+
 			var newPosition = {
 			x: i,
 			y: position.y
 			
 			};
-		//}
-		//if(this.facing == 'left' || this.facing == 'right'){
-		
-	//	}
-		
-		
-		
+
 		var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
 		if(this.legalPosition(newPosition)){
-		//	for(var j = -this.offset; j  <= this.offset; j++){
-				//console.log("Checking:", newPosition);
+		
 				this.checkRow(newPosition, 'up');
 				this.checkRow(newPosition, 'down');
 				this.checkRow(newPosition, 'left');
 				this.checkRow(newPosition, 'right');
 				this.checkMidRow(newPosition, this.facing);
-		//	}
+	
 		}
 			var newPosition = {
 			x: position.x,
@@ -512,14 +536,13 @@ Game.prototype.checkEntireRow = function(position, direction){
 			};
 			
 			if(this.legalPosition(newPosition)){
-		//	for(var j = -this.offset; j  <= this.offset; j++){
-				//console.log("Checking:", newPosition);
+		
 				this.checkRow(newPosition, 'up');
 				this.checkRow(newPosition, 'down');
 				this.checkRow(newPosition, 'left');
 				this.checkRow(newPosition, 'right');
 				this.checkMidRow(newPosition, this.facing);
-		//	}
+		
 		}
 	}
 	
@@ -798,8 +821,18 @@ Game.prototype.checkRow = function(position, direction) {
 					this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset].isEmpty = true;
 					this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset].isEmpty = true;
 					this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset].isEmpty = true;
-			
-		
+					score++;
+					
+					if(score !== scoreNext) {
+						score = scoreNext;
+						scoreKeeper = true;
+						return scoreKeeper;
+					}
+					else {
+						scoreKeeper = false;
+						return scoreKeeper;
+					}	
+						
 				}
 		}
 	
@@ -1026,6 +1059,8 @@ Game.prototype.destroyNextGem = function() {
 	
 };
 
+
+
 /*
  * Function that handles player input using the keyboard
  * Controls:
@@ -1041,6 +1076,9 @@ Game.prototype.destroyNextGem = function() {
  */
 Game.prototype.handleInput = function() {
 
+if(this.robot.boardPosition == this.goalGemz.boardPosition){
+	alert("You Win!");
+}
 
 // Character Movement
 	// Left (A Key)

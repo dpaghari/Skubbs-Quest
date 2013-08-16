@@ -33,19 +33,34 @@
 		<p>
         Bejewler
 		</p>
-        
+        <p> W - Move up a Space
+        	A - Move Left a Space
+        	S - Move Down a Space
+        	D - Move Right a Space</p>
+        	<p>
+        	L Arrow Key - face left
+        	U Arrow Key - face Up
+        	R Arrow Key - face right
+        	D Arrow Key - face down
+        	Spacebar - Shoot gem
+        	</p>
+        	<p>
+        	Get to the GOAL GEM! Before time expires 
+        	Match Gems to clear paths
+        	</p>
         <div id='gameArea' />
         
         <p id="timer"></p>
         
         <script>
-        //var Timer = setInterval(function() {
-        //                        setTime()},1000);
         var Ticker;
         var timeLeft;
         var totalTime;
         var time;
         var prevTime;
+        var score;
+        var scoreNext
+        var scoreKeeper;
 
 		function checkTime() {
 			if (time != prevTime) {
@@ -62,83 +77,18 @@
             totalTime = timeLeft;
             prevTime = time;
             Ticker = setInterval(function() {tick()}, 1000);
-            //return currentTime;
         }
             
         function tick(){
             id = document.getElementById("timer");
             timeLeft--;
             time = timeLeft;
-            //console.log(timeLeft);
-            //var currentTime = timeLeft;
-            //return currentTime;
-            //time = currentTime;
-            //returnTime(currentTime);
         }
-            
-            function returnTime(time) {
-                //console.log(time);
-                return time;
-            }
-
-            /*
-            //Global time displays
-            var d = new Date();
-            var currentTime = d.toLocaleTimeString();
-            document.getElementById("timer").innerHTML = currentTime;
-            console.log(currentTime);
-            var previousTime;
-            
-            if (previousTime !== currentTime){
-                currentTime = d.toLocaleTimeString();
-                previousTime = currentTime;
-                
-                //return currentTime;
-            }
-             */
-            
             </script>
         
-        <script id='board-vertex-shader' type='x-shader/x-vertex'>
-            uniform float uTime;
-            varying vec3 vNormal;
-            varying vec3 vPosition;
-            
-            void main() {
-                vNormal = normalMatrix * vec3(normal);
-                vPosition = position;
-                gl_Position = projectionMatrix *
-                modelViewMatrix *
-                vec4(position, 1.0);
-            }
-            </script>
+     
         
-        <script id='board-fragment-shader' type='x-shader/x-fragment'>
-            uniform float uTime;
-            varying vec3 vNormal;
-            varying vec3 vPosition;
-            
-            /* Turbulence from explosion demo at:
-             www.clicktorelease.com/code/perlin/explosion.html
-             */
-            float turbulence(vec3 p) {
-                float t = -.5;
-                for (float f = 1.0 ; f <= 10.0 ; f++){
-                    float power = pow(2.0, f);
-                    t += abs(pnoise(vec3(power * p ), vec3(10.0, 10.0, 10.0)) / power);
-                }
-                return t;
-            }
-            
-            void main() {
-                vec3 nvNormal = normalize(vNormal);
-                vec3 lookup = vPosition * 0.005 + 0.1 * uTime * vec3(0.0, 0.0, 1.0);
-                float turb = turbulence(lookup) * 10.0 + 2.5;
-                gl_FragColor = vec4(turb, 0.0, 0.0, 1.0);
-            }
-            </script>
-        
-        <script id='noise-vertex-shader' type='x-shader/x-vertex'>
+        <script id='wood-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
             varying vec3 vPosition;
             
@@ -153,14 +103,14 @@
             }
             </script>
         
-        <script id='noise-fragment-shader' type='x-shader/x-fragment'>
+        <script id='wood-fragment-shader' type='x-shader/x-fragment'>
             varying vec3 vNormal;
             uniform float uTime;
             varying vec3 vPosition;
             varying vec3 vView;
             
             float wood(vec3 p) {
-                float noise = 3.0 * cnoise(p * vec3(0.02, 0.005, 0.02));
+                float noise = 4.0 * cnoise(p * vec3(0.1, 0.005, 0.02));
                 return sin(0.3 * length(p.xz) + noise);
             }
             
@@ -172,35 +122,31 @@
                 gl_FragColor = vec4(noiseColor.rgb, 1.0);
             }
             </script>
-        
-        <script id='goal-vertex-shader' type='x-shader/x-vertex'>
-            varying vec3 vNormal;
-            varying vec3 vPosition;
             
-            void main() {
-                // Surface normal (world space)
-                vNormal = (modelMatrix * vec4(normal, 1.0)).xyz;
-                // Position (world space)
-                vPosition = (modelMatrix * vec4(position, 1.0)).xyz;
-                gl_Position = projectionMatrix *
-                modelViewMatrix *
-                vec4(position, 1.0);
-            }
-            </script>
-        
-        <script id='goal-fragment-shader' type='x-shader/x-fragment'>
-            uniform samplerCube envMap;
-            varying vec3 vNormal;
-            varying vec3 vPosition;
-            
-            void main() {
-                vec3 normal = normalize(vNormal);
-                vec3 cameraToVertex = normalize(vPosition - cameraPosition);
-                vec3 reflectVec = reflect(cameraToVertex, normal);
-                gl_FragColor = textureCube(envMap, reflectVec);
-            }
-            </script>
-        
+            <script id='goal-vertex-shader' type='x-shader/x-vertex'>
+			varying vec3 vNormal;
+			varying vec3 vPosition;
+			
+			void main() {
+			  vNormal = normalMatrix * vec3(normal);
+			  vPosition = position;
+			  gl_Position = projectionMatrix *
+			                modelViewMatrix *
+			                vec4(position, 1.0);
+			}
+			</script>
+			
+			<script id='goal-fragment-shader' type='x-shader/x-fragment'>
+			varying vec3 vNormal;
+			uniform float uTime;
+			varying vec3 vPosition;
+			
+			void main() {
+			  vec3 nvNormal = normalize(vNormal);
+			  gl_FragColor = vec4(cnoise(vPosition * 0.03 + uTime * vec3(1.0, 0.0, 0.0)), 0.0, 0.0, 1.0);
+			}
+			</script>
+       
         <script id='sphere-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
             

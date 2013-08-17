@@ -13,32 +13,9 @@ var loadFile = function(url) {
 
 var Game = function() {
     // A Game object is the highest level object representing entire game
-    // Container div
-    this.container = document.getElementById('gameArea');
-    this.container.style.position = 'relative';
+ 
     this.clock = new THREE.Clock();
-    
-    /*
-    // Create particle helper variables
-    this.particleCount = 50;
-    this.particles = new THREE.Geometry();
-    this.particleMaterial = new THREE.ParticleBasicMaterial({
-                                                           color: 0xFF0000,
-                                                           size: 20
-                                                           });
-    // Add vertices to particle geometry to place particles
-    for(var i = 0; i < this.particleCount; i++) {
-        this.px = (Math.random() * 2.0 - 1.0) * 1000;
-        this.py = (Math.random() * 2.0 - 1.0) * 1000;
-        this.pz = (Math.random() * 2.0 - 1.0) * 1000;
-        this.vertex = new THREE.Vector3(this.px, this.py, this.pz);
-        this.particles.vertices.push(this.vertex);
-    }
-    // Now create particle system itself
-    this.particleSystem = new THREE.ParticleSystem(
-                                                   this.particles,
-                                                   this.particleMaterial);
-    */
+ 
     };
     
 
@@ -51,23 +28,7 @@ Game.prototype.init = function() {
     this.offset = 5;						
     this.facing = 'up';
     scoreKeeper = false;
-   
-    
-    // Visible canvas area on top of 3D rendering area
-    this.canvas = document.createElement('canvas');
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.top = 0;
-    this.canvas.style.left = 0;
-    this.canvas.width = 800;
-    this.canvas.height = 600;
-    this.container.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext('2d');
-    
-    /* Skybox texture from:
-     http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
-     * Code for skybox inspired by:
-     http://stemkoski.github.io/Three.js/Skybox.html
-     */
+    this.gameOver = false;
    
     
     this.panes = [];
@@ -91,7 +52,6 @@ Game.prototype.init = function() {
 	var skyBox = new THREE.Mesh(skyGeometry, skyMaterial );
 	this.scene.add( skyBox );  
 
-    //this.scene.add(this.particleSystem);
    
    /* Create a board to keep track of collisions and legal moves
     * 
@@ -217,7 +177,7 @@ Game.prototype.init = function() {
     var vertexShaderText = $('#wood-vertex-shader').text();
     var fragmentShaderText = $('#wood-fragment-shader').text();
     
-   // this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
+   
     this.bgMaterial = new THREE.ShaderMaterial({
     	uniforms: {
     		'uTime': { type: 'f', value: 0.0},
@@ -243,10 +203,6 @@ Game.prototype.init = function() {
     this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
     this.LoseMaterialFront = new THREE.MeshBasicMaterial( { color: 0xF50000 } );
     
-    // Load the timer
-    //var currentTime = 0;
-    //var previousTime = 0;
-    //var time = setTime();
     
     // Set timer remaining text
     this.NextGeom = new THREE.TextGeometry( "Next : ",
@@ -402,6 +358,7 @@ Game.prototype.render = function(t, canvas, ctx) {
             this.LoseMesh.rotation.z = 50;
             this.scene.add(this.LoseMesh);
             this.scene.remove(this.NumberMesh);
+            this.gameOver = true;
 
    		}
     }
@@ -1081,6 +1038,8 @@ if(this.robot.boardPosition == this.goalGemz.boardPosition){
 }
 
 // Character Movement
+
+if(this.gameOver == false){
 	// Left (A Key)
 	if (this.keys[65] === true) {
 		this.keys[65] = 'triggered';
@@ -1226,6 +1185,8 @@ if(this.robot.boardPosition == this.goalGemz.boardPosition){
 
 		this.facing = 'right';
 	}
+	
+}
 
 };
 

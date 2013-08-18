@@ -57,6 +57,8 @@ Game.prototype.init = function() {
     
     this.panes = [];
 	
+    var that = this;
+   
 	var axes = new THREE.AxisHelper(100);
 	this.scene.add( axes );
 	
@@ -136,7 +138,6 @@ Game.prototype.init = function() {
                                                          x : (x - this.offset),
                                                          y : -(y - this.offset)
                                                          }, this.scene);
-                console.log(this.figure);
             }
             
             if (this.startingBoard[y][x] == '3') {
@@ -176,11 +177,12 @@ Game.prototype.init = function() {
      * Determine the initial first gem that the character can shoot when the level first loads
      */
     this.randNum = Math.floor(Math.random() * (101)); 
-    this.nextGem = new nextGem(this.scene, this.randNum);
-    
+    this.nextGem = new nextGem(this.scene, this.randNum); 
     
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 850;
+    
+    this.board = new Board(this.scene, this.camera);
  
     this.material = new THREE.MeshLambertMaterial({
                                                   color : 0xff0000
@@ -319,19 +321,7 @@ Game.prototype.init = function() {
     setTime(60);
     
     // Setup keyboard events
-    this.keys = {};
-    $('body').keydown(function(e) {
-                      if (e.which) {
-                      if (that.keys[e.which] !== 'triggered') {
-                      that.keys[e.which] = true;
-                      }
-                      }
-                      });
-    $('body').keyup(function(e) {
-                    if (e.which) {
-                    that.keys[e.which] = false;
-                    }
-                    });
+
 };
 
 // Render function
@@ -396,6 +386,7 @@ Game.prototype.render = function(t, canvas, ctx) {
             this.scene.remove(this.NumberMesh);
             // Remove player control
             this.gameOver = true;
+            this.board.gameOver = true;
    		}
     }
    
@@ -1239,13 +1230,15 @@ if(this.gameOver == false){
 Game.prototype.start = function() {
 	var that = this;
 	var time0 = new Date().getTime();
+	this.board.init();
 	// milliseconds since 1970
 	var loop = function() {
 		var time = new Date().getTime();
 		// Render visual frame
 		that.render(time - time0);
+		that.board.render(time - time0);
 		// Respond to user input
-		that.handleInput();
+		that.board.handleInput();
 		// Loop
 		requestAnimationFrame(loop, that.renderer.domElement);
 	};

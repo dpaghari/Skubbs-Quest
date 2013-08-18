@@ -19,13 +19,9 @@ var Game = function() {
 Game.prototype.init = function() {
 	// Initialize variables
     this.scene = new THREE.Scene();
-    
-   
-  
-    score = 0;
+
     var that = this;
-    
-    
+   
 	var axes = new THREE.AxisHelper(100);
 	this.scene.add( axes );
 	
@@ -51,7 +47,7 @@ Game.prototype.init = function() {
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 850;
     
-     this.board = new Board(this.scene, this.camera);
+    this.board = new Board(this.scene, this.camera);
  
     this.material = new THREE.MeshLambertMaterial({
                                                   color : 0xff0000
@@ -169,35 +165,19 @@ Game.prototype.init = function() {
 
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
+    
 	this.bgMaterial.uniforms['uTime'].value = (t);
+
 	//this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
   
+
+	//this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
+
    
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
-    
-    if(scoreKeeper == true){
-    	this.scene.remove(this.ScoreNumberMesh)
-    	this.ScoreNumberGeom = new THREE.TextGeometry( score, 
-    										{
-    											size: 100, height: 4, curveSegments: 3,
-    											face: "helvetiker", weight: "normal", 
-    											style: "normal", bevelThickness: 5,
-    											bevelSize: 2, bevelEnabled: true,
-    											material: 5, extrudeMaterial: 5
-    										});
-    
-    	this.ScoreNumberMesh = new THREE.Mesh(this.ScoreNumberGeom, this.TextMaterial);
-    	this.ScoreNumberGeom.computeBoundingBox();
-    	this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
-    
-    	this.ScoreNumberMesh.position.x = -800;
-   	 	this.ScoreNumberMesh.position.y = 700;
-    	this.ScoreNumberMesh.rotation.x = -100;
-    	this.scene.add(this.ScoreNumberMesh);
-    }
     
     // Add counting timer
     if (checkTime()){
@@ -240,8 +220,7 @@ Game.prototype.render = function(t, canvas, ctx) {
             this.LoseMesh.rotation.z = 50;
             this.scene.add(this.LoseMesh);
             this.scene.remove(this.NumberMesh);
-            this.gameOver = true;
-
+            this.board.gameOver = true;
    		}
     }
    

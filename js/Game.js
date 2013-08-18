@@ -19,12 +19,12 @@ var Game = function() {
 Game.prototype.init = function() {
 	// Initialize variables
     this.scene = new THREE.Scene();
-    score = 0;
+    this.score = 0;
+    var checkScore = false;
     var that = this;
     this.boardSize = 11;					
     this.offset = 5;						
     this.facing = 'up';
-    scoreKeeper = false;
     
     /* Skybox texture from:
      http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
@@ -288,35 +288,14 @@ Game.prototype.init = function() {
 
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
+    
 	this.bgMaterial.uniforms['uTime'].value = (t);
 	this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
-  
    
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
-    
-    if(scoreKeeper == true){
-    	this.scene.remove(this.ScoreNumberMesh)
-    	this.ScoreNumberGeom = new THREE.TextGeometry( score, 
-    										{
-    											size: 100, height: 4, curveSegments: 3,
-    											face: "helvetiker", weight: "normal", 
-    											style: "normal", bevelThickness: 5,
-    											bevelSize: 2, bevelEnabled: true,
-    											material: 5, extrudeMaterial: 5
-    										});
-    
-    	this.ScoreNumberMesh = new THREE.Mesh(this.ScoreNumberGeom, this.TextMaterial);
-    	this.ScoreNumberGeom.computeBoundingBox();
-    	this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
-    
-    	this.ScoreNumberMesh.position.x = -800;
-   	 	this.ScoreNumberMesh.position.y = 700;
-    	this.ScoreNumberMesh.rotation.x = -100;
-    	this.scene.add(this.ScoreNumberMesh);
-    }
     
     // Add counting timer
     if (checkTime()){
@@ -360,7 +339,6 @@ Game.prototype.render = function(t, canvas, ctx) {
             this.scene.add(this.LoseMesh);
             this.scene.remove(this.NumberMesh);
             this.gameOver = true;
-
    		}
     }
    
@@ -744,7 +722,6 @@ Game.prototype.checkRow = function(position, direction) {
 		}
 		
 		if(this.legalPosition(position)){
-				
 				if (this.threeRow(newPosition, this.facing, false)) {
 					
 					var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
@@ -779,23 +756,34 @@ Game.prototype.checkRow = function(position, direction) {
 					this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset].isEmpty = true;
 					this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset].isEmpty = true;
 					this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset].isEmpty = true;
-					score++;
 					
-					if(score !== scoreNext) {
-						score = scoreNext;
-						scoreKeeper = true;
-						return scoreKeeper;
-					}
-					else {
-						scoreKeeper = false;
-						return scoreKeeper;
-					}	
-						
+                    this.checkScore();
 				}
 		}
-	
-
 };
+
+Game.prototype.checkScore = function(){
+    this.score++;
+    console.log(this.score);
+    this.scene.remove(this.ScoreNumberMesh)
+    this.ScoreNumberGeom = new THREE.TextGeometry( this.score,
+                                                  {
+                                                  size: 100, height: 4, curveSegments: 3,
+                                                  face: "helvetiker", weight: "normal",
+                                                  style: "normal", bevelThickness: 5,
+                                                  bevelSize: 2, bevelEnabled: true,
+                                                  material: 5, extrudeMaterial: 5
+                                                  });
+    
+    this.ScoreNumberMesh = new THREE.Mesh(this.ScoreNumberGeom, this.TextMaterial);
+    this.ScoreNumberGeom.computeBoundingBox();
+    this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
+    
+    this.ScoreNumberMesh.position.x = -800;
+    this.ScoreNumberMesh.position.y = 700;
+    this.ScoreNumberMesh.rotation.x = -100;
+    this.scene.add(this.ScoreNumberMesh);
+}
 
 Game.prototype.checkMidRow = function(position, direction) {
 	// Check a row for sets of three gems of the same type in a row

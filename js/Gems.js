@@ -5,7 +5,16 @@
  *   NOT FOR USE IN PRODUCTION
  *   Use asynchronous loading in production.
  */
-
+var loadFile = function(url) {
+    var result = null;
+    $.ajax({
+           url: url,
+           async: false
+           }).done(function(data) {
+                   result = data;
+                   });
+    return result;
+};
 
 /*
  * Helper functions to correctly place new gems
@@ -62,8 +71,8 @@ var diamondGem = function(position, scene){
         y : 0
     };
     this.type = 'diamond';
-    var diamondVertexShaderText = $('#diamond-vertex-shader').text();
-    var diamondFragmentShaderText = $('#diamond-fragment-shader').text();
+    var diamondVertexShaderText = loadFile('shaders/diamondVert.glsl');
+    var diamondFragmentShaderText = loadFile('shaders/diamondFrag.glsl');
     
     var diamondMaterial = new THREE.ShaderMaterial({
                                               vertexShader: diamondVertexShaderText,
@@ -98,8 +107,8 @@ var cubeGem = function(position, scene){
         y : 0
     };
     this.type = 'cubegem';
-    var cubeVertexShaderText = $('#cube-vertex-shader').text();
-    var cubeFragmentShaderText = $('#cube-fragment-shader').text();
+    var cubeVertexShaderText = loadFile('shaders/cubeVert.glsl');
+    var cubeFragmentShaderText = loadFile('shaders/cubeFrag.glsl');
     
     var cubeMaterial = new THREE.ShaderMaterial({
                                               vertexShader:
@@ -129,8 +138,8 @@ var cubeGem = function(position, scene){
  * Constructor for Sphere Gems
  */
 var sphereGem = function(position, scene){
-    var sphereVertexShaderText = $('#sphere-vertex-shader').text();
-    var sphereFragmentShaderText = $('#sphere-fragment-shader').text();
+    var sphereVertexShaderText = loadFile('shaders/sphereVert.glsl');
+    var sphereFragmentShaderText = loadFile('shaders/sphereFrag.glsl');
     
     var sphereMaterial = new THREE.ShaderMaterial({
                                               vertexShader: sphereVertexShaderText,
@@ -173,8 +182,8 @@ var isoGem = function(position, scene){
         y : 0
     };
     this.type = 'isogem';
-    var isoVertexShaderText = $('#iso-vertex-shader').text();
-    var isoFragmentShaderText = $('#iso-fragment-shader').text();
+    var isoVertexShaderText = loadFile('shaders/isoVert.glsl');
+    var isoFragmentShaderText = loadFile('shaders/isoFrag.glsl');
     
     var isoMaterial = new THREE.ShaderMaterial({
                                               vertexShader:
@@ -212,15 +221,9 @@ var goalGem = function(position, scene){
     };
     this.type = 'goalgem';
     
-    // Camera to draw reflections
-    var sphereCamera = new THREE.CubeCamera(75, 4.0 / 3.0, 1);
-    //scene.add(sphereCamera);
-    //sphereCamera.updateCubeMap(this.renderer, this.scene);
-    //this.sphere.visible = true;
-    
-    this.perlinText = loadFile('perlin.glsl');
-    this.goalVertexShaderText = $('#goal-vertex-shader').text();
-    this.goalFragmentShaderText = $('#goal-fragment-shader').text();
+    this.perlinText = loadFile('shaders/perlin.glsl');
+    this.goalVertexShaderText = loadFile('shaders/goalVert.glsl');
+    this.goalFragmentShaderText = loadFile('shaders/goalFrag.glsl');
     
    	this.goalMaterial = new THREE.ShaderMaterial({
     uniforms: { 
@@ -253,21 +256,18 @@ var nextGem = function(scene, random){
     var that = this;
     this.randNum = random;
     
-    
-   
-    
     this.type = 'nextgem';
     
-    var diamondVertexShaderText = $('#diamond-vertex-shader').text();
-    var diamondFragmentShaderText = $('#diamond-fragment-shader').text();
+    var diamondVertexShaderText = loadFile('shaders/diamondVert.glsl');
+    var diamondFragmentShaderText = loadFile('shaders/diamondFrag.glsl');
     
     var diamondMaterial = new THREE.ShaderMaterial({
                                               vertexShader: diamondVertexShaderText,
                                               fragmentShader: diamondFragmentShaderText
                                               });
     
-    var cubeVertexShaderText = $('#cube-vertex-shader').text();
-    var cubeFragmentShaderText = $('#cube-fragment-shader').text();
+    var cubeVertexShaderText = loadFile('shaders/cubeVert.glsl');
+    var cubeFragmentShaderText = loadFile('shaders/cubeFrag.glsl');
     
     var cubeMaterial = new THREE.ShaderMaterial({
                                               vertexShader:
@@ -275,16 +275,16 @@ var nextGem = function(scene, random){
                                               fragmentShader: cubeFragmentShaderText
                                               });
     
-    var sphereVertexShaderText = $('#sphere-vertex-shader').text();
-    var sphereFragmentShaderText = $('#sphere-fragment-shader').text();
+    var sphereVertexShaderText = loadFile('shaders/sphereVert.glsl');
+    var sphereFragmentShaderText = loadFile('shaders/sphereFrag.glsl');
     
     var sphereMaterial = new THREE.ShaderMaterial({
                                               vertexShader: sphereVertexShaderText,
                                               fragmentShader: sphereFragmentShaderText
                                               });
                                               
-    var isoVertexShaderText = $('#iso-vertex-shader').text();
-    var isoFragmentShaderText = $('#iso-fragment-shader').text();
+    var isoVertexShaderText = loadFile('shaders/isoVert.glsl');
+    var isoFragmentShaderText = loadFile('shaders/isoFrag.glsl');
     
     var isoMaterial = new THREE.ShaderMaterial({
                                               vertexShader:

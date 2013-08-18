@@ -1,4 +1,3 @@
-
 var loadFile = function(url) {
     var result = null;
     $.ajax({
@@ -17,29 +16,7 @@ var Game = function() {
     this.container = document.getElementById('gameArea');
     this.container.style.position = 'relative';
     this.clock = new THREE.Clock();
-    
-    /*
-    // Create particle helper variables
-    this.particleCount = 50;
-    this.particles = new THREE.Geometry();
-    this.particleMaterial = new THREE.ParticleBasicMaterial({
-                                                           color: 0xFF0000,
-                                                           size: 20
-                                                           });
-    // Add vertices to particle geometry to place particles
-    for(var i = 0; i < this.particleCount; i++) {
-        this.px = (Math.random() * 2.0 - 1.0) * 1000;
-        this.py = (Math.random() * 2.0 - 1.0) * 1000;
-        this.pz = (Math.random() * 2.0 - 1.0) * 1000;
-        this.vertex = new THREE.Vector3(this.px, this.py, this.pz);
-        this.particles.vertices.push(this.vertex);
-    }
-    // Now create particle system itself
-    this.particleSystem = new THREE.ParticleSystem(
-                                                   this.particles,
-                                                   this.particleMaterial);
-    */
-    };
+};
     
 
 Game.prototype.init = function() {
@@ -51,17 +28,6 @@ Game.prototype.init = function() {
     this.offset = 5;						
     this.facing = 'up';
     scoreKeeper = false;
-   
-    
-    // Visible canvas area on top of 3D rendering area
-    this.canvas = document.createElement('canvas');
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.top = 0;
-    this.canvas.style.left = 0;
-    this.canvas.width = 800;
-    this.canvas.height = 600;
-    this.container.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext('2d');
     
     /* Skybox texture from:
      http://www.keithlantz.net/2011/10/rendering-a-skybox-using-a-cube-map-with-opengl-and-glsl/
@@ -76,7 +42,6 @@ Game.prototype.init = function() {
 	this.scene.add( axes );
 	
 	// Set up Skybox
-	
 	var directions  = ["space", "space", "space", "space", "space", "space"];
 	var imageSuffix = ".png";
 	var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );	
@@ -213,9 +178,9 @@ Game.prototype.init = function() {
     this.scene.add(ambient_light);
     // Background plane
     
-    var perlinText = loadFile('perlin.glsl');
-    var vertexShaderText = $('#wood-vertex-shader').text();
-    var fragmentShaderText = $('#wood-fragment-shader').text();
+    var perlinText = loadFile('shaders/perlin.glsl');
+    var vertexShaderText = loadFile('shaders/woodVert.glsl');
+    var fragmentShaderText = loadFile('shaders/woodFrag.glsl');
     
    // this.bgTexture = new THREE.ImageUtils.loadTexture( 'images/floor.jpg' );
     this.bgMaterial = new THREE.ShaderMaterial({

@@ -41,11 +41,12 @@ var Robot = function(position, scene) {
 };
 
 
-
+// Update robot position according to board offset
 Robot.prototype.updateBoardPosition = function() {
     this.figure.position = robot_to_world(this.boardPosition);
 };
 
+// Make the robot's position update with user input
 Robot.prototype.moveTo = function(position) {
     this.boardPosition = position;
     this.updateBoardPosition();

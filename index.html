@@ -50,7 +50,11 @@
         	</p>
         <div id='gameArea' />
         
+        
         <p id="timer"></p>
+        
+        <!--Set the timer to count down every second,
+         then pass that variable to Game.render()----->
         
         <script>
         var Ticker;
@@ -85,8 +89,9 @@
             time = timeLeft;
         }
             </script>
-        
      
+        <!----Procedural wood texture used to create the board. 
+         Uses perlin noise to create the effect. ------------>
         
         <script id='wood-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
@@ -122,7 +127,10 @@
                 gl_FragColor = vec4(noiseColor.rgb, 1.0);
             }
             </script>
-            
+        
+            <!--Goal shader used to create a bumpy texture on the 
+             goal gem. Uses perlin noise to create the effect. -->
+        
             <script id='goal-vertex-shader' type='x-shader/x-vertex'>
 			varying vec3 vNormal;
 			varying vec3 vPosition;
@@ -146,7 +154,10 @@
 			  gl_FragColor = vec4(cnoise(vPosition * 0.03 + uTime * vec3(1.0, 0.0, 0.0)), 0.0, 0.0, 1.0);
 			}
 			</script>
-       
+        
+        <!---Vertex and fragment shaders used to create the "toon
+         shading" effect on the gems.--->
+        
         <script id='sphere-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
             
@@ -248,7 +259,7 @@
                 gl_FragColor = transform(prod);
             }
             </script>
-            
+        
         <script id='cube-vertex-shader' type='x-shader/x-vertex'>
             varying vec3 vNormal;
             
@@ -283,7 +294,7 @@
                 gl_FragColor = transform(prod);
             }
             </script>
-
+        
 		<script>
 
 			$(function() {

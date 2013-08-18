@@ -168,12 +168,6 @@ Game.prototype.render = function(t, canvas, ctx) {
     
 	this.bgMaterial.uniforms['uTime'].value = (t);
 
-	//this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
-  
-
-	//this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
-
-   
     // Bob the camera a bit
     this.camera.position.x = 0;
     this.camera.position.y = -400;

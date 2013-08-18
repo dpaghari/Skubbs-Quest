@@ -9,19 +9,41 @@ var loadFile = function(url) {
     return result;
 };
 
+/**
+ * Beat object
+ * Helps convert between seconds and beats
+ */
+var Beat = function(bpm) {
+    this.bpm = bpm;
+};
+
+/**
+ * Convert time to beatTime
+ * BeatTime represents time measured in beats
+ */
+Beat.prototype.toBeatTime = function(t) {
+    return t * this.bpm / 60.0;
+};
+
+/**
+ * Convert time to beat value
+ * Beat value is 0 to 1, hits 1 on the beat
+ */
+Beat.prototype.toBeat = function(t) {
+    return 1.0 - Math.abs(Math.sin(this.toBeatTime(t) * 3.14159));
+};
 
 var Game = function() {
     // A Game object is the highest level object representing entire game
     this.clock = new THREE.Clock();
 };
-    
 
 Game.prototype.init = function() {
 	// Initialize variables
     this.scene = new THREE.Scene();
     this.score = 0;
-    var checkScore = false;
     var that = this;
+    this.beat = new Beat(120.0);
     this.boardSize = 11;					
     this.offset = 5;						
     this.facing = 'up';
@@ -108,7 +130,7 @@ Game.prototype.init = function() {
                                                       }, this.scene);
             }
             
-            // If there is a 2 in startingBoard create a gem object
+            // If there is a 2 in startingBoard create a diamond gem object
             if (this.startingBoard[y][x] == '2') {
                 this.virtualBoard[y][x] = new diamondGem({
                                                          x : (x - this.offset),
@@ -169,15 +191,42 @@ Game.prototype.init = function() {
     var spotlight = new THREE.PointLight(0xffffff, 1, 1000);
     spotlight.position.set(0, -100, 400);
     this.scene.add(spotlight);
+    
     // Ambient light
     var ambient_light = new THREE.AmbientLight(0x202020);
     this.scene.add(ambient_light);
-    // Background plane
     
+    // Add speakers
+    var speakerVertexShaderText = loadFile('shaders/speakerVert.glsl');
+    var speakerFragmentShaderText = loadFile('shaders/speakerFrag.glsl');
+    
+    this.speakerMaterial = new THREE.ShaderMaterial({
+                                               uniforms: {
+                                               'uTime': { type: 'f', value: 0.0 },
+                                               'uBeatTime': { type: 'f', value: 0.0 },
+                                               'uBeat': { type: 'f', value: 0.0 }
+                                               },
+                                               vertexShader: speakerVertexShaderText,
+                                               fragmentShader: speakerFragmentShaderText
+                                               });
+    this.speaker1 = new THREE.Mesh(
+                               new THREE.SphereGeometry(200, 6, 6),
+                               this.speakerMaterial);
+    this.speaker1.position.x = -800;
+    this.speaker1.position.y = 400;
+    this.scene.add(this.speaker1);
+    
+    this.speaker2 = new THREE.Mesh(
+                                   new THREE.SphereGeometry(200, 6, 6),
+                                   this.speakerMaterial);
+    this.speaker2.position.x = 800;
+    this.speaker2.position.y = 400;
+    this.scene.add(this.speaker2);
+    
+    // Board plane
     var perlinText = loadFile('shaders/perlin.glsl');
     var vertexShaderText = loadFile('shaders/woodVert.glsl');
     var fragmentShaderText = loadFile('shaders/woodFrag.glsl');
-    
    
     this.bgMaterial = new THREE.ShaderMaterial({
     	uniforms: {
@@ -203,7 +252,6 @@ Game.prototype.init = function() {
     this.materialFront = new THREE.MeshBasicMaterial( { color: 0xDF2BF0 } );
     this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
     this.LoseMaterialFront = new THREE.MeshBasicMaterial( { color: 0xF50000 } );
-    
     
     // Set timer remaining text
     this.NextGeom = new THREE.TextGeometry( "Next : ",
@@ -243,8 +291,8 @@ Game.prototype.init = function() {
     this.TimeGeom.computeBoundingBox();
     this.TimeWidth = this.TimeGeom.boundingBox.max.x - this.TimeGeom.boundingBox.min.x;
     
-    this.TimeTextMesh.position.x = -575;
-    this.TimeTextMesh.position.y = 700;
+    this.TimeTextMesh.position.x = -475;
+    this.TimeTextMesh.position.y = 800;
     this.TimeTextMesh.rotation.x = -100;
     this.scene.add(this.TimeTextMesh);
     
@@ -263,7 +311,7 @@ Game.prototype.init = function() {
     this.ScoreWidth = this.ScoreGeom.boundingBox.max.x - this.ScoreGeom.boundingBox.min.x;
     
     this.ScoreMesh.position.x = -1200;
-    this.ScoreMesh.position.y = 700;
+    this.ScoreMesh.position.y = 800;
     this.ScoreMesh.rotation.x = -100;
     this.scene.add(this.ScoreMesh);
     
@@ -288,9 +336,12 @@ Game.prototype.init = function() {
 
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
-    
+    // Load in uniform variables for shaders
 	this.bgMaterial.uniforms['uTime'].value = (t);
 	this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
+    this.speakerMaterial.uniforms['uTime'].value = t;
+    this.speakerMaterial.uniforms['uBeatTime'].value = this.beat.toBeatTime(t);
+    this.speakerMaterial.uniforms['uBeat'].value = this.beat.toBeat(t);
    
     // Bob the camera a bit
     this.camera.position.x = 0;
@@ -298,8 +349,11 @@ Game.prototype.render = function(t, canvas, ctx) {
     this.camera.lookAt(this.scene.position);
     
     // Add counting timer
+    // If the time hasn't been updated
     if (checkTime()){
+        // Remove the previous time 
     	this.scene.remove(this.NumberMesh);
+        // Create a new mesh for the next second passed
     	this.NumberGeom = new THREE.TextGeometry(time,
                                         {
                                         size: 100, height: 4, curveSegments: 3,
@@ -313,11 +367,13 @@ Game.prototype.render = function(t, canvas, ctx) {
    		 this.NumberGeom.computeBoundingBox();
    		 this.NumberWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
     
-   	 	this.NumberMesh.position.x = 400;
-    	this.NumberMesh.position.y = 700;
+   	 	this.NumberMesh.position.x = 500;
+    	this.NumberMesh.position.y = 800;
    	    this.NumberMesh.rotation.x = -100;
    		this.scene.add(this.NumberMesh);
+        // When time runs out
    		if (time <= 1){
+            // Create losing text on screen
    			this.LoseGeom = new THREE.TextGeometry("Game over!",
                                                      {
                                                      size: 175, height: 4, curveSegments: 3,
@@ -338,6 +394,7 @@ Game.prototype.render = function(t, canvas, ctx) {
             this.LoseMesh.rotation.z = 50;
             this.scene.add(this.LoseMesh);
             this.scene.remove(this.NumberMesh);
+            // Remove player control
             this.gameOver = true;
    		}
     }
@@ -752,18 +809,18 @@ Game.prototype.checkRow = function(position, direction) {
 						this.scene.remove(boardSlot3.figure);
 					}
 					
-					
 					this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset].isEmpty = true;
 					this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset].isEmpty = true;
 					this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset].isEmpty = true;
 					
+                    // Increment score when match is made
                     this.checkScore();
 				}
 		}
 };
 
 Game.prototype.checkScore = function(){
-    this.score++;
+    this.score = this.score + 1;
     console.log(this.score);
     this.scene.remove(this.ScoreNumberMesh)
     this.ScoreNumberGeom = new THREE.TextGeometry( this.score,
@@ -780,7 +837,7 @@ Game.prototype.checkScore = function(){
     this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
     
     this.ScoreNumberMesh.position.x = -800;
-    this.ScoreNumberMesh.position.y = 700;
+    this.ScoreNumberMesh.position.y = 800;
     this.ScoreNumberMesh.rotation.x = -100;
     this.scene.add(this.ScoreNumberMesh);
 }
@@ -1027,7 +1084,7 @@ if(this.robot.boardPosition == this.goalGemz.boardPosition){
 }
 
 // Character Movement
-
+// If the player hasn't lost
 if(this.gameOver == false){
 	// Left (A Key)
 	if (this.keys[65] === true) {

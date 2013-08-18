@@ -274,7 +274,7 @@ Game.prototype.render = function(t, canvas, ctx) {
             this.scene.add(this.LoseMesh);
             this.scene.remove(this.NumberMesh);
             // Remove player control
-            this.gameOver = true;
+            
             this.board.gameOver = true;
    		}
     }

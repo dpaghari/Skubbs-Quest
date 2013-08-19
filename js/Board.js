@@ -43,6 +43,19 @@ Board.prototype.init = function(){
                     that.keys[e.which] = false;
                     }
                     });
+                    
+    var perlinText = loadFile('shaders/perlin.glsl');
+    var goalVertexShaderText = loadFile('shaders/goalVert.glsl');
+    var goalFragmentShaderText = loadFile('shaders/goalFrag.glsl');
+    
+    this.goalMaterial = new THREE.ShaderMaterial({
+    uniforms: { 
+      'uTime': { type: 'f', value: 0.0 },
+      'uBeatTime': { type: 'f', value: 0.0 }
+    },
+    vertexShader: perlinText + goalVertexShaderText,
+    fragmentShader: perlinText + goalFragmentShaderText
+  });
     
     /* Create a board to keep track of collisions and legal moves
     * 
@@ -130,7 +143,7 @@ Board.prototype.init = function(){
                 this.goalGemz = new goalGem({
                                                      x : (x - this.offset),
                                                      y : -(y - this.offset)
-                                                     }, this.scene);
+                                                     }, this.scene, this.goalMaterial);
                            this.virtualBoard[y][x].isEmpty = true;
                            
             }
@@ -151,6 +164,8 @@ Board.prototype.init = function(){
      */
     this.randNum = Math.floor(Math.random() * (101)); 
     this.nextGem = new nextGem(this.scene, this.randNum);
+    
+
 		
 };
 
@@ -1000,20 +1015,19 @@ Board.prototype.render = function(t) {
 	
 	for(var x = 0; x < this.boardSize; x++){
 		for(var y = 0; y < this.boardSize; y++){
-			if(this.virtualBoard[y][x].isEmpty === false){
-				this.virtualBoard[y][x].rotation += 0.01;
-				//this.virtualBoard[y][x].position += Math.sin(1000) * 2.0; 
+			if(this.virtualBoard[y][x].figure){
+				//if(this.board.virtualBoard[y][x].isEmpty === false){
+					if(this.virtualBoard[y][x].type !== 'robot'){
+					//this.virtualBoard[y][x].figure.rotation.z += 0.01;
+					this.virtualBoard[y][x].figure.rotation.z += 0.01;
+					//this.virtualBoard[y][x].figure.position.y += Math.sin(1000) * 2.0; 
+					}
+				//}
 			}
 		}
-		
 	}
 	
-	/*
-	for(var i = 0; i < this.gemTracker.length(); i++){
-		
-		this.gemTracker[i].figure.rotation.x += 0.01;
-	}
-	*/	
-	this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
-    //this.renderer.render(this.scene, this.camera);
+	this.goalMaterial.uniforms['uTime'].value = t;
+	
+
 };

@@ -86,8 +86,9 @@ var diamondGem = function(position, scene){
     				if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, diamondMaterial);
                     that.figure.scale.set(40, 40, 40);
-                    that.figure.rotation.y = 55;
+                   /* that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
+                    */
                     scene.add(that.figure);
                     that.figure.position = diamond_gem_to_world(position);
                    }
@@ -123,9 +124,9 @@ var cubeGem = function(position, scene){
     			if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, cubeMaterial);
                     that.figure.scale.set(40, 40, 40);
-                    that.figure.rotation.x = 10;
-                    that.figure.rotation.y = 55;
-                    that.figure.rotation.z = 100;
+                    that.figure.rotation.y = 10;
+                    //that.figure.rotation.y = 55;
+                    //that.figure.rotation.z = 100;
                     scene.add(that.figure);
                     that.figure.position = cube_gem_to_world(position);
                     
@@ -161,8 +162,10 @@ var sphereGem = function(position, scene){
     			if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, sphereMaterial);
                     that.figure.scale.set(40, 40, 40);
+                    /*
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
+                    */
                     scene.add(that.figure);
                     that.figure.position = sphere_gem_to_world(position);
                }
@@ -198,9 +201,11 @@ var isoGem = function(position, scene){
     			if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, isoMaterial);
                     that.figure.scale.set(40, 40, 40);
+                    /*
                     that.figure.rotation.x = 40;
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
+                    */
                     scene.add(that.figure);
                     that.figure.position = iso_gem_to_world(position);
                 }    
@@ -212,7 +217,7 @@ var isoGem = function(position, scene){
 /*
  * Constructor for Goal Gem
  */
-var goalGem = function(position, scene){
+var goalGem = function(position, scene, material){
     var that = this;
     this.isEmpty = true;
     this.boardPosition = position || {
@@ -221,28 +226,31 @@ var goalGem = function(position, scene){
     };
     this.type = 'goalgem';
     
-    this.perlinText = loadFile('shaders/perlin.glsl');
-    this.goalVertexShaderText = loadFile('shaders/goalVert.glsl');
-    this.goalFragmentShaderText = loadFile('shaders/goalFrag.glsl');
-    
+    var perlinText = loadFile('shaders/perlin.glsl');
+    var goalVertexShaderText = loadFile('shaders/goalVert.glsl');
+    var goalFragmentShaderText = loadFile('shaders/goalFrag.glsl');
+    /*
    	this.goalMaterial = new THREE.ShaderMaterial({
     uniforms: { 
       'uTime': { type: 'f', value: 0.0 },
       'uBeatTime': { type: 'f', value: 0.0 }
     },
-    vertexShader: this.perlinText + this.goalVertexShaderText,
-    fragmentShader: this.perlinText + this.goalFragmentShaderText
+    vertexShader: perlinText + goalVertexShaderText,
+    fragmentShader: perlinText + goalFragmentShaderText
   });
+  */
 
     this.figure = null;
     
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/isoGem.js', function(geometry) {
-                    that.figure = new THREE.Mesh(geometry, this.goalMaterial);
+                    that.figure = new THREE.Mesh(geometry, material);
                     that.figure.scale.set(40, 40, 40);
+                    
                     that.figure.rotation.x = 40;
                     that.figure.rotation.y = 55;
                     that.figure.rotation.z = 100;
+                    
                     scene.add(that.figure);
                     that.figure.position = goal_gem_to_world(position);
                     });

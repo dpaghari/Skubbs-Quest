@@ -67,7 +67,7 @@ Game.prototype.init = function() {
 
     
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
-    this.camera.position.z = 850;
+    this.camera.position.z = 1000;
     
     
  
@@ -112,6 +112,10 @@ Game.prototype.init = function() {
     this.speaker2.position.y = 400;
     this.scene.add(this.speaker2);
     
+    
+    
+  
+    
     // Board plane
     var perlinText = loadFile('shaders/perlin.glsl');
     var vertexShaderText = loadFile('shaders/woodVert.glsl');
@@ -137,6 +141,8 @@ Game.prototype.init = function() {
     document.body.appendChild(this.renderer.domElement);
     
     this.board = new Board(this.scene, this.camera, this.renderer);
+    
+
     
     // Load the 'Next' section
     // Add Materials
@@ -222,12 +228,16 @@ Game.prototype.render = function(t, canvas, ctx) {
     this.speakerMaterial.uniforms['uTime'].value = t;
     this.speakerMaterial.uniforms['uBeatTime'].value = this.beat.toBeatTime(t);
     this.speakerMaterial.uniforms['uBeat'].value = this.beat.toBeat(t);
+    
+    
    
 
     // Bob the camera a bit
     this.camera.position.x = 0;
-    this.camera.position.y = -400;
+   // this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
+    
+	
     
     // Add counting timer
     // If the time hasn't been updated
@@ -293,8 +303,8 @@ Game.prototype.start = function() {
 	var loop = function() {
 		var time = new Date().getTime();
 		// Render visual frame
-		that.render(time - time0);
-		that.board.render(time - time0);
+		that.render((time - time0) * 0.001);
+		that.board.render((time - time0) * 0.001);
 		// Respond to user input
 		that.board.handleInput();
 		// Loop

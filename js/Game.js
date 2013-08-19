@@ -45,6 +45,16 @@ Game.prototype.init = function() {
     var that = this;
     this.beat = new Beat(120.0);
 
+    // Add shaders
+    // Speakers
+    var perlinText = loadFile('shaders/perlin.glsl');
+    var speakerVertexShaderText = loadFile('shaders/speakerVert.glsl');
+    var speakerFragmentShaderText = loadFile('shaders/speakerFrag.glsl');
+    // Board plane
+    var perlinText = loadFile('shaders/perlin.glsl');
+    var vertexShaderText = loadFile('shaders/woodVert.glsl');
+    var fragmentShaderText = loadFile('shaders/woodFrag.glsl');
+    
    
 	var axes = new THREE.AxisHelper(100);
 	this.scene.add( axes );
@@ -85,18 +95,14 @@ Game.prototype.init = function() {
     var ambient_light = new THREE.AmbientLight(0x202020);
     this.scene.add(ambient_light);
     
-    // Add speakers
-    var speakerVertexShaderText = loadFile('shaders/speakerVert.glsl');
-    var speakerFragmentShaderText = loadFile('shaders/speakerFrag.glsl');
-    
     this.speakerMaterial = new THREE.ShaderMaterial({
                                                uniforms: {
                                                'uTime': { type: 'f', value: 0.0 },
                                                'uBeatTime': { type: 'f', value: 0.0 },
                                                'uBeat': { type: 'f', value: 0.0 }
                                                },
-                                               vertexShader: speakerVertexShaderText,
-                                               fragmentShader: speakerFragmentShaderText
+                                               vertexShader: perlinText + speakerVertexShaderText,
+                                               fragmentShader: perlinText + speakerFragmentShaderText
                                                });
     this.speaker1 = new THREE.Mesh(
                                new THREE.SphereGeometry(200, 6, 6),
@@ -111,15 +117,12 @@ Game.prototype.init = function() {
     this.speaker2.position.x = 800;
     this.speaker2.position.y = 400;
     this.scene.add(this.speaker2);
-    
-    
-    
-  
-    
+
     // Board plane
     var perlinText = loadFile('shaders/perlin.glsl');
     var vertexShaderText = loadFile('shaders/woodVert.glsl');
     var fragmentShaderText = loadFile('shaders/woodFrag.glsl');
+
    
     this.bgMaterial = new THREE.ShaderMaterial({
     	uniforms: {
@@ -221,16 +224,13 @@ Game.prototype.init = function() {
 
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
-    // Load in uniform variables for shaders
+    // Load in uniform variables for wood board 
 	this.bgMaterial.uniforms['uTime'].value = (t);
-
-	
+	// Load in uniform variables for speakers
     this.speakerMaterial.uniforms['uTime'].value = t;
     this.speakerMaterial.uniforms['uBeatTime'].value = this.beat.toBeatTime(t);
     this.speakerMaterial.uniforms['uBeat'].value = this.beat.toBeat(t);
-    
-    
-   
+
 
     // Bob the camera a bit
     this.camera.position.x = 0;

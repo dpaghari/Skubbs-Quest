@@ -9,3 +9,5 @@ CHANGELOG:
 page. It takes in the player's current location. 
 - Added goal object and positioned it on the map.
 - Updated barrier positions 
+18 August 2013
+- 

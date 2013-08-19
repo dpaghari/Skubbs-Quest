@@ -9,7 +9,6 @@ var loadFile = function(url) {
     return result;
 };
 
-
 var Board = function(scene, camera, renderer){
 	
 	this.scene = scene;
@@ -230,7 +229,7 @@ Board.prototype.detRand = function(){
 Board.prototype.createGem = function(position) {
     
 	if(this.legalPosition(position)){
-		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
+		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {				
 			
 			// If the random number is between 0 and 20 create a Diamond
 			if(this.randNum >= 0.0 && this.randNum <= 25.0){
@@ -255,6 +254,7 @@ Board.prototype.createGem = function(position) {
                
 			 }
 
+			
 			this.gemTracker.push(this.virtualBoard[-position.y + this.offset][position.x + this.offset]);
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 			this.checkEntireRow(position, this.facing);
@@ -262,6 +262,7 @@ Board.prototype.createGem = function(position) {
 		}
 	}
 			
+		
 		
 			
 			this.destroyNextGem();
@@ -610,6 +611,8 @@ Board.prototype.checkScore = function(){
     this.ScoreNumberGeom.computeBoundingBox();
     this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
     
+    this.ScoreNumberMesh.position.x = -700;
+    this.ScoreNumberMesh.position.y = 800;
     this.ScoreNumberMesh.position.x = -800;
     this.ScoreNumberMesh.position.y = 700;
     this.ScoreNumberMesh.rotation.x = -100;
@@ -853,6 +856,8 @@ Board.prototype.destroyNextGem = function() {
  */
 Board.prototype.handleInput = function() {
 
+if(this.robot.boardPosition == this.goalGemz.boardPosition){
+	alert("You Win!");
 
 if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.boardPosition.y == this.goalGemz.boardPosition.y)){
 	this.gameOver = true;
@@ -1013,16 +1018,18 @@ if(this.gameOver == false){
 
 Board.prototype.render = function(t) {
 	
+	
+   
 	for(var x = 0; x < this.boardSize; x++){
 		for(var y = 0; y < this.boardSize; y++){
 			if(this.virtualBoard[y][x].figure){
-				//if(this.board.virtualBoard[y][x].isEmpty === false){
+				
 					if(this.virtualBoard[y][x].type !== 'robot'){
-					//this.virtualBoard[y][x].figure.rotation.z += 0.01;
+					
 					this.virtualBoard[y][x].figure.rotation.z += 0.01;
 					//this.virtualBoard[y][x].figure.position.y += Math.sin(1000) * 2.0; 
 					}
-				//}
+				
 			}
 		}
 	}
@@ -1031,3 +1038,4 @@ Board.prototype.render = function(t) {
 	
 
 };
+}

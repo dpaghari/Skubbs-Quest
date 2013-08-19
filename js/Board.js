@@ -25,7 +25,7 @@ Board.prototype.init = function(){
     this.facing = 'up';
     scoreKeeper = false;
     this.gameOver = false;
-    this.gemTracker = [];
+    
     
     
     
@@ -108,7 +108,7 @@ Board.prototype.init = function(){
                                                       x : (x - this.offset),
                                                       y : -(y - this.offset)
                                                       }, this.scene);
-                                                      this.gemTracker.push(this.virtualBoard[y][x]);
+                                                     
             }
             
             // If there is a 2 in startingBoard create a gem object
@@ -117,7 +117,7 @@ Board.prototype.init = function(){
                                                          x : (x - this.offset),
                                                          y : -(y - this.offset)
                                                          }, this.scene);
-                                                         this.gemTracker.push(this.virtualBoard[y][x]);
+                                                         
              
             }
             
@@ -126,7 +126,7 @@ Board.prototype.init = function(){
                                                         x : (x - this.offset),
                                                         y : -(y - this.offset)
                                                         }, this.scene);
-                                                        this.gemTracker.push(this.virtualBoard[y][x]);
+                                                        
             }
             
             if (this.startingBoard[y][x] == '4') {
@@ -134,7 +134,7 @@ Board.prototype.init = function(){
                                                      x : (x - this.offset),
                                                      y : -(y - this.offset)
                                                      }, this.scene);
-                                                     this.gemTracker.push(this.virtualBoard[y][x]);
+                                                    
             }
             
             if (this.startingBoard[y][x] == '5') {
@@ -255,7 +255,7 @@ Board.prototype.createGem = function(position) {
 			 }
 
 			
-			this.gemTracker.push(this.virtualBoard[-position.y + this.offset][position.x + this.offset]);
+			
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 			this.checkEntireRow(position, this.facing);
 			
@@ -834,9 +834,7 @@ Board.prototype.destroyNextGem = function() {
 		this.scene.remove(this.nextGem);
 		this.scene.remove(this.nextGem.figure);
 		this.nextGem = new nextGem(this.scene, this.randNum);
-		
-
-	
+			
 };
 
 
@@ -1016,7 +1014,9 @@ if(this.gameOver == false){
 Board.prototype.render = function(t) {
 	
 	
-   
+   /* Check the entire board for existing gems and make them rotate
+    * 
+    */
 	for(var x = 0; x < this.boardSize; x++){
 		for(var y = 0; y < this.boardSize; y++){
 			if(this.virtualBoard[y][x].figure){
@@ -1030,7 +1030,7 @@ Board.prototype.render = function(t) {
 			}
 		}
 	}
-	
+	// Update goal gem's material
 	this.goalMaterial.uniforms['uTime'].value = t;
 	
 

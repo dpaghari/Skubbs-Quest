@@ -15,6 +15,8 @@
         <script src="js/Game.js"></script>
         <script src="js/Panes.js"></script>
         <script src="js/Board.js"></script>
+        <script src="js/TitlePane.js"></script>
+        <script src="js/GamePane.js"></script>
        
        
         <!-- load fonts -->
@@ -51,6 +53,7 @@
         	Get to the GOAL GEM! Before time expires 
         	Match Gems to clear paths
         	</p>
+        <audio id='song' src="when-the-fire-starts-to-burn.mp3"></audio>
         <div id='gameArea' />
         
         
@@ -97,8 +100,10 @@
 			$(function() {
               
               var game = new Game();
+              game.pushPane(new TitlePane());
               game.init();
-              //game.pushPane(new MenuPane());
+              //game.pushPane(new TitlePane());
+              
               game.start();
               
               });

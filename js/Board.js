@@ -611,7 +611,7 @@ Board.prototype.checkScore = function(){
     this.ScoreNumberGeom.computeBoundingBox();
     this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
     
-    this.ScoreNumberMesh.position.x = -700;
+    this.ScoreNumberMesh.position.x = -800;
     this.ScoreNumberMesh.position.y = 800;
 
     this.ScoreNumberMesh.rotation.x = -100;
@@ -854,7 +854,29 @@ Board.prototype.handleInput = function() {
 
 if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.boardPosition.y == this.goalGemz.boardPosition.y)){
 	this.gameOver = true;
-	console.log("win text");
+	this.materialFront = new THREE.MeshBasicMaterial( { color: 0xDF2BF0 } );
+    this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+    this.WinMaterialFront = new THREE.MeshBasicMaterial( { color: 0xF50000 } );
+    
+    // Set timer remaining text
+    this.WinGeom = new THREE.TextGeometry( "You win! ",
+                                           {
+                                           size: 175, height: 4, curveSegments: 3,
+                                           face: "helvetiker", weight: "normal", style: "normal",
+                                           bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                           material: 5, extrudeMaterial: 5
+                                           });
+    this.WinMesh = new THREE.Mesh(this.WinGeom, this.TextMaterial);
+    
+    this.WinGeom.computeBoundingBox();
+    this.WinWidth = this.WinGeom.boundingBox.max.x - this.WinGeom.boundingBox.min.x;
+    
+    this.WinMesh.position.x = -400;
+    this.WinMesh.position.y = 80;
+    this.WinMesh.position.z = 400;
+    this.WinMesh.rotation.x = -100;
+    this.WinMesh.rotation.z = 50;
+    this.scene.add(this.WinMesh);
 }
 
 // Character Movement
@@ -942,6 +964,8 @@ if(this.gameOver == false){
 			var moveSpaces = this.countSpaces(newPosition, this.facing);
 			newPosition.y += moveSpaces;
 			
+			
+			
 
 			if (!moveSpaces == 0) {
 				if (this.legalPosition(newPosition)) {
@@ -986,24 +1010,33 @@ if(this.gameOver == false){
 	// Up arrow key
 	if (this.keys[38] === true) {
 		this.keys[38] = 'triggered';
+		
+		this.robot.figure.rotation.y = 72.30;
+		
 
 		this.facing = 'up';
 	}
 	// Left arrow key
 	if (this.keys[37] === true) {
 		this.keys[37] = 'triggered';
+		
+		this.robot.figure.rotation.y = 67.80;
 
 		this.facing = 'left';
 	}
 	// Down arrow key
 	if (this.keys[40] === true) {
 		this.keys[40] = 'triggered';
+		
+		this.robot.figure.rotation.y = 69.15;
 
 		this.facing = 'down';
 	}
 	// Right arrow key
 	if (this.keys[39] === true) {
 		this.keys[39] = 'triggered';
+		
+		this.robot.figure.rotation.y = 70.95;
 
 		this.facing = 'right';
 	}

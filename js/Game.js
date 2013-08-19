@@ -36,12 +36,16 @@ Beat.prototype.toBeat = function(t) {
 var Game = function() {
     // A Game object is the highest level object representing entire game
     this.clock = new THREE.Clock();
+    
+    this.panes = [];
 };
 
 Game.prototype.init = function() {
 	// Initialize variables
     this.scene = new THREE.Scene();
     
+    this.song = $('#song')[0];
+  	this.song.play();
     var that = this;
     this.beat = new Beat(120.0);
   
@@ -204,7 +208,7 @@ Game.prototype.init = function() {
     this.ScoreGeom.computeBoundingBox();
     this.ScoreWidth = this.ScoreGeom.boundingBox.max.x - this.ScoreGeom.boundingBox.min.x;
     
-    this.ScoreMesh.position.x = -1100;
+    this.ScoreMesh.position.x = -1000;
     this.ScoreMesh.position.y = 800;
     this.ScoreMesh.rotation.x = -100;
     this.scene.add(this.ScoreMesh);
@@ -214,6 +218,22 @@ Game.prototype.init = function() {
     
     // Setup keyboard events
 
+};
+
+/**
+ * Add pane to Game object
+ * Any existing panes are pushed down on stack
+ */
+Game.prototype.pushPane = function(pane) {
+  this.panes.push(pane);
+};
+
+/**
+ * Pop off top pane
+ * Reveals lower panes on stack
+ */
+Game.prototype.popPane = function() {
+  this.panes.pop();
 };
 
 // Render function
@@ -235,6 +255,18 @@ Game.prototype.render = function(t, canvas, ctx) {
     //this.camera.position.y = -400;
 
     this.camera.lookAt(this.scene.position);
+    
+     // If there is no active pane do nothing
+  	if(this.panes.length > 0) {
+    var pane = this.panes[this.panes.length - 1];
+    // Handle player input
+    pane.handleInput(this.keyboard, this);
+    // Update pane
+    // Pass renderer so it can do cubemaps for reflections
+    pane.update(t, this.renderer);
+    // Render the pane
+    this.renderer.render(pane.scene, pane.camera);
+  	}
     
 	
     
@@ -277,7 +309,7 @@ Game.prototype.render = function(t, canvas, ctx) {
 
             this.LoseGeom.computeBoundingBox();
             this.LoseWidth = this.LoseGeom.boundingBox.max.x - this.LoseGeom.boundingBox.min.x;
-            this.LoseMesh.position.x = -600;
+            this.LoseMesh.position.x = -400;
             this.LoseMesh.position.y = 80;
             this.LoseMesh.position.z = 400;
             this.LoseMesh.rotation.x = -100;

@@ -856,9 +856,6 @@ Board.prototype.destroyNextGem = function() {
  */
 Board.prototype.handleInput = function() {
 
-if(this.robot.boardPosition == this.goalGemz.boardPosition){
-	alert("You Win!");
-
 if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.boardPosition.y == this.goalGemz.boardPosition.y)){
 	this.gameOver = true;
 }
@@ -1038,4 +1035,4 @@ Board.prototype.render = function(t) {
 	
 
 };
-}
+

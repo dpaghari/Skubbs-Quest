@@ -9,11 +9,11 @@ var loadFile = function(url) {
     return result;
 };
 
-
-var Board = function(scene, camera){
+var Board = function(scene, camera, renderer){
 	
 	this.scene = scene;
 	this.camera = camera;
+	this.renderer = renderer;
 	
 };
 
@@ -25,6 +25,9 @@ Board.prototype.init = function(){
     this.facing = 'up';
     scoreKeeper = false;
     this.gameOver = false;
+    this.gemTracker = [];
+    
+    
     
     this.keys = {};
     $('body').keydown(function(e) {
@@ -92,6 +95,7 @@ Board.prototype.init = function(){
                                                       x : (x - this.offset),
                                                       y : -(y - this.offset)
                                                       }, this.scene);
+                                                      this.gemTracker.push(this.virtualBoard[y][x]);
             }
             
             // If there is a 2 in startingBoard create a gem object
@@ -100,6 +104,7 @@ Board.prototype.init = function(){
                                                          x : (x - this.offset),
                                                          y : -(y - this.offset)
                                                          }, this.scene);
+                                                         this.gemTracker.push(this.virtualBoard[y][x]);
              
             }
             
@@ -108,6 +113,7 @@ Board.prototype.init = function(){
                                                         x : (x - this.offset),
                                                         y : -(y - this.offset)
                                                         }, this.scene);
+                                                        this.gemTracker.push(this.virtualBoard[y][x]);
             }
             
             if (this.startingBoard[y][x] == '4') {
@@ -115,6 +121,7 @@ Board.prototype.init = function(){
                                                      x : (x - this.offset),
                                                      y : -(y - this.offset)
                                                      }, this.scene);
+                                                     this.gemTracker.push(this.virtualBoard[y][x]);
             }
             
             if (this.startingBoard[y][x] == '5') {
@@ -124,6 +131,7 @@ Board.prototype.init = function(){
                                                      y : -(y - this.offset)
                                                      }, this.scene);
                            this.virtualBoard[y][x].isEmpty = true;
+                           
             }
              if (this.startingBoard[y][x] == '6') {
                 this.virtualBoard[y][x] = this.robot = new Robot({
@@ -131,6 +139,7 @@ Board.prototype.init = function(){
                            y : -(y - this.offset)
                            }, this.scene);
                            this.virtualBoard[y][x].isEmpty = true;
+                           
             }
         }
     }
@@ -205,11 +214,12 @@ Board.prototype.detRand = function(){
 Board.prototype.createGem = function(position) {
     
 	if(this.legalPosition(position)){
-		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {
-				
+		if (this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty) {				
+			
 			// If the random number is between 0 and 20 create a Diamond
 			if(this.randNum >= 0.0 && this.randNum <= 25.0){
                 this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
+                
                 
 			  }
 			
@@ -230,6 +240,7 @@ Board.prototype.createGem = function(position) {
 			 }
 
 			
+			this.gemTracker.push(this.virtualBoard[-position.y + this.offset][position.x + this.offset]);
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
 			this.checkEntireRow(position, this.facing);
 			
@@ -238,6 +249,7 @@ Board.prototype.createGem = function(position) {
 			
 		
 		
+			
 			this.destroyNextGem();
 
 };
@@ -586,6 +598,8 @@ Board.prototype.checkScore = function(){
     
     this.ScoreNumberMesh.position.x = -700;
     this.ScoreNumberMesh.position.y = 800;
+    this.ScoreNumberMesh.position.x = -800;
+    this.ScoreNumberMesh.position.y = 700;
     this.ScoreNumberMesh.rotation.x = -100;
     this.scene.add(this.ScoreNumberMesh);
 }
@@ -829,6 +843,9 @@ Board.prototype.handleInput = function() {
 
 if(this.robot.boardPosition == this.goalGemz.boardPosition){
 	alert("You Win!");
+
+if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.boardPosition.y == this.goalGemz.boardPosition.y)){
+	this.gameOver = true;
 }
 
 // Character Movement
@@ -988,4 +1005,23 @@ Board.prototype.render = function(t) {
 	
 	this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
     //this.renderer.render(this.scene, camera);
+	for(var x = 0; x < this.boardSize; x++){
+		for(var y = 0; y < this.boardSize; y++){
+			if(this.virtualBoard[y][x].isEmpty === false){
+				this.virtualBoard[y][x].rotation += 0.01;
+				//this.virtualBoard[y][x].position += Math.sin(1000) * 2.0; 
+			}
+		}
+		
+	}
+	
+	/*
+	for(var i = 0; i < this.gemTracker.length(); i++){
+		
+		this.gemTracker[i].figure.rotation.x += 0.01;
+	}
+	*/	
+	this.goalGemz.goalMaterial.uniforms['uTime'].value = t;
+    //this.renderer.render(this.scene, this.camera);
 };
+}

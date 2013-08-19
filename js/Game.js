@@ -79,7 +79,7 @@ Game.prototype.init = function() {
     this.camera = new THREE.PerspectiveCamera(75, 4.0 / 3.0, 1, 10000);
     this.camera.position.z = 850;
     
-    this.board = new Board(this.scene, this.camera);
+    
  
     this.material = new THREE.MeshLambertMaterial({
                                                   color : 0xff0000
@@ -136,6 +136,8 @@ Game.prototype.init = function() {
     this.renderer.setSize(800, 600);
     this.renderer.setClearColor(0xeeeeee, 1.0);
     document.body.appendChild(this.renderer.domElement);
+    
+    this.board = new Board(this.scene, this.camera, this.renderer);
     
     // Load the 'Next' section
     // Add Materials

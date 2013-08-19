@@ -204,7 +204,7 @@ Game.prototype.init = function() {
     this.ScoreGeom.computeBoundingBox();
     this.ScoreWidth = this.ScoreGeom.boundingBox.max.x - this.ScoreGeom.boundingBox.min.x;
     
-    this.ScoreMesh.position.x = -1200;
+    this.ScoreMesh.position.x = -1100;
     this.ScoreMesh.position.y = 800;
     this.ScoreMesh.rotation.x = -100;
     this.scene.add(this.ScoreMesh);
@@ -227,8 +227,13 @@ Game.prototype.render = function(t, canvas, ctx) {
 
 
     // Bob the camera a bit
+
    // this.camera.position.x = 0;
     this.camera.position.y = -400;
+
+    this.camera.position.x = 0;
+    //this.camera.position.y = -400;
+
     this.camera.lookAt(this.scene.position);
     
 	
@@ -298,8 +303,8 @@ Game.prototype.start = function() {
 		var time = new Date().getTime();
 		// Render visual frame
 		that.render((time - time0) * 0.001);
-		that.board.render((time - time0) * 0.001);
-		// Respond to user input
+ 		that.board.render((time - time0) * 0.001);
+ 		// Respond to user input
 		that.board.handleInput();
 		// Loop
 		requestAnimationFrame(loop, that.renderer.domElement);

@@ -597,7 +597,6 @@ Board.prototype.checkRow = function(position, direction) {
  */
 Board.prototype.checkScore = function(){
     this.score++;
-   // console.log(this.score);
     this.scene.remove(this.ScoreNumberMesh)
     this.ScoreNumberGeom = new THREE.TextGeometry( this.score,
                                                   {
@@ -614,6 +613,9 @@ Board.prototype.checkScore = function(){
     
     this.ScoreNumberMesh.position.x = -700;
     this.ScoreNumberMesh.position.y = 800;
+
+    this.ScoreNumberMesh.rotation.x = -100;
+
     this.scene.add(this.ScoreNumberMesh);
 }
 

@@ -229,16 +229,6 @@ var goalGem = function(position, scene, material){
     var perlinText = loadFile('shaders/perlin.glsl');
     var goalVertexShaderText = loadFile('shaders/goalVert.glsl');
     var goalFragmentShaderText = loadFile('shaders/goalFrag.glsl');
-    /*
-   	this.goalMaterial = new THREE.ShaderMaterial({
-    uniforms: { 
-      'uTime': { type: 'f', value: 0.0 },
-      'uBeatTime': { type: 'f', value: 0.0 }
-    },
-    vertexShader: perlinText + goalVertexShaderText,
-    fragmentShader: perlinText + goalFragmentShaderText
-  });
-  */
 
     this.figure = null;
     

@@ -1,22 +1,13 @@
-uniform float uTime;
-varying vec3 vNormal;
-varying vec3 vPosition;
 
-/* Turbulence from explosion demo at:
- www.clicktorelease.com/code/perlin/explosion.html
- */
-float turbulence(vec3 p) {
-    float t = -.5;
-    for (float f = 1.0 ; f <= 10.0 ; f++){
-        float power = pow(2.0, f);
-        t += abs(pnoise(vec3(power * p ), vec3(10.0, 10.0, 10.0)) / power);
-    }
-    return t;
-}
+varying vec3 vNormal;
+uniform float uTime;
+uniform float uBeatTime;
+uniform float uBeat;
 
 void main() {
-    vec3 nvNormal = normalize(vNormal);
-    vec3 lookup = vPosition * 0.005 + 0.1 * uTime * vec3(0.0, 0.0, 1.0);
-    float turb = turbulence(lookup) * 10.0 + 2.5;
-    gl_FragColor = vec4(turb, 0.0, 0.0, 1.0);
+  vec3 light = vec3(1.0, 1.0, 1.0);
+  light = normalize(light);
+  vec3 nvNormal = normalize(vNormal);
+  float prod = max(0.0, dot(nvNormal, light));
+  gl_FragColor = vec4(0.0, prod, 0.0, 1.0);
 }

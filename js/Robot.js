@@ -2,8 +2,8 @@
 var robot_to_world = function(position) {
     
     return {
-        x : (100 * position.x),
-        y : (100 * position.y) + 50,
+        x : (110 * position.x) - 15,
+        y : (100 * position.y) + 10,
         z : 0
     };
     

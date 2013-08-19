@@ -44,18 +44,7 @@ Game.prototype.init = function() {
     
     var that = this;
     this.beat = new Beat(120.0);
-
-    // Add shaders
-    // Speakers
-    var perlinText = loadFile('shaders/perlin.glsl');
-    var speakerVertexShaderText = loadFile('shaders/speakerVert.glsl');
-    var speakerFragmentShaderText = loadFile('shaders/speakerFrag.glsl');
-    // Board plane
-    var perlinText = loadFile('shaders/perlin.glsl');
-    var vertexShaderText = loadFile('shaders/woodVert.glsl');
-    var fragmentShaderText = loadFile('shaders/woodFrag.glsl');
-    
-   
+  
 	var axes = new THREE.AxisHelper(100);
 	this.scene.add( axes );
 	
@@ -95,6 +84,11 @@ Game.prototype.init = function() {
     var ambient_light = new THREE.AmbientLight(0x202020);
     this.scene.add(ambient_light);
     
+    // Speakers
+    var perlinText = loadFile('shaders/perlin.glsl');
+    var speakerVertexShaderText = loadFile('shaders/speakerVert.glsl');
+    var speakerFragmentShaderText = loadFile('shaders/speakerFrag.glsl');
+    
     this.speakerMaterial = new THREE.ShaderMaterial({
                                                uniforms: {
                                                'uTime': { type: 'f', value: 0.0 },
@@ -131,7 +125,7 @@ Game.prototype.init = function() {
     	vertexShader: perlinText + vertexShaderText,
     	fragmentShader: perlinText + fragmentShaderText });
      
-    this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1150, 1100, 75), this.bgMaterial);
+    this.bgplane = new THREE.Mesh(new THREE.CubeGeometry(1200, 1100, 75), this.bgMaterial);
     this.bgplane.rotation.x = 0;
     this.bgplane.translateZ(-100);
     this.scene.add(this.bgplane);
@@ -233,8 +227,8 @@ Game.prototype.render = function(t, canvas, ctx) {
 
 
     // Bob the camera a bit
-    this.camera.position.x = 0;
-   // this.camera.position.y = -400;
+   // this.camera.position.x = 0;
+    this.camera.position.y = -400;
     this.camera.lookAt(this.scene.position);
     
 	

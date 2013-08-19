@@ -614,9 +614,6 @@ Board.prototype.checkScore = function(){
     
     this.ScoreNumberMesh.position.x = -700;
     this.ScoreNumberMesh.position.y = 800;
-    this.ScoreNumberMesh.position.x = -800;
-    this.ScoreNumberMesh.position.y = 700;
-    this.ScoreNumberMesh.rotation.x = -100;
     this.scene.add(this.ScoreNumberMesh);
 }
 
@@ -855,6 +852,7 @@ Board.prototype.handleInput = function() {
 
 if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.boardPosition.y == this.goalGemz.boardPosition.y)){
 	this.gameOver = true;
+	console.log("win text");
 }
 
 // Character Movement
@@ -1023,9 +1021,11 @@ Board.prototype.render = function(t) {
 			if(this.virtualBoard[y][x].figure){
 				
 					if(this.virtualBoard[y][x].type !== 'robot'){
-					
-					this.virtualBoard[y][x].figure.rotation.z += 0.01;
-					//this.virtualBoard[y][x].figure.position.y += Math.sin(1000) * 2.0; 
+						if(this.virtualBoard[y][x].isEmpty == false){
+						//this.virtualBoard[y][x].figure.rotation.x += 0.04;
+						this.virtualBoard[y][x].figure.rotation.y += 0.05;
+						//this.virtualBoard[y][x].figure.position.y += Math.sin(1000) * 2.0; 
+						}
 					}
 				
 			}

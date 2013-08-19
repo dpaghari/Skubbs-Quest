@@ -22,31 +22,31 @@ var loadFile = function(url) {
  */
 var sphere_gem_to_world = function(position) {
     return {
-        x : (100 * position.x) + 130,
-        y : (100 * position.y) - 30,
+        x : (110 * position.x),
+        y : (100 * position.y),
         z : 0
     };
 };
 
 var iso_gem_to_world = function(position) {
     return {
-        x : (100 * position.x) + 100,
-        y : (100 * position.y) - 50,
+        x : (110 * position.x),
+        y : (100 * position.y),
         z : 0
     };
 };
 
 var goal_gem_to_world = function(position) {
     return {
-        x : (100 * position.x) + 100,
-        y : (100 * position.y) - 50,
+        x : (100 * position.x),
+        y : (100 * position.y),
         z : 0
     };
 };
 
 var cube_gem_to_world = function(position) {
     return {
-        x : (100 * position.x) + 20,
+        x : (110 * position.x),
         y : (100 * position.y),
         z : 0
     };
@@ -54,8 +54,8 @@ var cube_gem_to_world = function(position) {
 
 var diamond_gem_to_world = function(position) {
     return {
-        x : (100 * position.x) + 115,
-        y : (100 * position.y) - 30,
+        x : (110 * position.x),
+        y : (100 * position.y),
         z : 0
     };
 };
@@ -85,9 +85,10 @@ var diamondGem = function(position, scene){
     	
     				if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, diamondMaterial);
-                    that.figure.scale.set(40, 40, 40);
-                   /* that.figure.rotation.y = 55;
-                    that.figure.rotation.z = 100;
+                    that.figure.scale.set(35, 35, 30);
+                    /*
+                    that.figure.rotation.x = 0.04;
+                    that.figure.rotation.y = 0.05;
                     */
                     scene.add(that.figure);
                     that.figure.position = diamond_gem_to_world(position);
@@ -124,9 +125,9 @@ var cubeGem = function(position, scene){
     			if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, cubeMaterial);
                     that.figure.scale.set(40, 40, 40);
-                    that.figure.rotation.y = 10;
-                    //that.figure.rotation.y = 55;
-                    //that.figure.rotation.z = 100;
+                    that.figure.rotation.x = .04;
+                    that.figure.rotation.y = .005;
+                    
                     scene.add(that.figure);
                     that.figure.position = cube_gem_to_world(position);
                     
@@ -161,10 +162,10 @@ var sphereGem = function(position, scene){
     			
     			if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, sphereMaterial);
-                    that.figure.scale.set(40, 40, 40);
+                    that.figure.scale.set(40, 40, 35);
                     /*
-                    that.figure.rotation.y = 55;
-                    that.figure.rotation.z = 100;
+                    that.figure.rotation.x = .04;
+                    that.figure.rotation.y = .005;
                     */
                     scene.add(that.figure);
                     that.figure.position = sphere_gem_to_world(position);
@@ -201,11 +202,10 @@ var isoGem = function(position, scene){
     			if(that.figure !== 'empty'){
                     that.figure = new THREE.Mesh(geometry, isoMaterial);
                     that.figure.scale.set(40, 40, 40);
-                    /*
-                    that.figure.rotation.x = 40;
-                    that.figure.rotation.y = 55;
-                    that.figure.rotation.z = 100;
-                    */
+                    
+                    that.figure.rotation.x = .04;
+                    that.figure.rotation.y = .005;
+                    
                     scene.add(that.figure);
                     that.figure.position = iso_gem_to_world(position);
                 }    

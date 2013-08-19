@@ -28,7 +28,9 @@ Board.prototype.init = function(){
     
     
     
-    
+/* Functions that allow keyboard input
+ * 
+ */    
     this.keys = {};
     $('body').keydown(function(e) {
                       if (e.which) {
@@ -96,13 +98,13 @@ Board.prototype.init = function(){
     for (var x = 0; x < this.boardSize; x++) {
         for (var y = 0; y < this.boardSize; y++) {
             
-            // If there is a 0 in startingBoard set the slot's isEmpty property to true'
+            // If there is a 0 in startingBoard set the slot's isEmpty property to true
             if (this.startingBoard[y][x] == '0') {
-                // For every slot in the board create an object Slot
+                
                 this.virtualBoard[y][x].isEmpty = true;
             }
             
-            // If there is a 1 in startingBoard create a barrier object
+            // If there is a 1 create a Cube Gem in that board slot
             if (this.startingBoard[y][x] == '1') {
                 this.virtualBoard[y][x] = new cubeGem({
                                                       x : (x - this.offset),
@@ -111,7 +113,7 @@ Board.prototype.init = function(){
                                                      
             }
             
-            // If there is a 2 in startingBoard create a gem object
+            // If there is a 2 create a Diamond Gem in that board slot
             if (this.startingBoard[y][x] == '2') {
                 this.virtualBoard[y][x] = new diamondGem({
                                                          x : (x - this.offset),
@@ -120,7 +122,7 @@ Board.prototype.init = function(){
                                                          
              
             }
-            
+            // If there is a 3 create a Sphere Gem in that board slot
             if (this.startingBoard[y][x] == '3') {
                 this.virtualBoard[y][x] = new sphereGem({
                                                         x : (x - this.offset),
@@ -128,7 +130,7 @@ Board.prototype.init = function(){
                                                         }, this.scene);
                                                         
             }
-            
+            // If there is a 4 create a Isometric Gem in that board slot
             if (this.startingBoard[y][x] == '4') {
                 this.virtualBoard[y][x] = new isoGem({
                                                      x : (x - this.offset),
@@ -136,7 +138,7 @@ Board.prototype.init = function(){
                                                      }, this.scene);
                                                     
             }
-            
+            // If there is a 5 create a Goal Gem in that board slot
             if (this.startingBoard[y][x] == '5') {
             	this.goalGemz = this.virtualBoard[y][x];
                 this.goalGemz = new goalGem({
@@ -146,6 +148,7 @@ Board.prototype.init = function(){
                            this.virtualBoard[y][x].isEmpty = true;
                            
             }
+            // If there is a 6 create the Robot in that board slot
              if (this.startingBoard[y][x] == '6') {
                 this.virtualBoard[y][x] = this.robot = new Robot({
                            x : (x - this.offset),
@@ -233,38 +236,29 @@ Board.prototype.createGem = function(position) {
 			
 			// If the random number is between 0 and 20 create a Diamond
 			if(this.randNum >= 0.0 && this.randNum <= 25.0){
-                this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);
-                
-                
+                this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new diamondGem(position, this.scene);                
 			  }
 			
 			 // If the random number is between 20 and 40 create a Sphere
 			 if(this.randNum > 25.0 && this.randNum <= 50.0){
-                 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new sphereGem(position, this.scene);
-                
+                 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new sphereGem(position, this.scene);               
 			 }
 			 // If the random number is between 40 and 60 create an Isometric Gem
 			 if(this.randNum > 50.0 && this.randNum <= 75.0){
-                 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new isoGem(position, this.scene);
-               
+                 this.virtualBoard[-position.y + this.offset][position.x + this.offset]= new isoGem(position, this.scene);              
 			 }
 			 // If the random number is between 60 and 100 create a Cube Gem
 			 if(this.randNum > 75.0 && this.randNum <= 100.0){
-                 this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new cubeGem(position, this.scene);
-               
+                 this.virtualBoard[-position.y + this.offset][position.x + this.offset] = new cubeGem(position, this.scene);              
 			 }
-
-			
-			
+			// Set that slot position as occupied
 			this.virtualBoard[-position.y + this.offset][position.x + this.offset].isEmpty = false;
+			// Check new location of gem for matches horizontally and vertically
 			this.checkEntireRow(position, this.facing);
 			
 		}
 	}
-			
-		
-		
-			
+			// Update the Next Gem Indicator to show a new gem once the gem is shot			
 			this.destroyNextGem();
 
 };
@@ -272,16 +266,15 @@ Board.prototype.createGem = function(position) {
 
 Board.prototype.checkEntireRow = function(position, direction){
 	
+	
 	for(var i = -this.offset; i <= this.offset; i++){
-
+			// Check a whole row for matches in every direction
 			var newPosition = {
 			x: i,
 			y: position.y
 			
 			};
 
-		var boardSlot = this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset];
-		if(this.legalPosition(newPosition)){
 		
 				this.checkRow(newPosition, 'up');
 				this.checkRow(newPosition, 'down');
@@ -289,22 +282,21 @@ Board.prototype.checkEntireRow = function(position, direction){
 				this.checkRow(newPosition, 'right');
 				this.checkMidRow(newPosition, this.facing);
 	
-		}
+		
+			// Check a whole column for matches in every direction
 			var newPosition = {
 			x: position.x,
 			y: i
 			
 			};
 			
-			if(this.legalPosition(newPosition)){
-		
 				this.checkRow(newPosition, 'up');
 				this.checkRow(newPosition, 'down');
 				this.checkRow(newPosition, 'left');
 				this.checkRow(newPosition, 'right');
 				this.checkMidRow(newPosition, this.facing);
 		
-		}
+		
 	}
 	
 	
@@ -462,7 +454,7 @@ Board.prototype.threeRow = function(position, direction, checkMid) {
 			}
 		}
 
-
+	// Check if the given position of the three gems are of the same type and are within the board's limits
 	if (this.legalPosition(newPosition) && this.legalPosition(newPosition2) && this.legalPosition(newPosition3)) {
 		if((this.checkType(newPosition) == 1) && (this.checkType(newPosition2) == 1) && (this.checkType(newPosition3) == 1)){
 			
@@ -554,6 +546,10 @@ Board.prototype.checkRow = function(position, direction) {
 					var boardSlot2 = this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset];
 					var boardSlot3 = this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset];
 					
+					/* Checks if the gem's figure has loaded and if it has to not bother making it since we are destroying
+					 * it due to a match.  Whereas if it does exist simply remove it.
+					 */
+					 
 					if(boardSlot.figure === null){
 						
 						boardSlot.figure = 'empty';
@@ -578,7 +574,10 @@ Board.prototype.checkRow = function(position, direction) {
 						this.scene.remove(boardSlot3.figure);
 					}
 					
-					
+					/*
+					 * Set the Positions of the gems as unoccupied allowing 
+					 * the robot to move through those positions
+					 */
 					this.virtualBoard[-newPosition.y + this.offset][newPosition.x + this.offset].isEmpty = true;
 					this.virtualBoard[-newPosition2.y + this.offset][newPosition2.x + this.offset].isEmpty = true;
 					this.virtualBoard[-newPosition3.y + this.offset][newPosition3.x + this.offset].isEmpty = true;
@@ -593,7 +592,9 @@ Board.prototype.checkRow = function(position, direction) {
 
 };
 
-
+/*
+ * Function that checks the score and adds points if user gets a match
+ */
 Board.prototype.checkScore = function(){
     this.score++;
     this.scene.remove(this.ScoreNumberMesh)
@@ -834,8 +835,6 @@ Board.prototype.destroyNextGem = function() {
 			
 };
 
-
-
 /*
  * Function that handles player input using the keyboard
  * Controls:
@@ -920,6 +919,8 @@ if(this.gameOver == false){
 			x : this.robot.boardPosition.x,
 			y : this.robot.boardPosition.y
 		};
+		
+		
 		if (this.facing == 'right') {
 			var moveSpaces = this.countSpaces(newPosition, this.facing);
 			newPosition.x += moveSpaces;

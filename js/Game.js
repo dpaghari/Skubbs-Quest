@@ -42,6 +42,7 @@ var Game = function() {
  	document.body.appendChild(this.renderer.domElement);
     this.panes = [];
     this.curPane;
+    timeStop = false;
 };
 
 /**
@@ -62,7 +63,6 @@ Game.prototype.popPane = function() {
 
 // Render function
 Game.prototype.render = function(t, canvas, ctx) {
-    
      // If there is no active pane do nothing
   	if(this.panes.length > 0) {
     var pane = this.panes[this.panes.length - 1];

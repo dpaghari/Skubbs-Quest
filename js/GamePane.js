@@ -205,12 +205,18 @@ GamePane.prototype.update = function(t, renderer) {
   this.speakerMaterial.uniforms['uBeatTime'].value = this.beat.toBeatTime(t);
   this.speakerMaterial.uniforms['uBeat'].value = this.beat.toBeat(t);
   
+  if (timeStop == true){
+  	time = this.time; 
+  	this.time = "Win!";
+  } else {
+  	this.time = time;
+  }
   
    if (checkTime()){
         // Remove the previous time 
     	this.scene.remove(this.NumberMesh);
         // Create a new mesh for the next second passed
-    	this.NumberGeom = new THREE.TextGeometry(time,
+    	this.NumberGeom = new THREE.TextGeometry(this.time,
                                         {
                                         size: 100, height: 4, curveSegments: 3,
                                         face: "helvetiker", weight: "normal", style: "normal",

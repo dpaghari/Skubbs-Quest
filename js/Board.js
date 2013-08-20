@@ -611,7 +611,7 @@ Board.prototype.checkScore = function(){
     this.ScoreNumberGeom.computeBoundingBox();
     this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
     
-    this.ScoreNumberMesh.position.x = -650;
+    this.ScoreNumberMesh.position.x = -800;
     this.ScoreNumberMesh.position.y = 800;
 
     this.ScoreNumberMesh.rotation.x = -100;
@@ -861,7 +861,7 @@ if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.
     // Set timer remaining text
     this.WinGeom = new THREE.TextGeometry( "You win! ",
                                            {
-                                           size: 175, height: 4, curveSegments: 3,
+                                           size: 250, height: 4, curveSegments: 3,
                                            face: "helvetiker", weight: "normal", style: "normal",
                                            bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
                                            material: 5, extrudeMaterial: 5
@@ -871,17 +871,16 @@ if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.
     this.WinGeom.computeBoundingBox();
     this.WinWidth = this.WinGeom.boundingBox.max.x - this.WinGeom.boundingBox.min.x;
     
-    this.WinMesh.position.x = -400;
-    this.WinMesh.position.y = 80;
+    this.WinMesh.position.x = -650;
+    this.WinMesh.position.y = -80;
     this.WinMesh.position.z = 400;
     this.WinMesh.rotation.x = -100;
     this.WinMesh.rotation.z = 50;
     this.scene.add(this.WinMesh);
-    //time = '';
+    timeStop = true;
 }
 
 // Character Movement
-
 if(this.gameOver == false){
 	// Left (A Key)
 	if (this.keys[65] === true) {

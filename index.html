@@ -69,6 +69,7 @@
         var totalTime;
         var time;
         var prevTime;
+        var timeFinish = false;
             
 		function checkTime() {
 			if (time != prevTime) {
@@ -81,16 +82,20 @@
 		}
             
         function setTime(amountOfTime){
-            timeLeft = amountOfTime;
-            totalTime = timeLeft;
-            prevTime = time;
-            Ticker = setInterval(function() {tick()}, 1000);
+        		timeLeft = amountOfTime;
+            	totalTime = timeLeft;
+          	    prevTime = time;
+          		Ticker = setInterval(function() {tick()}, 1000);
         }
             
         function tick(){
-            id = document.getElementById("timer");
-            timeLeft--;
-            time = timeLeft;
+        	if (timeStop){
+        		time = "Win!";
+        	} else {
+       		   id = document.getElementById("timer");
+         	   timeLeft--;
+         	   time = timeLeft;
+        	}
         }
             </script>
      

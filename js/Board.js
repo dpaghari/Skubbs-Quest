@@ -26,7 +26,6 @@ Board.prototype.init = function(){
     this.facing = 'up';
     scoreKeeper = false;
     this.gameOver = false;
-    //setTime(60);
     
 /* Functions that allow keyboard input
  * 
@@ -828,7 +827,7 @@ Board.prototype.handleInput = function(game) {
 if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.boardPosition.y == this.goalGemz.boardPosition.y)){
 	this.gameOver = true;
     levelNum++;
-    if (levelNum == 3){
+    if (levelNum === 4){
     	time = "Win!";
     	this.materialFront = new THREE.MeshBasicMaterial( { color: 0xDF2BF0 } );
   	  	this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
@@ -854,8 +853,10 @@ if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.
   		  this.WinMesh.rotation.z = 50;
   		  this.scene.add(this.WinMesh);
     }
-    setTime(60);
+    //setTime(60);
+    if(levelNum !== 4){
     this.game.pushPane(new GamePane(game));
+    }
 }
 
 // Character Movement
@@ -1042,6 +1043,9 @@ Board.prototype.render = function(t) {
 				
 			}
 		}
+	}
+	if(this.nextGem.figure){
+		this.nextGem.figure.rotation.y += 0.05;
 	}
   // Update goal gem's material
   this.goalMaterial.uniforms['uTime'].value = t;

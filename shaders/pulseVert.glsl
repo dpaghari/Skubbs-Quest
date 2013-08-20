@@ -1,9 +1,13 @@
+// Pulse a model to the beat
+
 varying vec3 vNormal;
 uniform float uTime;
 uniform float uBeatTime;
 uniform float uBeat;
 
 void main() {
+    // Pulse to the beat defined in the 
+    // Pane
     vNormal = normalMatrix * vec3(normal);
     gl_Position = projectionMatrix *
     modelViewMatrix *

@@ -140,7 +140,7 @@ var GamePane = function(game) {
 		                       ['5', '0', '0', '2', '0', '0', '1', '1', '0', '3', '0']];
 		                      }
 	if(levelNum == 3){
-	   this.startingBoard =   [['1', '1', '4', '4', '0', '4', '1', '2', '0', '6', '0'], 
+	   this.startingBoard =   [['1', '1', '4', '4', '0', '4', '1', '2', '0', '5', '0'], 
 	                           ['0', '4', '2', '2', '3', '4', '1', '2', '0', '0', '0'], 
 	                           ['4', '4', '0', '0', '3', '0', '4', '4', '0', '0', '0'],
 		                       ['3', '3', '1', '4', '4', '2', '0', '3', '3', '0', '1'],
@@ -155,8 +155,10 @@ var GamePane = function(game) {
 
     this.board = new Board(this.scene, this.camera, this.startingBoard, this.game);  
     if (levelNum == 1){
-    	setTime(60);
+    	setTime(120);
+    	//timeLeft = 90;
     }
+    
     this.board.init();
     
     // Load the 'Next' section

@@ -1,3 +1,5 @@
+// Apply texture to model with normalized map
+
 varying vec3 vNormal;
 varying vec2 vUV;
 uniform sampler2D tBumpTexture;

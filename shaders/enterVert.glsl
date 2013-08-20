@@ -1,9 +1,12 @@
+// Pulsing text
+
 varying vec3 vNormal;
 uniform float uTime;
 uniform float uBeatTime;
 uniform float uBeat;
 
 void main() {
+	// Pulse the text to a beat
     vNormal = normalMatrix * vec3(normal);
     gl_Position = projectionMatrix *
     modelViewMatrix *

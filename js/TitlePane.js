@@ -41,6 +41,7 @@ var TitlePane = function() {
   this.camera.position.z = 1400;
   this.camera.position.x = 1000;
   this.camera.position.y = 500;
+  this.panes = [];
     
   this.container = document.getElementById('gameArea');
   this.container.style.position = 'relative';
@@ -53,7 +54,7 @@ var TitlePane = function() {
   this.canvas.width = 800;
   this.canvas.height = 600;
   this.container.appendChild(this.canvas);
-  this.ctx = this.canvas.getContext('2d');
+  ctx = this.canvas.getContext('2d');
 
   
   this.keys = {};
@@ -72,15 +73,20 @@ var TitlePane = function() {
 
   this.scene = new THREE.Scene();
   
-  // Add 3D text
+  // Add 3D text with custom shader applied to underside
+  
+  /* Shader code borrorwed from 
+   * http://stemkoski.github.io/Three.js/Shader-Animate.html
+   */
+  
     // Cloud texture from http://goo.gl/ZqcHYU
     var noiseTexture = new THREE.ImageUtils.loadTexture( 'images/cloud.jpg' );
 	noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping;
     // Water texture from http://goo.gl/irCXM2
     var waterTexture = new THREE.ImageUtils.loadTexture( 'images/water.jpg' );
     waterTexture.wrapS = waterTexture.wrapT = THREE.RepeatWrapping;
-    var waterVertexShader = loadFile('shaders/waterVert.glsl');
-    var waterFragmentShader = loadFile('shaders/waterFrag.glsl');
+    var waterVertexShader = loadFile('shaders/titleVert.glsl');
+    var waterFragmentShader = loadFile('shaders/titleFrag.glsl');
 
     // use "this." to create global object
     this.customUniforms2 = {
@@ -93,7 +99,7 @@ var TitlePane = function() {
     };
 
     // create custom material from the shader code above
-    //   that is within specially labeled script tags
+    // that is within specially labeled script tags
     var customMaterial2 = new THREE.ShaderMaterial(
                                                    {
                                                    uniforms: this.customUniforms2,
@@ -102,21 +108,17 @@ var TitlePane = function() {
                                                    }   );
 
     // other material properties
-    customMaterial2.side = THREE.DoubleSide;
     customMaterial2.transparent = true;
 	
   // Add Materials
   this.TitleGeom = new THREE.TextGeometry( "Skubb's Quest ",
                                            {
                                            size: 350, height: 4, curveSegments: 3,
-                                           face: "helvetiker", weight: "bold", style: "normal",
-                                           bevelThickness: 13, bevelSize: 2, bevelEnabled: true,
+                                           face: "helvetiker", weight: "normal", style: "normal",
+                                           bevelThickness: 17, bevelSize: 2, bevelEnabled: true,
                                            material: 5, extrudeMaterial: 5
                                            });
      
-  // font: helvetiker, gentilis, droid sans, droid serif, optimer
-  // weight: normal, bold
-        
   this.TitleMesh = new THREE.Mesh(this.TitleGeom, customMaterial2);
     
   this.TitleGeom.computeBoundingBox();
@@ -129,8 +131,8 @@ var TitlePane = function() {
     
   // Create speaker material and speakers
   var perlinText = loadFile('shaders/perlin.glsl');
-  var EnterVertexShaderText = loadFile('shaders/enterVert.glsl');
-  var EnterFragmentShaderText = loadFile('shaders/enterFrag.glsl');
+  var EnterVertexShaderText = loadFile('shaders/pulseVert.glsl');
+  var EnterFragmentShaderText = loadFile('shaders/pulseFrag.glsl');
 
   this.EnterMaterial = new THREE.ShaderMaterial({
                                                     uniforms: {
@@ -149,9 +151,6 @@ var TitlePane = function() {
                                            bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
                                            material: 5, extrudeMaterial: 5
                                            });
-     
-  // font: helvetiker, gentilis, droid sans, droid serif, optimer
-  // weight: normal, bold
         
   this.EnterMesh = new THREE.Mesh(this.EnterGeom, this.EnterMaterial);
     
@@ -160,6 +159,7 @@ var TitlePane = function() {
     
   this.EnterMesh.position.x = -650;
   this.EnterMesh.position.y = -900;
+
   this.scene.add(this.EnterMesh);
     
     var androidVertexShaderText = loadFile('shaders/androidVert.glsl');
@@ -169,17 +169,15 @@ var TitlePane = function() {
      http://opengameart.org/sites/default/files/oga-textures/tunnel_ceiling.jpg
      and 
      http://opengameart.org/sites/default/files/oga-textures/siding1_n.jpg
+     
+     Android model and gun from
+     http://rrpictureproductions.com/files/Android_Tutorial.zip
+     http://opengameart.org/content/multi-gun
+     
      */
     var bumpTexture = THREE.ImageUtils.loadTexture('images/android_normal.jpg');
-    var lightingTexture = THREE.ImageUtils.loadTexture('images/android.jpg');
-    this.androidMaterial = new THREE.ShaderMaterial({
-                                               uniforms: {
-                                               'tBumpTexture': { type: 't', value: bumpTexture },
-                                               'tLightingTexture': { type: 't', value: lightingTexture },
-                                               },
-                                               vertexShader: androidVertexShaderText,
-                                               fragmentShader: androidFragmentShaderText
-                                               });
+    var androidTexture = loadFile('images/android.jpg');
+    this.androidMaterial = new THREE.MeshBasicMaterial({ map: androidTexture });
   
     // Add Android figure
     var robotMaterial = new THREE.MeshPhongMaterial({
@@ -194,11 +192,12 @@ var TitlePane = function() {
                     that.figure.position.y = - 200;
 					that.figure.position.z = 400;
                     that.scene.add(that.figure);
-                    // Look at cube
-  					//that.camera.lookAt(that.figure.position);
                     });
     
     // Set up Skybox
+    var axes = new THREE.AxisHelper(100);
+	this.scene.add( axes );
+	
 	var directions  = ["skybox", "skybox", "skybox", "skybox", "skybox", "skybox"];
 	var imageSuffix = ".jpg";
 	var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
@@ -220,27 +219,25 @@ var TitlePane = function() {
 };
 
 /**
- * Update BoringPane's state to time t
- * Do nothing
+ * Update TitlePane's state to time t 
  */
 TitlePane.prototype.update = function(t, renderer) {
+  var pane = this.panes[this.panes.length - 1];
   var delta = this.clock.getDelta();
   this.customUniforms2.time.value += delta;
   this.EnterMaterial.uniforms['uTime'].value = t;
   this.EnterMaterial.uniforms['uBeatTime'].value = this.beat.toBeatTime(t);
   this.EnterMaterial.uniforms['uBeat'].value = this.beat.toBeat(t);
+  
   // Bob the camera a bit
   this.camera.position.x = Math.sin(t / 1000.0) * 60;
   this.camera.position.y = -500 + Math.sin(t / 700.0) * 40;
     
     if (this.figure) {
         this.figure.rotation.y += 0.01;
-        //this.figure.rotation.x += 0.007;
     }
     
   this.camera.lookAt(this.scene.position);
-  
-  //renderer.render(this.scene, this.camera);
 };
 
 /**
@@ -254,16 +251,4 @@ TitlePane.prototype.handleInput = function(game) {
 		 game.pushPane(new GamePane(game));
 		 
 	}	
-};
-
-/**
- * Draw overlay for TitlePane
- * Red square
- */
-TitlePane.prototype.overlay = function(ctx) {
-    ctx.fillStyle = '#ff0000';
-    ctx.fillRect(100, 100, 300, 100);
-    ctx.font = 'bold 18px sans-serif';
-    ctx.fillStyle = '#000000';
-    ctx.fillText('Controls', 150, 150);
 };

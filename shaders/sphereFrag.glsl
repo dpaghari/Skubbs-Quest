@@ -1,6 +1,10 @@
+// Toon shade the sphere gem 
+
 varying vec3 vNormal;
 
 vec4 transform(float u) {
+    // Give different shades to 
+	// sections of the model 
     if (u > 0.95)
         return vec4(0.5,1.0,0.5,1.0);
     else if (u > 0.5)

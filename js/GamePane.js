@@ -11,9 +11,10 @@ var loadFile = function(url) {
 
 
 
-var GamePane = function() {
+var GamePane = function(game) {
   // Initialize variables
     this.scene = new THREE.Scene();
+    this.game = game;
     
     var that = this;
     this.beat = new Beat(120.0);
@@ -57,7 +58,7 @@ var GamePane = function() {
     var ambient_light = new THREE.AmbientLight(0x202020);
     this.scene.add(ambient_light);
     
-    // Speakers
+    // Create speaker material and speakers
     var perlinText = loadFile('shaders/perlin.glsl');
     var speakerVertexShaderText = loadFile('shaders/speakerVert.glsl');
     var speakerFragmentShaderText = loadFile('shaders/speakerFrag.glsl');
@@ -102,11 +103,61 @@ var GamePane = function() {
     this.bgplane.rotation.x = 0;
     this.bgplane.translateZ(-100);
     this.scene.add(this.bgplane);
-
-    this.board = new Board(this.scene, this.camera);
-    this.board.init();
     
+     /*	Create a Board giving a visual representation of the level
+     * 1 - Cube
+     * 2 - Diamond
+     * 3 - Sphere
+     * 4 - Iso
+     * 5 - Goal
+     * 6 - Robot
+     */
+    
+     	if(levelNum == 1){
+	    this.startingBoard = [['0', '0', '1', '2', '1', '1', '0', '0', '3', '0', '5'], 
+	                          ['1', '3', '1', '1', '3', '2', '1', '0', '3', '0', '0'], 
+	                          ['2', '1', '2', '2', '3', '2', '1', '4', '1', '2', '2'],
+	                          ['1', '1', '2', '3', '4', '3', '0', '4', '4', '2', '1'],
+	                          ['0', '2', '3', '0', '2', '0', '0', '0', '0', '1', '1'],
+	                          ['1', '2', '3', '1', '2', '0', '0', '3', '2', '0', '3'],
+	                          ['1', '4', '4', '1', '0', '1', '1', '3', '2', '0', '3'],
+	                          ['0', '3', '4', '0', '0', '3', '0', '0', '1', '1', '0'],
+	                          ['0', '0', '0', '2', '3', '4', '1', '0', '2', '0', '0'],
+	                          ['0', '0', '0', '2', '3', '2', '1', '0', '0', '1', '1'],
+	                          ['0', '6', '0', '0', '2', '2', '0', '4', '4', '0', '0']];
+                        }
+        if(levelNum == 2){
+	   this.startingBoard =   [['1', '1', '4', '4', '0', '4', '1', '2', '0', '6', '0'], 
+	                           ['0', '4', '2', '2', '3', '4', '1', '2', '0', '0', '0'], 
+	                           ['4', '4', '0', '0', '3', '0', '4', '4', '0', '0', '0'],
+		                       ['3', '3', '1', '4', '4', '2', '0', '3', '3', '0', '1'],
+		                       ['0', '0', '1', '0', '0', '2', '0', '0', '2', '0', '1'],
+		                       ['2', '2', '0', '0', '0', '0', '1', '1', '4', '2', '2'],
+		                       ['3', '1', '2', '1', '3', '3', '2', '3', '3', '0', '3'],
+		                       ['3', '0', '3', '1', '0', '0', '2', '0', '0', '3', '3'],
+		                       ['0', '0', '3', '4', '4', '2', '4', '4', '1', '2', '2'],
+		                       ['0', '0', '2', '2', '0', '2', '0', '0', '1', '3', '1'],
+		                       ['5', '0', '0', '2', '0', '0', '1', '1', '0', '3', '0']];
+		                      }
+	if(levelNum == 3){
+	   this.startingBoard =   [['1', '1', '4', '4', '0', '4', '1', '2', '0', '6', '0'], 
+	                           ['0', '4', '2', '2', '3', '4', '1', '2', '0', '0', '0'], 
+	                           ['4', '4', '0', '0', '3', '0', '4', '4', '0', '0', '0'],
+		                       ['3', '3', '1', '4', '4', '2', '0', '3', '3', '0', '1'],
+		                       ['0', '0', '1', '0', '0', '2', '0', '0', '2', '0', '1'],
+		                       ['2', '2', '0', '0', '0', '0', '1', '1', '4', '2', '2'],
+		                       ['3', '1', '2', '1', '3', '3', '2', '3', '3', '0', '3'],
+		                       ['3', '0', '3', '1', '0', '0', '2', '0', '0', '3', '3'],
+		                       ['0', '0', '3', '4', '4', '2', '4', '4', '1', '2', '2'],
+		                       ['0', '0', '2', '2', '0', '2', '0', '0', '1', '3', '1'],
+		                       ['6', '0', '0', '2', '0', '0', '1', '1', '0', '3', '0']];
+		                      }
 
+    this.board = new Board(this.scene, this.camera, this.startingBoard, this.game);  
+    if (levelNum == 1){
+    	setTime(60);
+    }
+    this.board.init();
     
     // Load the 'Next' section
     // Add Materials
@@ -175,14 +226,7 @@ var GamePane = function() {
     this.ScoreMesh.position.y = 800;
     this.ScoreMesh.rotation.x = -100;
     this.scene.add(this.ScoreMesh);
-    
-    // Load the time
-    setTime(60);
-    
-    // Setup keyboard events
 
-  
-  
 
 };
 
@@ -193,24 +237,18 @@ var GamePane = function() {
  * renderer is an optional argument, is the main Game's
  * renderer so we can update cubemaps
  */
-GamePane.prototype.update = function(t, renderer) {
+GamePane.prototype.update = function(t, renderer,game) {
   this.camera.position.y = -400;
   this.camera.lookAt(this.scene.position);
   this.bgMaterial.uniforms['uTime'].value = (t);
   this.board.render(t);
-  this.board.handleInput();
+  this.board.handleInput(this.game);
 	
  
   this.speakerMaterial.uniforms['uTime'].value = t;
   this.speakerMaterial.uniforms['uBeatTime'].value = this.beat.toBeatTime(t);
   this.speakerMaterial.uniforms['uBeat'].value = this.beat.toBeat(t);
-  
-  if (timeStop == true){
-  	time = this.time; 
-  	this.time = "Win!";
-  } else {
-  	this.time = time;
-  }
+  this.time = time;
   
    if (checkTime()){
         // Remove the previous time 
@@ -240,7 +278,7 @@ GamePane.prototype.update = function(t, renderer) {
                                                      {
                                                      size: 175, height: 4, curveSegments: 3,
                                                      face: "helvetiker", weight: "normal", style: "normal",
-                                                     bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                                     bevelThickness: 10, bevelSize: 2, bevelEnabled: true,
                                                      material: 5, extrudeMaterial: 5
                                                      });
 

@@ -41,7 +41,7 @@ var Game = function() {
   	this.renderer.setClearColor(0xeeeeee, 1.0);
  	document.body.appendChild(this.renderer.domElement);
     this.panes = [];
-    this.curPane;
+    
     timeStop = false;
 };
 

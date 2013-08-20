@@ -43,8 +43,8 @@ var TitlePane = function() {
   this.TitleGeom = new THREE.TextGeometry( "Skubb's Quest ",
                                            {
                                            size: 350, height: 4, curveSegments: 3,
-                                           face: "helvetiker", weight: "normal", style: "normal",
-                                           bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                           face: "helvetiker", weight: "bold", style: "normal",
+                                           bevelThickness: 13, bevelSize: 2, bevelEnabled: true,
                                            material: 5, extrudeMaterial: 5
                                            });
      
@@ -57,7 +57,7 @@ var TitlePane = function() {
   this.TitleGeom.computeBoundingBox();
   this.TitleWidth = this.TitleGeom.boundingBox.max.x - this.TitleGeom.boundingBox.min.x;
     
-  this.TitleMesh.position.x = -1600;
+  this.TitleMesh.position.x = -1675;
   this.TitleMesh.position.y = 900;
   //this.TitleMesh.rotation.x = -120;
   //this.Titl
@@ -132,7 +132,7 @@ TitlePane.prototype.handleInput = function(game) {
 	if (this.keys[13] === true) {
 		this.keys[13] = 'triggered';
 		 
-		 game.pushPane(new GamePane());
+		 game.pushPane(new GamePane(game));
 		 
 	}	
 };

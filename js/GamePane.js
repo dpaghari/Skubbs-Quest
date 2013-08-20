@@ -1,3 +1,16 @@
+var loadFile = function(url) {
+    var result = null;
+    $.ajax({
+           url: url,
+           async: false
+           }).done(function(data) {
+                   result = data;
+                   });
+    return result;
+};
+
+
+
 var GamePane = function() {
   // Initialize variables
     this.scene = new THREE.Scene();
@@ -89,15 +102,9 @@ var GamePane = function() {
     this.bgplane.rotation.x = 0;
     this.bgplane.translateZ(-100);
     this.scene.add(this.bgplane);
-    
-    this.renderer = new THREE.WebGLRenderer({
-                                            antialias : true
-                                            });
-    this.renderer.setSize(800, 600);
-    this.renderer.setClearColor(0xeeeeee, 1.0);
-    document.body.appendChild(this.renderer.domElement);
-    
-    this.board = new Board(this.scene, this.camera, this.renderer);
+
+    this.board = new Board(this.scene, this.camera);
+    this.board.init();
     
 
     
@@ -164,7 +171,7 @@ var GamePane = function() {
     this.ScoreGeom.computeBoundingBox();
     this.ScoreWidth = this.ScoreGeom.boundingBox.max.x - this.ScoreGeom.boundingBox.min.x;
     
-    this.ScoreMesh.position.x = -1100;
+    this.ScoreMesh.position.x = -1200;
     this.ScoreMesh.position.y = 800;
     this.ScoreMesh.rotation.x = -100;
     this.scene.add(this.ScoreMesh);
@@ -187,8 +194,67 @@ var GamePane = function() {
  * renderer so we can update cubemaps
  */
 GamePane.prototype.update = function(t, renderer) {
- 
+  this.camera.position.y = -400;
   this.camera.lookAt(this.scene.position);
+  this.bgMaterial.uniforms['uTime'].value = (t);
+  this.board.render(t);
+  this.board.handleInput();
+	
+ 
+  this.speakerMaterial.uniforms['uTime'].value = t;
+  this.speakerMaterial.uniforms['uBeatTime'].value = this.beat.toBeatTime(t);
+  this.speakerMaterial.uniforms['uBeat'].value = this.beat.toBeat(t);
+  
+  
+   if (checkTime()){
+        // Remove the previous time 
+    	this.scene.remove(this.NumberMesh);
+        // Create a new mesh for the next second passed
+    	this.NumberGeom = new THREE.TextGeometry(time,
+                                        {
+                                        size: 100, height: 4, curveSegments: 3,
+                                        face: "helvetiker", weight: "normal", style: "normal",
+                                        bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                        material: 5, extrudeMaterial: 5
+                                        });
+    	this.NumberMaterial = new THREE.MeshBasicMaterial(this.materialFront, this.materialSide);
+   	    this.NumberMesh = new THREE.Mesh(this.NumberGeom, this.NumberMaterial);
+    
+   		 this.NumberGeom.computeBoundingBox();
+   		 this.NumberWidth = this.NumberGeom.boundingBox.max.x - this.NumberGeom.boundingBox.min.x;
+    
+   	 	this.NumberMesh.position.x = 500;
+    	this.NumberMesh.position.y = 800;
+   	    this.NumberMesh.rotation.x = -100;
+   		this.scene.add(this.NumberMesh);
+        // When time runs out
+   		if (time <= 1){
+            // Create losing text on screen
+   			this.LoseGeom = new THREE.TextGeometry("Game over!",
+                                                     {
+                                                     size: 175, height: 4, curveSegments: 3,
+                                                     face: "helvetiker", weight: "normal", style: "normal",
+                                                     bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                                     material: 5, extrudeMaterial: 5
+                                                     });
+
+            this.LoseMaterial = new THREE.MeshBasicMaterial(this.LoseMaterialFront, this.materialSide);
+            this.LoseMesh = new THREE.Mesh(this.LoseGeom, this.LoseMaterial);
+
+            this.LoseGeom.computeBoundingBox();
+            this.LoseWidth = this.LoseGeom.boundingBox.max.x - this.LoseGeom.boundingBox.min.x;
+            this.LoseMesh.position.x = -700;
+            this.LoseMesh.position.y = 80;
+            this.LoseMesh.position.z = 400;
+            this.LoseMesh.rotation.x = -100;
+            this.LoseMesh.rotation.z = 50;
+            this.scene.add(this.LoseMesh);
+            this.scene.remove(this.NumberMesh);
+            // Remove player control
+            
+            this.board.gameOver = true;
+   		}
+    }
  
 };
 

@@ -9,11 +9,11 @@ var loadFile = function(url) {
     return result;
 };
 
-var Board = function(scene, camera, renderer){
+var Board = function(scene, camera){
 	
 	this.scene = scene;
 	this.camera = camera;
-	this.renderer = renderer;
+
 	
 };
 
@@ -611,7 +611,7 @@ Board.prototype.checkScore = function(){
     this.ScoreNumberGeom.computeBoundingBox();
     this.ScoreNumberWidth = this.ScoreNumberGeom.boundingBox.max.x - this.ScoreNumberGeom.boundingBox.min.x;
     
-    this.ScoreNumberMesh.position.x = -800;
+    this.ScoreNumberMesh.position.x = -650;
     this.ScoreNumberMesh.position.y = 800;
 
     this.ScoreNumberMesh.rotation.x = -100;
@@ -877,6 +877,7 @@ if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.
     this.WinMesh.rotation.x = -100;
     this.WinMesh.rotation.z = 50;
     this.scene.add(this.WinMesh);
+    //time = '';
 }
 
 // Character Movement
@@ -1046,9 +1047,7 @@ if(this.gameOver == false){
 };
 
 Board.prototype.render = function(t) {
-	
-	
-   /* Check the entire board for existing gems and make them rotate
+	/* Check the entire board for existing gems and make them rotate
     * 
     */
 	for(var x = 0; x < this.boardSize; x++){
@@ -1058,6 +1057,7 @@ Board.prototype.render = function(t) {
 					if(this.virtualBoard[y][x].type !== 'robot'){
 						if(this.virtualBoard[y][x].isEmpty == false){
 						//this.virtualBoard[y][x].figure.rotation.x += 0.04;
+						
 						this.virtualBoard[y][x].figure.rotation.y += 0.05;
 						//this.virtualBoard[y][x].figure.position.y += Math.sin(1000) * 2.0; 
 						}
@@ -1066,8 +1066,9 @@ Board.prototype.render = function(t) {
 			}
 		}
 	}
-	// Update goal gem's material
-	this.goalMaterial.uniforms['uTime'].value = t;
+  // Update goal gem's material
+  this.goalMaterial.uniforms['uTime'].value = t;
+   
 	
 
 };

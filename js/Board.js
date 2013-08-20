@@ -9,11 +9,12 @@ var loadFile = function(url) {
     return result;
 };
 
-var Board = function(scene, camera){
+var Board = function(scene, camera, startingBoard, game){
 	
 	this.scene = scene;
 	this.camera = camera;
-
+	this.startingBoard = startingBoard;
+	this.game = game;
 	
 };
 
@@ -25,8 +26,7 @@ Board.prototype.init = function(){
     this.facing = 'up';
     scoreKeeper = false;
     this.gameOver = false;
-    
-    
+    //setTime(60);
     
 /* Functions that allow keyboard input
  * 
@@ -69,27 +69,7 @@ Board.prototype.init = function(){
             this.virtualBoard[i].push({});
         }
         
-    }
-    /*	Create a Board giving a visual representation of the level
-     * 1 - Cube
-     * 2 - Diamond
-     * 3 - Sphere
-     * 4 - Iso
-     * 5 - Goal
-     * 6 - Robot
-     */
-     
-    this.startingBoard = [['0', '0', '1', '2', '1', '1', '0', '0', '3', '0', '5'], 
-                          ['1', '3', '1', '1', '3', '2', '1', '0', '3', '0', '0'], 
-                          ['2', '1', '2', '2', '3', '2', '1', '4', '1', '2', '2'],
-                          ['1', '1', '2', '3', '4', '3', '0', '4', '4', '2', '1'],
-                          ['0', '2', '3', '0', '2', '0', '0', '0', '0', '1', '1'],
-                          ['1', '2', '3', '1', '2', '0', '0', '3', '2', '0', '3'],
-                          ['1', '4', '4', '1', '0', '1', '1', '3', '2', '0', '3'],
-                          ['0', '3', '4', '0', '0', '3', '0', '0', '1', '1', '0'],
-                          ['0', '0', '0', '2', '3', '4', '1', '0', '2', '0', '0'],
-                          ['0', '0', '0', '2', '3', '2', '1', '0', '0', '1', '1'],
-                          ['0', '6', '0', '0', '2', '2', '0', '4', '4', '0', '0']];
+    }        
     
    /* Add board elements(gems, character) to the 
     * board handling collision and legal moves
@@ -275,14 +255,11 @@ Board.prototype.checkEntireRow = function(position, direction){
 			
 			};
 
-		
 				this.checkRow(newPosition, 'up');
 				this.checkRow(newPosition, 'down');
 				this.checkRow(newPosition, 'left');
 				this.checkRow(newPosition, 'right');
 				this.checkMidRow(newPosition, this.facing);
-	
-		
 			// Check a whole column for matches in every direction
 			var newPosition = {
 			x: position.x,
@@ -295,10 +272,7 @@ Board.prototype.checkEntireRow = function(position, direction){
 				this.checkRow(newPosition, 'left');
 				this.checkRow(newPosition, 'right');
 				this.checkMidRow(newPosition, this.facing);
-		
-		
 	}
-	
 	
 };
 
@@ -348,7 +322,6 @@ Board.prototype.threeRow = function(position, direction, checkMid) {
 	// Check if there is three in a row of a gem from the given position going to the right
 	// Returns true or false
 	// If off the board return false
-	
 	
 		var newPosition = {
 			x : position.x,
@@ -850,34 +823,39 @@ Board.prototype.destroyNextGem = function() {
  * Down Arrow Key - Turn Down
  * Space - Shoot Next Gem
  */
-Board.prototype.handleInput = function() {
+Board.prototype.handleInput = function(game) {
 
 if((this.robot.boardPosition.x == this.goalGemz.boardPosition.x) && (this.robot.boardPosition.y == this.goalGemz.boardPosition.y)){
 	this.gameOver = true;
-	this.materialFront = new THREE.MeshBasicMaterial( { color: 0xDF2BF0 } );
-    this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-    this.WinMaterialFront = new THREE.MeshBasicMaterial( { color: 0xF50000 } );
+    levelNum++;
+    if (levelNum == 3){
+    	time = "Win!";
+    	this.materialFront = new THREE.MeshBasicMaterial( { color: 0xDF2BF0 } );
+  	  	this.materialSide = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+  		  this.WinMaterialFront = new THREE.MeshBasicMaterial( { color: 0xF50000 } );
     
-    // Set timer remaining text
-    this.WinGeom = new THREE.TextGeometry( "You win! ",
-                                           {
+ 	  	 // Set timer remaining text
+ 	 	  this.WinGeom = new THREE.TextGeometry( "You win! ",
+     	                                      {
                                            size: 250, height: 4, curveSegments: 3,
                                            face: "helvetiker", weight: "normal", style: "normal",
-                                           bevelThickness: 5, bevelSize: 2, bevelEnabled: true,
+                                           bevelThickness: 10, bevelSize: 2, bevelEnabled: true,
                                            material: 5, extrudeMaterial: 5
                                            });
-    this.WinMesh = new THREE.Mesh(this.WinGeom, this.TextMaterial);
+   	 	this.WinMesh = new THREE.Mesh(this.WinGeom, this.TextMaterial);
     
-    this.WinGeom.computeBoundingBox();
-    this.WinWidth = this.WinGeom.boundingBox.max.x - this.WinGeom.boundingBox.min.x;
+  		  this.WinGeom.computeBoundingBox();
+  		  this.WinWidth = this.WinGeom.boundingBox.max.x - this.WinGeom.boundingBox.min.x;
     
-    this.WinMesh.position.x = -650;
-    this.WinMesh.position.y = -80;
-    this.WinMesh.position.z = 400;
-    this.WinMesh.rotation.x = -100;
-    this.WinMesh.rotation.z = 50;
-    this.scene.add(this.WinMesh);
-    timeStop = true;
+  		  this.WinMesh.position.x = -650;
+  		  this.WinMesh.position.y = -80;
+  		  this.WinMesh.position.z = 400;
+  		  this.WinMesh.rotation.x = -100;
+  		  this.WinMesh.rotation.z = 50;
+  		  this.scene.add(this.WinMesh);
+    }
+    setTime(60);
+    this.game.pushPane(new GamePane(game));
 }
 
 // Character Movement

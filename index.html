@@ -64,13 +64,20 @@
          then pass that variable to Game.render()----->
         
         <script>
+        // Declare variables needed to caculate time
         var Ticker;
         var timeLeft;
         var totalTime;
         var time;
         var prevTime;
         var timeFinish = false;
+        var levelNum = 1;
+        var restartGame;
             
+        /* Function checks to see if the next second 
+         * passed has yet to be rendered on the screen.
+         * If it hasn't, update it or break out. 
+         */
 		function checkTime() {
 			if (time != prevTime) {
 				prevTime = time;
@@ -81,21 +88,27 @@
 			}
 		}
             
+        /* Function takes in the amount of time before 
+         * a level is initialized, and then sets that time 
+         * to be the total time. Calls the tick() function at
+         * 1 second intervals. 
+         */
         function setTime(amountOfTime){
+        	if(levelNum == 1){
         		timeLeft = amountOfTime;
             	totalTime = timeLeft;
           	    prevTime = time;
           		Ticker = setInterval(function() {tick()}, 1000);
-        }
-            
-        function tick(){
-        	if (timeStop){
-        		time = "Win!";
-        	} else {
-       		   id = document.getElementById("timer");
-         	   timeLeft--;
-         	   time = timeLeft;
         	}
+        }
+        
+        /* Decrement the time left at 1 second intervals, then 
+         * set that to be the time displayed on screen.
+         */ 
+        function tick(){
+       		  id = document.getElementById("timer");
+         	  timeLeft--;
+         	  time = timeLeft;
         }
             </script>
      

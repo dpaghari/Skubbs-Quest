@@ -41,6 +41,19 @@ var TitlePane = function() {
   this.camera.position.z = 1400;
   this.camera.position.x = 1000;
   this.camera.position.y = 500;
+    
+  this.container = document.getElementById('gameArea');
+  this.container.style.position = 'relative';
+    
+  // Visible canvas area on top of 3D rendering area
+  this.canvas = document.createElement('canvas');
+  this.canvas.style.position = 'absolute';
+  this.canvas.style.top = 0;
+  this.canvas.style.left = 0;
+  this.canvas.width = 800;
+  this.canvas.height = 600;
+  this.container.appendChild(this.canvas);
+  this.ctx = this.canvas.getContext('2d');
 
   
   this.keys = {};
@@ -60,8 +73,10 @@ var TitlePane = function() {
   this.scene = new THREE.Scene();
   
   // Add 3D text
+    // Cloud texture from http://goo.gl/ZqcHYU
     var noiseTexture = new THREE.ImageUtils.loadTexture( 'images/cloud.jpg' );
 	noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping;
+    // Water texture from http://goo.gl/irCXM2
     var waterTexture = new THREE.ImageUtils.loadTexture( 'images/water.jpg' );
     waterTexture.wrapS = waterTexture.wrapT = THREE.RepeatWrapping;
     var waterVertexShader = loadFile('shaders/waterVert.glsl');
@@ -239,4 +254,16 @@ TitlePane.prototype.handleInput = function(game) {
 		 game.pushPane(new GamePane(game));
 		 
 	}	
+};
+
+/**
+ * Draw overlay for TitlePane
+ * Red square
+ */
+TitlePane.prototype.overlay = function(ctx) {
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(100, 100, 300, 100);
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillStyle = '#000000';
+    ctx.fillText('Controls', 150, 150);
 };

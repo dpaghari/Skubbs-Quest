@@ -24,7 +24,10 @@ var Robot = function(position, scene) {
     var robotMaterial = new THREE.MeshPhongMaterial({
                                                 color : 0x0000ff
                                                 });
-    /* Robot from http://opengameart.org/content/simple-character */
+    /* Robot from http://opengameart.org/content/simple-character 
+     * and 
+     * http://opengameart.org/content/multi-gun
+     */
     var jsonLoader = new THREE.JSONLoader();
     jsonLoader.load('models/android.js', function(geometry) {
                     that.figure = new THREE.Mesh(geometry, robotMaterial);
